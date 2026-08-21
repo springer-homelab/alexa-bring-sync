@@ -237,6 +237,46 @@ def parse_items(raw_text, catalog_names):
         items.append({'name': matched_name, 'specification': spec})
     return items
 
+ACTIVE_ITEMS_FILE = os.path.join(CONFIG_DIR, '.bring_active.json')
+
+def fetch_active_bring_items():
+    """
+    Holt alle aktiven Einkaufsartikel von Bring! und speichert sie als JSON-Array in .bring_active.json
+    """
+    try:
+        email, password, list_name = get_credentials()
+        auth = authenticate()
+        list_uuid = get_target_list_uuid(auth, list_name)
+        
+        headers = {
+            'Authorization': f"{auth['token_type']} {auth['access_token']}",
+            'X-BRING-API-KEY': API_KEY,
+            'X-BRING-CLIENT': CLIENT,
+            'X-BRING-APPLICATION': APPLICATION,
+            'X-BRING-COUNTRY': COUNTRY,
+            'X-BRING-USER-UUID': auth['uuid'],
+            'X-BRING-PUBLIC-USER-UUID': auth['publicUuid']
+        }
+        
+        url = f"{API_BASE}/v2/bringlists/{list_uuid}"
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            items = []
+            for item in data.get('purchase', []):
+                name = item.get('name') or item.get('itemId')
+                spec = item.get('specification') or ''
+                full = f"{name} ({spec})".strip() if spec else name.strip()
+                items.append(full)
+            with open(ACTIVE_ITEMS_FILE, 'w', encoding='utf-8') as f:
+                json.dump(items, f, ensure_ascii=False)
+            res = {'items': items, 'count': len(items)}
+            print(json.dumps(res, ensure_ascii=False))
+            return items
+    except Exception as e:
+        print(json.dumps({'items': [], 'count': 0, 'error': str(e)}))
+        return []
+
 def execute_bring_sync(spoken_text):
     if not spoken_text or not spoken_text.strip():
         print("Kein Text übergeben.")
@@ -282,6 +322,7 @@ def execute_bring_sync(spoken_text):
     try:
         with urllib.request.urlopen(req) as resp:
             print(f"[OK] Bring Sync erfolgreich ({op}): {items}")
+            fetch_active_bring_items()
     except urllib.error.HTTPError as e:
         if e.code == 401:
             if os.path.exists(CACHE_FILE):
@@ -291,12 +332,16 @@ def execute_bring_sync(spoken_text):
             req = urllib.request.Request(url, data=payload, headers=headers, method='PUT')
             with urllib.request.urlopen(req) as resp2:
                 print(f"[OK Retry] Bring Sync erfolgreich ({op}): {items}")
+                fetch_active_bring_items()
         else:
             raise
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        text = " ".join(sys.argv[1:])
-        execute_bring_sync(text)
+        if sys.argv[1] == '--fetch-active':
+            fetch_active_bring_items()
+        else:
+            text = " ".join(sys.argv[1:])
+            execute_bring_sync(text)
     else:
-        print("Nutzung: python bring_sync.py '<gesprochener_text>'")
+        print("Nutzung: python bring_sync.py '<gesprochener_text>' oder --fetch-active")

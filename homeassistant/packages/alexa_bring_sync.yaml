@@ -1,6 +1,22 @@
+# ==============================================================================
 # Package: Alexa ➔ Bring! Sync Hub (100% Lokal in Home Assistant)
+# ==============================================================================
+
 shell_command:
-  bring_voice_sync: "python3 /config/scripts/bring_sync.py \"{{ spoken_text }}\""
+  bring_voice_sync: >-
+    python3 /config/scripts/bring_sync.py "{{ spoken_text }}"
+  bring_fetch_active: >-
+    python3 /config/scripts/bring_sync.py --fetch-active
+
+command_line:
+  - sensor:
+      name: "Bring Active Items"
+      unique_id: bring_active_items
+      command: "python3 /config/scripts/bring_sync.py --fetch-active"
+      value_template: "{{ value_json.count | default(0) }}"
+      json_attributes:
+        - items
+      scan_interval: 120
 
 automation:
   - id: alexa_bring_voice_sync
@@ -35,4 +51,70 @@ automation:
           value: "{{ trigger.to_state.attributes.last_called_timestamp | string }}"
       - service: shell_command.bring_voice_sync
         data:
-          spoken_text: "{{ trigger.to_state.attributes.last_called_summary }}"
+          spoken_text: >-
+            {{ trigger.to_state.attributes.last_called_summary | replace('"', '') | replace("'", "") }}
+      - delay: 4
+      - service: homeassistant.update_entity
+        target:
+          entity_id: sensor.bring_active_items
+      - service: automation.trigger
+        target:
+          entity_id: automation.bring_to_amazon_mirror_reconcile
+
+  - id: bring_to_amazon_mirror_reconcile
+    alias: "Bring! -> Amazon: 1-Way Mirror Reconciler"
+    description: "Hält Amazon's Einkaufsliste 100% synchron mit Bring! und entfernt abgehakte Artikel lautlos."
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        minutes: "/2"
+      - platform: homeassistant
+        event: start
+    condition:
+      - condition: template
+        value_template: "{{ states('todo.alexa_todo_shop') not in ['unavailable', 'unknown', 'none'] }}"
+    action:
+      - service: todo.get_items
+        target:
+          entity_id: todo.alexa_todo_shop
+        data:
+          status: needs_action
+        response_variable: alexa_res
+      - variables:
+          bring_names: "{{ state_attr('sensor.bring_active_items', 'items') | default([], true) }}"
+          alexa_items: "{{ alexa_res['todo.alexa_todo_shop']['items'] | default([], true) }}"
+          alexa_names: "{{ alexa_items | map(attribute='summary') | map('trim') | list }}"
+          items_to_remove: >-
+            {% set ns_r = namespace(uids=[]) %}
+            {% for a in alexa_items %}
+              {% if a.summary | trim not in bring_names %}
+                {% set ns_r.uids = ns_r.uids + [a.uid] %}
+              {% endif %}
+            {% endfor %}
+            {{ ns_r.uids }}
+          items_to_add: >-
+            {% set ns_a = namespace(names=[]) %}
+            {% for b in bring_names %}
+              {% if b not in alexa_names %}
+                {% set ns_a.names = ns_a.names + [b] %}
+              {% endif %}
+            {% endfor %}
+            {{ ns_a.names }}
+
+      - repeat:
+          for_each: "{{ items_to_remove }}"
+          sequence:
+            - service: todo.remove_item
+              target:
+                entity_id: todo.alexa_todo_shop
+              data:
+                item: "{{ repeat.item }}"
+
+      - repeat:
+          for_each: "{{ items_to_add }}"
+          sequence:
+            - service: todo.add_item
+              target:
+                entity_id: todo.alexa_todo_shop
+              data:
+                item: "{{ repeat.item }}"
