@@ -96,21 +96,40 @@ Läuft 24/7 kostenlos in Google Apps Script (Serverless).
 
 ---
 
-## 📱 Pfad C: iOS Siri Kurzbefehl & Android Widget
+## 📱 Pfad C: Smartphone Shortcuts & Voice (Unterwegs im Auto & zu Fuß)
 
-Für die schnelle Spracheingabe unterwegs im Auto oder beim Spazierengehen:
+### 🍎 Apple iOS (iPhone, Apple Watch & CarPlay)
+1. Öffne die **Kurzbefehle**-App auf deinem iPhone und erstelle einen neuen Kurzbefehl namens **„Einkaufsliste“**.
+2. Füge folgende Aktionen hinzu:
+   * **1. Aktion:** *„Diktierter Text“* (Deutsch)
+   * **2. Aktion:** *„Inhalte von URL abrufen“*:
+     - **URL:** Deine Google Apps Script Web-App URL
+     - **Methode:** `POST`
+     - **Header:** `Content-Type: application/json`
+     - **Anforderungstext:** `JSON`
+       ```json
+       {
+         "text": "Diktierter Text",
+         "key": "mein-geheimer-schluessel"
+       }
+       ```
+3. **Aufruf:** *„Hey Siri, Einkaufsliste: 2 Gurken und 500g Quark“* (funktioniert auch im Auto über Apple CarPlay & auf der Apple Watch).
 
-1. Erstelle einen **iOS Kurzbefehl** namens *„Einkaufsliste“*.
-2. Füge die Aktion **„Diktierter Text“** hinzu.
-3. Sende einen **HTTP POST** an deine Google Apps Script Web-App URL mit folgendem JSON-Payload:
-   ```json
-   {
-     "text": "Diktierter Text",
-     "key": "mein-geheimer-schluessel"
-   }
-   ```
-   *(💡 **Hinweis zu `key`:** Falls du in den Google Apps Script Skripteigenschaften `API_SECRET_KEY` gesetzt hast, trage denselben Wert hier als `key` ein).*
-4. **Aufruf:** *„Hey Siri, Einkaufsliste: 2 Gurken und 500g Quark“*!
+---
+
+### 🤖 Android (Google Pixel, Samsung Galaxy, Oppo, OnePlus)
+Die universellste, kostenlose und werbefreie Methode für alle Android-Hersteller ist die Open-Source-App **[HTTP Shortcuts](https://play.google.com/store/apps/details?id=ch.rmy.android.http_shortcuts)** (Play Store / F-Droid):
+
+1. **Shortcut erstellen:**
+   - **Name:** `Bring Einkaufsliste`
+   - **URL:** Deine Google Apps Script Web-App URL
+   - **Methode:** `POST`
+   - **Request Body (JSON):** `{"text": "{prompt}", "key": "mein-geheimer-schluessel"}`
+   - **Eingabedialog:** *„Vor Ausführung nach Text fragen“* ➔ *„Spracheingabe-Dialog anzeigen“*.
+2. **Herstellerspezifische Schnellzugriffe:**
+   * **Google Pixel:** Lege das Shortcut-Icon als 1-Click-Widget auf den Startbildschirm oder in die Schnelleinstellungen (Quick Settings Tile).
+   * **Samsung Galaxy:** Über **Modi und Routinen** kannst du den Shortcut auf das *zweimalige Drücken der Power-Taste* oder auf Bixby legen.
+   * **Oppo / OnePlus (ColorOS):** Ziehe die Verknüpfung in die *Smart-Seitenleiste* oder belege eine Bildschirm-Aus-Geste (z. B. „V“ zeichnen).
 
 ---
 
