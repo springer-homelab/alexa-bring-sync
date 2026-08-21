@@ -321,41 +321,59 @@ def match_catalog_name(query_name, catalog_names):
     words = [w.capitalize() for w in q_clean.split()]
     return " ".join(words)
 
-KNOWN_MULTIWORD = {
-    'wiener würstchen', 'saure sahne', 'rote beete', 'grüne bohnen', 'pollo fino',
-    'passierte tomaten', 'gehackte tomaten', 'getrocknete tomaten', 'frische milch',
-    'hafer milch', 'mandel milch', 'soja milch', 'kokos milch', 'oliven öl',
-    'sonnenblumen öl', 'raps öl', 'brauner zucker', 'puder zucker', 'vanille zucker',
-    'back pulver', 'creme fraiche', 'crème fraîche', 'saures gemüse', 'butter gemüse',
-    'butter kekse', 'vollmilch schokolade', 'zartbitter schokolade', 'weiße schokolade'
+GROCERY_ADJECTIVES = {
+    'wiener', 'saure', 'saurer', 'saures', 'rote', 'roter', 'rotes', 'grüne', 'grüner', 'grünes',
+    'frische', 'frischer', 'frisches', 'passierte', 'passierter', 'passiertes',
+    'gehackte', 'gehackter', 'gehacktes', 'getrocknete', 'getrockneter', 'getrocknetes',
+    'geriebene', 'geriebener', 'geriebenes', 'braune', 'brauner', 'braunes',
+    'italienische', 'italienischer', 'italienisches', 'griechische', 'griechischer',
+    'gemischte', 'gemischter', 'gemischtes', 'stille', 'stiller', 'stilles',
+    'scharfe', 'scharfer', 'scharfes', 'süße', 'süßer', 'süßes', 'milde', 'milder', 'mildes'
 }
 
-def split_consecutive_items(text, catalog_names):
+COMPOUND_PREFIXES = {
+    'oliven', 'sonnenblumen', 'raps', 'kokos', 'mandel', 'soja', 'hafer', 'dinkel',
+    'puder', 'vanille', 'back', 'kakao', 'kakaopulver', 'vollmilch', 'zartbitter', 'schoko',
+    'mineral', 'erdnuss', 'haselnuss', 'walnuss', 'kräuter', 'knoblauch', 'chili',
+    'balsamico', 'weizen', 'roggen', 'mais', 'tiefkühl', 'tk'
+}
+
+FOREIGN_TERMS = {
+    'pollo fino', 'creme fraiche', 'crème fraîche', 'sour cream', 'cream cheese',
+    'peanut butter', 'curry paste', 'pulled pork', 'ice tea', 'hot dog', 'french dressing'
+}
+
+def is_multiword_pair(w1, w2, catalog_names):
+    low1, low2 = w1.lower(), w2.lower()
+    full = f"{low1} {low2}"
+    if any(cat.lower() == full for cat in catalog_names) or full in FOREIGN_TERMS:
+        return True
+    if low1 in GROCERY_ADJECTIVES or low1 in COMPOUND_PREFIXES:
+        return True
+    return False
+
+def smart_split_consecutive(text, catalog_names):
     t = text.strip()
     words = t.split()
     if len(words) <= 1:
         return [t]
 
     low = t.lower()
-    if low in KNOWN_MULTIWORD or any(cat.lower() == low for cat in catalog_names):
+    if any(cat.lower() == low for cat in catalog_names) or low in FOREIGN_TERMS:
         return [t]
 
     results = []
-    current = []
-    for w in words:
-        if current:
-            combined = " ".join(current + [w]).lower()
-            if combined in KNOWN_MULTIWORD or any(cat.lower() == combined for cat in catalog_names):
-                current.append(w)
+    i = 0
+    while i < len(words):
+        w = words[i]
+        if i + 1 < len(words):
+            next_w = words[i + 1]
+            if is_multiword_pair(w, next_w, catalog_names):
+                results.append(f"{w} {next_w}")
+                i += 2
                 continue
-            
-            results.append(" ".join(current))
-            current = [w]
-        else:
-            current.append(w)
-
-    if current:
-        results.append(" ".join(current))
+        results.append(w)
+        i += 1
 
     return results
 
@@ -368,8 +386,7 @@ def parse_items(raw_text, catalog_names):
         rp = rp.strip()
         if not rp:
             continue
-        # Falls innerhalb eines Teils mehrere Artikel ohne "und" genannt wurden (z. B. "Blumenerde Teebeutel")
-        parts.extend(split_consecutive_items(rp, catalog_names))
+        parts.extend(smart_split_consecutive(rp, catalog_names))
 
     items = []
     for p in parts:
