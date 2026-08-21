@@ -44,6 +44,25 @@ def stem_german(word):
         w = re.sub(r'(?:en|ern|er|e|s|n)$', '', w)
     return w
 
+def normalize_spoken_german(text):
+    t = text.strip()
+    # Multi-Wort Zahlen wie "zwei hundert", "fünf hundert"
+    for w1, n1 in [('zwei', 200), ('drei', 300), ('vier', 400), ('fünf', 500), ('sechs', 600), ('sieben', 700), ('acht', 800), ('neun', 900)]:
+        t = re.sub(rf'\b{w1}\s+hundert\b', str(n1), t, flags=re.IGNORECASE)
+
+    word_to_num = {
+        'eine': '1', 'ein': '1', 'einen': '1', 'einem': '1', 'einer': '1', 'eins': '1',
+        'zwei': '2', 'drei': '3', 'vier': '4', 'fünf': '5', 'sechs': '6', 'sieben': '7', 'acht': '8', 'neun': '9', 'zehn': '10',
+        'elf': '11', 'zwölf': '12', 'dreizehn': '13', 'vierzehn': '14', 'fünfzehn': '15', 'sechzehn': '16', 'siebzehn': '17', 'achtzehn': '18', 'neunzehn': '19', 'zwanzig': '20',
+        'dreißig': '30', 'vierzig': '40', 'fünfzig': '50', 'sechzig': '60', 'siebzig': '70', 'achtzig': '80', 'neunzig': '90',
+        'hundert': '100', 'zweihundert': '200', 'dreihundert': '300', 'vierhundert': '400', 'fünfhundert': '500',
+        'sechshundert': '600', 'siebenhundert': '700', 'achthundert': '800', 'neunhundert': '900', 'tausend': '1000',
+        'halbes': '0.5', 'halb': '0.5', 'halbe': '0.5', 'anderthalb': '1.5', 'eineinhalb': '1.5'
+    }
+    for w, n in word_to_num.items():
+        t = re.sub(rf'\b{w}\b', str(n), t, flags=re.IGNORECASE)
+    return t
+
 def strip_command_phrases(text):
     t = text.strip()
     patterns = [
@@ -81,6 +100,10 @@ def extract_specification(text):
     if m:
         spec = m.group(1).strip()
         name = m.group(2).strip()
+        # Einheiten sauber formatieren (z. B. "100 gramm" -> "100g", "2 kilo" -> "2kg")
+        spec = re.sub(r'(\d+)\s*gramm\b', r'\1g', spec, flags=re.IGNORECASE)
+        spec = re.sub(r'(\d+)\s*kilo(?:gramm)?\b', r'\1kg', spec, flags=re.IGNORECASE)
+        spec = re.sub(r'(\d+)\s*liter\b', r'\1l', spec, flags=re.IGNORECASE)
         return name, spec
     return t, ''
 
@@ -194,9 +217,9 @@ def get_cached_catalog(auth, list_uuid):
 def match_catalog_name(query_name, catalog_names):
     """
     Intelligenter, generischer Abgleich gegen alle Bring-Katalog-Artikel:
-    1. Exakter Match
+    1. Exakter Match (case-insensitive)
     2. Linguistischer Wortstamm-Match (Plural <-> Singular, z. B. Erdbeeren -> Erdbeere)
-    3. Teilwort-Match
+    3. Whole Word Match (wenn Katalogname exakt als ganzes Wort in query vorkommt)
     4. Fallback: Saubere Groß-/Kleinschreibung (Title Case)
     """
     q_clean = query_name.strip()
@@ -215,17 +238,18 @@ def match_catalog_name(query_name, catalog_names):
             if c_stem == q_stem:
                 return cat
 
-    # 3. Substring / Teilwort-Match
+    # 3. Whole Word Token Match (NUR als ganzes Wort, niemals "Milch" -> "Heumilch"!)
     for cat in catalog_names:
-        if q_low in cat.lower() or cat.lower() in q_low:
+        if re.search(rf'\b{re.escape(cat.lower())}\b', q_low):
             return cat
 
-    # 4. Fallback: Saubere Großschreibung
+    # 4. Fallback: Saubere Großschreibung (Title Case)
     words = [w.capitalize() for w in q_clean.split()]
     return " ".join(words)
 
 def parse_items(raw_text, catalog_names):
-    cleaned = strip_command_phrases(raw_text)
+    norm = normalize_spoken_german(raw_text)
+    cleaned = strip_command_phrases(norm)
     parts = re.split(r'\s+(?:und|sowie)\s+|,\s*', cleaned, flags=re.IGNORECASE)
     items = []
     for p in parts:
