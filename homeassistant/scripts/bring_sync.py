@@ -380,8 +380,21 @@ def smart_split_consecutive(text, catalog_names):
 def parse_items(raw_text, catalog_names):
     norm = normalize_spoken_german(raw_text)
     cleaned = strip_command_phrases(norm)
-    raw_parts = re.split(r'\s+(?:und|sowie|\+)\s+|,\s*', cleaned, flags=re.IGNORECASE)
     
+    first_split = re.split(r'\s+(?:und|sowie|\+)\s+|,\s*', cleaned, flags=re.IGNORECASE)
+    
+    raw_parts = []
+    split_pattern = rf'(?<=[a-zA-ZäöüÄÖÜß])\s+(?=\d+(?:[.,]\d+)?\s*(?:(?:{UNITS_PATTERN})\s+)?[a-zA-ZäöüÄÖÜß])'
+    for fs in first_split:
+        fs = fs.strip()
+        if not fs:
+            continue
+        subparts = re.split(split_pattern, fs, flags=re.IGNORECASE)
+        for sp in subparts:
+            sp = sp.strip()
+            if sp:
+                raw_parts.append(sp)
+
     items = []
     for rp in raw_parts:
         rp = rp.strip()
