@@ -381,21 +381,22 @@ def parse_items(raw_text, catalog_names):
     norm = normalize_spoken_german(raw_text)
     cleaned = strip_command_phrases(norm)
     raw_parts = re.split(r'\s+(?:und|sowie|\+)\s+|,\s*', cleaned, flags=re.IGNORECASE)
-    parts = []
+    
+    items = []
     for rp in raw_parts:
         rp = rp.strip()
         if not rp:
             continue
-        parts.extend(smart_split_consecutive(rp, catalog_names))
-
-    items = []
-    for p in parts:
-        p = p.strip()
-        if not p:
-            continue
-        name, spec = extract_specification(p)
-        matched_name = match_catalog_name(name, catalog_names)
-        items.append({'name': matched_name, 'specification': spec})
+        name, spec = extract_specification(rp)
+        if not spec:
+            split_names = smart_split_consecutive(name, catalog_names)
+            for sn in split_names:
+                matched_name = match_catalog_name(sn, catalog_names)
+                items.append({'name': matched_name, 'specification': ''})
+        else:
+            matched_name = match_catalog_name(name, catalog_names)
+            items.append({'name': matched_name, 'specification': spec})
+            
     return items
 
 ACTIVE_ITEMS_FILE = os.path.join(CONFIG_DIR, '.bring_active.json')
