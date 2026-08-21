@@ -1,0 +1,24 @@
+# Secrets, Auth & Environment
+secrets.yaml
+.env
+bring_auth_cache.json
+bring_catalog_cache.json
+.storage/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Google Apps Script Clasp
+.clasp.json
+.claspignore
+
+# OS Specific
+.DS_Store
+Thumbs.db

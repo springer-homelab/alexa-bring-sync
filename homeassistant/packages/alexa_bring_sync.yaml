@@ -1,0 +1,38 @@
+# Package: Alexa ➔ Bring! Sync Hub (100% Lokal in Home Assistant)
+shell_command:
+  bring_voice_sync: "python3 /config/scripts/bring_sync.py \"{{ spoken_text }}\""
+
+automation:
+  - id: alexa_bring_voice_sync
+    alias: "Alexa -> Bring! Sprach-Sniffer (Echtzeit Lokal)"
+    description: "Fängt Spracheingaben für die Einkaufsliste ab und synchronisiert Hinzufügen/Löschen zu 100% lokal nach Bring!."
+    mode: queued
+    max: 10
+    trigger:
+      - platform: state
+        entity_id:
+          - media_player.echo_dot
+          - media_player.this_device
+        attribute: last_called_timestamp
+    condition:
+      - condition: template
+        value_template: >-
+          {% set cur_ts = trigger.to_state.attributes.last_called_timestamp | default('', true) | string %}
+          {% set last_ts = states('input_text.bring_last_called_timestamp') | default('', true) | string %}
+          {% set raw = trigger.to_state.attributes.last_called_summary | default('', true) | string | lower %}
+          {% set is_question = 'was steht' in raw or 'was ist auf' in raw or 'lies' in raw or 'was habe ich' in raw or 'welche artikel' in raw or 'vorlesen' in raw %}
+          {{ cur_ts != last_ts and cur_ts | length > 0 and not is_question and (
+            'einkauf' in raw or 'liste' in raw or 'zettel' in raw or 'bring' in raw
+            or 'setz' in raw or 'pack' in raw or 'schreib' in raw
+            or 'füg' in raw or 'für' in raw or 'kauf' in raw or 'brauchen' in raw
+            or 'lösch' in raw or 'entfern' in raw or 'streich' in raw or 'nimm' in raw
+          ) }}
+    action:
+      - service: input_text.set_value
+        target:
+          entity_id: input_text.bring_last_called_timestamp
+        data:
+          value: "{{ trigger.to_state.attributes.last_called_timestamp | string }}"
+      - service: shell_command.bring_voice_sync
+        data:
+          spoken_text: "{{ trigger.to_state.attributes.last_called_summary }}"

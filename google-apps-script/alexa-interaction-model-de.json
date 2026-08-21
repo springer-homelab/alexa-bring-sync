@@ -1,0 +1,93 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "mein einkaufszettel",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": [
+            "abbrechen",
+            "stopp"
+          ]
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": [
+            "hilfe",
+            "was kann ich tun",
+            "wie funktioniert das"
+          ]
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": [
+            "beenden",
+            "tschüss",
+            "stopp"
+          ]
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AddItemsIntent",
+          "slots": [
+            {
+              "name": "Items",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "{Items}",
+            "setze {Items} auf die Liste",
+            "setze {Items} auf den Einkaufszettel",
+            "packe {Items} auf die Liste",
+            "packe {Items} auf den Einkaufszettel",
+            "füge {Items} hinzu",
+            "schreibe {Items} auf die Liste",
+            "schreibe {Items} auf den Einkaufszettel",
+            "wir brauchen {Items}",
+            "kauf bitte {Items}",
+            "pack {Items} drauf",
+            "setze {Items} drauf",
+            "füge {Items} zur Liste hinzu"
+          ]
+        },
+        {
+          "name": "GetListIntent",
+          "slots": [],
+          "samples": [
+            "was steht auf der Liste",
+            "was steht auf dem Einkaufszettel",
+            "was ist auf der Liste",
+            "was ist auf dem Einkaufszettel",
+            "lies die Liste vor",
+            "was müssen wir einkaufen",
+            "welche Artikel stehen auf der Liste",
+            "was brauchen wir"
+          ]
+        },
+        {
+          "name": "CompleteItemIntent",
+          "slots": [
+            {
+              "name": "Item",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "hake {Item} ab",
+            "{Item} abhaken",
+            "streiche {Item} von der Liste",
+            "lösche {Item}",
+            "{Item} erledigt",
+            "wir haben {Item} gekauft",
+            "{Item} löschen"
+          ]
+        }
+      ],
+      "types": []
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "bring",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": ["abbrechen", "stopp"]
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": ["hilfe", "was kann ich tun", "wie funktioniert das"]
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": ["beenden", "stopp", "tschüss"]
+        },
+        {
+          "name": "AddItemsIntent",
+          "slots": [
+            {
+              "name": "Items",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "setze {Items} auf die einkaufsliste",
+            "setze {Items} auf die liste",
+            "setz {Items} auf die einkaufsliste",
+            "setz {Items} auf die liste",
+            "pack {Items} auf die einkaufsliste",
+            "pack {Items} auf die liste",
+            "packe {Items} auf die einkaufsliste",
+            "schreib {Items} auf die einkaufsliste",
+            "schreibe {Items} auf die einkaufsliste",
+            "füge {Items} hinzu",
+            "füg {Items} hinzu",
+            "kauf {Items}",
+            "wir brauchen {Items}",
+            "{Items}"
+          ]
+        },
+        {
+          "name": "RemoveItemsIntent",
+          "slots": [
+            {
+              "name": "Items",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "lösche {Items} von der einkaufsliste",
+            "lösche {Items} von der liste",
+            "lösch {Items} von der einkaufsliste",
+            "entferne {Items} von der einkaufsliste",
+            "entfern {Items} von der einkaufsliste",
+            "streiche {Items} von der einkaufsliste",
+            "nimm {Items} von der einkaufsliste runter"
+          ]
+        },
+        {
+          "name": "GetItemsIntent",
+          "slots": [],
+          "samples": [
+            "was steht auf der einkaufsliste",
+            "was steht auf meiner einkaufsliste",
+            "was steht auf der liste",
+            "was ist auf der einkaufsliste",
+            "lies die einkaufsliste vor",
+            "welche artikel sind auf der liste"
+          ]
+        }
+      ]
+    }
+  }
+}
