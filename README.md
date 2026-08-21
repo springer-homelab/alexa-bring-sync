@@ -80,10 +80,11 @@ Läuft 24/7 kostenlos in Google Apps Script (Serverless).
 1. **Google Apps Script Backend bereitstellen:**
    * Erstelle ein Projekt auf [script.google.com](https://script.google.com).
    * Lade alle Dateien aus dem Ordner [`google-apps-script/`](google-apps-script/) hoch (`clasp push`).
-   * Hinterlege in den **Skripteigenschaften**:
-     * `BRING_EMAIL` = `deine-email@example.com`
-     * `BRING_PASSWORD` = `dein-passwort`
-     * `BRING_LIST_NAME` = `Einkaufsliste`
+   * Hinterlege in den **Projekteinstellungen (⚙️) ➔ Skripteigenschaften**:
+     * `BRING_EMAIL` = `deine-email@example.com` *(Pflicht)*
+     * `BRING_PASSWORD` = `dein-passwort` *(Pflicht)*
+     * `BRING_LIST_NAME` = `Einkaufsliste` *(Optional, Standard: Standard-Liste)*
+     * `API_SECRET_KEY` = `mein-geheimer-schluessel` *(Optional für Webhook-Absicherung)*
    * Klicke auf **Bereitstellen ➔ Neue Bereitstellung** (Web-App, Zugriff: *Jeder*) und kopiere die Web-App-URL.
 
 2. **Alexa Custom Skill anlegen:**
@@ -101,13 +102,14 @@ Für die schnelle Spracheingabe unterwegs im Auto oder beim Spazierengehen:
 
 1. Erstelle einen **iOS Kurzbefehl** namens *„Einkaufsliste“*.
 2. Füge die Aktion **„Diktierter Text“** hinzu.
-3. Sende einen **HTTP POST** an deine Google Apps Script Web-App URL mit dem JSON-Payload:
+3. Sende einen **HTTP POST** an deine Google Apps Script Web-App URL mit folgendem JSON-Payload:
    ```json
    {
      "text": "Diktierter Text",
-     "key": "dein-api-key"
+     "key": "mein-geheimer-schluessel"
    }
    ```
+   *(💡 **Hinweis zu `key`:** Falls du in den Google Apps Script Skripteigenschaften `API_SECRET_KEY` gesetzt hast, trage denselben Wert hier als `key` ein).*
 4. **Aufruf:** *„Hey Siri, Einkaufsliste: 2 Gurken und 500g Quark“*!
 
 ---
