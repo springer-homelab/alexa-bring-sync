@@ -262,8 +262,9 @@ def fetch_active_bring_items():
         req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req) as resp:
             data = json.loads(resp.read().decode('utf-8'))
+            raw_purchase = data.get('purchase') or (data.get('items', {}).get('purchase') if isinstance(data.get('items'), dict) else []) or []
             items = []
-            for item in data.get('purchase', []):
+            for item in raw_purchase:
                 name = item.get('name') or item.get('itemId')
                 spec = item.get('specification') or ''
                 full = f"{name} ({spec})".strip() if spec else name.strip()
