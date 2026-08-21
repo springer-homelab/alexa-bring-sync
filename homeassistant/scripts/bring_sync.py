@@ -321,10 +321,56 @@ def match_catalog_name(query_name, catalog_names):
     words = [w.capitalize() for w in q_clean.split()]
     return " ".join(words)
 
+KNOWN_MULTIWORD = {
+    'wiener würstchen', 'saure sahne', 'rote beete', 'grüne bohnen', 'pollo fino',
+    'passierte tomaten', 'gehackte tomaten', 'getrocknete tomaten', 'frische milch',
+    'hafer milch', 'mandel milch', 'soja milch', 'kokos milch', 'oliven öl',
+    'sonnenblumen öl', 'raps öl', 'brauner zucker', 'puder zucker', 'vanille zucker',
+    'back pulver', 'creme fraiche', 'crème fraîche', 'saures gemüse', 'butter gemüse',
+    'butter kekse', 'vollmilch schokolade', 'zartbitter schokolade', 'weiße schokolade'
+}
+
+def split_consecutive_items(text, catalog_names):
+    t = text.strip()
+    words = t.split()
+    if len(words) <= 1:
+        return [t]
+
+    low = t.lower()
+    if low in KNOWN_MULTIWORD or any(cat.lower() == low for cat in catalog_names):
+        return [t]
+
+    results = []
+    current = []
+    for w in words:
+        if current:
+            combined = " ".join(current + [w]).lower()
+            if combined in KNOWN_MULTIWORD or any(cat.lower() == combined for cat in catalog_names):
+                current.append(w)
+                continue
+            
+            results.append(" ".join(current))
+            current = [w]
+        else:
+            current.append(w)
+
+    if current:
+        results.append(" ".join(current))
+
+    return results
+
 def parse_items(raw_text, catalog_names):
     norm = normalize_spoken_german(raw_text)
     cleaned = strip_command_phrases(norm)
-    parts = re.split(r'\s+(?:und|sowie)\s+|,\s*', cleaned, flags=re.IGNORECASE)
+    raw_parts = re.split(r'\s+(?:und|sowie|\+)\s+|,\s*', cleaned, flags=re.IGNORECASE)
+    parts = []
+    for rp in raw_parts:
+        rp = rp.strip()
+        if not rp:
+            continue
+        # Falls innerhalb eines Teils mehrere Artikel ohne "und" genannt wurden (z. B. "Blumenerde Teebeutel")
+        parts.extend(split_consecutive_items(rp, catalog_names))
+
     items = []
     for p in parts:
         p = p.strip()
