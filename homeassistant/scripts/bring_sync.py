@@ -46,22 +46,51 @@ def stem_german(word):
 
 def normalize_spoken_german(text):
     t = text.strip()
-    # Multi-Wort Zahlen wie "zwei hundert", "fünf hundert"
-    for w1, n1 in [('zwei', 200), ('drei', 300), ('vier', 400), ('fünf', 500), ('sechs', 600), ('sieben', 700), ('acht', 800), ('neun', 900)]:
-        t = re.sub(rf'\b{w1}\s+hundert\b', str(n1), t, flags=re.IGNORECASE)
 
+    # 1. Brüche und gemischte Zahlen (z. B. "ein halbes kilo" -> 0.5kg, "anderthalb" -> 1.5)
+    fraction_map = [
+        (r'\banderthalb\b|\beineinhalb\b', '1.5'),
+        (r'\bzweieinhalb\b', '2.5'),
+        (r'\bdreieinhalb\b', '3.5'),
+        (r'\bviereinhalb\b', '4.5'),
+        (r'\bfünfeinhalb\b', '5.5'),
+        (r'\bdreiviertel\b|\bdrei\s*viertel\b', '0.75'),
+        (r'(?:\bein\s+)?halbes\b|(?:\bein\s+)?halber\b|(?:\bein\s+)?halb\b|(?:\beine\s+)?halbe\b', '0.5'),
+        (r'(?:\bein\s+)?viertel\b', '0.25')
+    ]
+    for pattern, val in fraction_map:
+        t = re.sub(pattern, val, t, flags=re.IGNORECASE)
+
+    # 2. Hunderter & Tausender (z. B. "zweihundertfünfzig" -> "200 50", "fünfhundert" -> "500")
+    hundred_prefixes = {'ein': 100, 'zwei': 200, 'drei': 300, 'vier': 400, 'fünf': 500, 'sechs': 600, 'sieben': 700, 'acht': 800, 'neun': 900}
+    for h_name, h_val in hundred_prefixes.items():
+        t = re.sub(rf'\b{h_name}\s*hundert', f'{h_val} ', t, flags=re.IGNORECASE)
+    t = re.sub(r'\bhundert\b', '100 ', t, flags=re.IGNORECASE)
+    t = re.sub(r'\btausend\b', '1000 ', t, flags=re.IGNORECASE)
+
+    # 3. Zweistellige Zahlen (z. B. "zweiundzwanzig" -> 22, "fünfunddreißig" -> 35)
+    ones = {'ein': 1, 'zwei': 2, 'drei': 3, 'vier': 4, 'fünf': 5, 'sechs': 6, 'sieben': 7, 'acht': 8, 'neun': 9}
+    tens = {'zwanzig': 20, 'dreißig': 30, 'vierzig': 40, 'fünfzig': 50, 'sechzig': 60, 'siebzig': 70, 'achtzig': 80, 'neunzig': 90}
+    for one_k, one_v in ones.items():
+        for ten_k, ten_v in tens.items():
+            compound = f"{one_k}und{ten_k}"
+            total = one_v + ten_v
+            t = re.sub(rf'\b{compound}\b', str(total), t, flags=re.IGNORECASE)
+
+    # 4. Einzelne Zahlwörter
     word_to_num = {
-        'eine': '1', 'ein': '1', 'einen': '1', 'einem': '1', 'einer': '1', 'eins': '1',
-        'zwei': '2', 'drei': '3', 'vier': '4', 'fünf': '5', 'sechs': '6', 'sieben': '7', 'acht': '8', 'neun': '9', 'zehn': '10',
-        'elf': '11', 'zwölf': '12', 'dreizehn': '13', 'vierzehn': '14', 'fünfzehn': '15', 'sechzehn': '16', 'siebzehn': '17', 'achtzehn': '18', 'neunzehn': '19', 'zwanzig': '20',
-        'dreißig': '30', 'vierzig': '40', 'fünfzig': '50', 'sechzig': '60', 'siebzig': '70', 'achtzig': '80', 'neunzig': '90',
-        'hundert': '100', 'zweihundert': '200', 'dreihundert': '300', 'vierhundert': '400', 'fünfhundert': '500',
-        'sechshundert': '600', 'siebenhundert': '700', 'achthundert': '800', 'neunhundert': '900', 'tausend': '1000',
-        'halbes': '0.5', 'halb': '0.5', 'halbe': '0.5', 'anderthalb': '1.5', 'eineinhalb': '1.5'
+        'zwanzig': '20', 'dreißig': '30', 'vierzig': '40', 'fünfzig': '50', 'sechzig': '60', 'siebzig': '70', 'achtzig': '80', 'neunzig': '90',
+        'dreizehn': '13', 'vierzehn': '14', 'fünfzehn': '15', 'sechzehn': '16', 'siebzehn': '17', 'achtzehn': '18', 'neunzehn': '19',
+        'zwölf': '12', 'elf': '11', 'zehn': '10', 'neun': '9', 'acht': '8', 'sieben': '7', 'sechs': '6', 'fünf': '5', 'vier': '4', 'drei': '3', 'zwei': '2',
+        'eins': '1', 'eine': '1', 'einen': '1', 'einem': '1', 'einer': '1', 'ein': '1'
     }
     for w, n in word_to_num.items():
         t = re.sub(rf'\b{w}\b', str(n), t, flags=re.IGNORECASE)
-    return t
+
+    # 5. Addition von Hunderter + Zehner/Einer (z. B. "200 50" -> 250, "100 25" -> 125)
+    t = re.sub(r'\b(\d{1,4}00)\s+(\d{1,2})\b', lambda m: str(int(m.group(1)) + int(m.group(2))), t)
+
+    return t.strip()
 
 def strip_command_phrases(text):
     t = text.strip()
@@ -92,19 +121,57 @@ def detect_operation(raw_text):
             return 'TO_RECENTLY'
     return 'TO_PURCHASE'
 
+UNITS_LIST = [
+    'kg', 'kilo', 'kilogramm',
+    'g', 'gramm',
+    'l', 'liter',
+    'ml', 'milliliter', 'cl', 'dl',
+    'packung', 'packungen', 'pkg', 'pack', 'packs', 'pck',
+    'stk', 'stück',
+    'flasche', 'flaschen',
+    'dose', 'dosen',
+    'bund',
+    'beutel',
+    'glas', 'gläser',
+    'scheibe', 'scheiben',
+    'kasten', 'kästen', 'kiste', 'kisten',
+    'tüte', 'tüten',
+    'becher',
+    'zehe', 'zehen', 'knolle', 'knollen',
+    'tafel', 'tafeln',
+    'tube', 'tuben',
+    'stange', 'stangen',
+    'zweig', 'zweige',
+    'rolle', 'rollen',
+    'karton', 'kartons',
+    'portion', 'portionen',
+    'paar',
+    'schale', 'schalen',
+    'netz', 'netze',
+    'steige', 'steigen'
+]
+
+UNITS_PATTERN = '|'.join(sorted(UNITS_LIST, key=len, reverse=True))
+
 def extract_specification(text):
     t = text.strip()
-    units = r'(?:kg|kilo|kilogramm|gramm|g|liter|l|ml|cl|stk|stück|packungen|packung|pkg|flaschen|flasche|beutel|dosen|dose|bund|gläser|glas|becher|scheiben|scheibe|tüten|tüte|tafeln|tafel|rollen|rolle|kasten|kästen|paar)'
-    pattern = rf'^\s*(\d+(?:[.,]\d+)?\s*{units}?|\d+)\s+(.+)$'
-    m = re.match(pattern, t, re.IGNORECASE)
+    pattern_unit = rf'^\s*(\d+(?:[.,]\d+)?\s*(?:{UNITS_PATTERN}))\s+(?:von\s+(?:den|der|dem|meinen)?\s*)?(.+)$'
+    m = re.match(pattern_unit, t, re.IGNORECASE)
     if m:
         spec = m.group(1).strip()
         name = m.group(2).strip()
-        # Einheiten sauber formatieren (z. B. "100 gramm" -> "100g", "2 kilo" -> "2kg")
         spec = re.sub(r'(\d+)\s*gramm\b', r'\1g', spec, flags=re.IGNORECASE)
         spec = re.sub(r'(\d+)\s*kilo(?:gramm)?\b', r'\1kg', spec, flags=re.IGNORECASE)
         spec = re.sub(r'(\d+)\s*liter\b', r'\1l', spec, flags=re.IGNORECASE)
         return name, spec
+
+    pattern_plain = r'^\s*(\d+(?:[.,]\d+)?)\s+(?:von\s+(?:den|der|dem)?\s*)?([a-zA-ZäöüÄÖÜß].+)$'
+    m = re.match(pattern_plain, t, re.IGNORECASE)
+    if m:
+        spec = m.group(1).strip()
+        name = m.group(2).strip()
+        return name, spec
+
     return t, ''
 
 def get_credentials():
