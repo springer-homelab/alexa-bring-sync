@@ -120,9 +120,59 @@ def strip_command_phrases(text):
     t = re.sub(r'\s+(?:zur|zu|auf|an|für|hinzu|drauf|runter|weg|bitte|danke|noch|löschen|entfernen|streichen)$', '', t, flags=re.IGNORECASE)
     return t.strip()
 
+GERMAN_STOPWORDS = {
+    'in', 'an', 'auf', 'aus', 'bei', 'mit', 'nach', 'seit', 'von', 'zu', 'über', 'unter', 'vor', 'zwischen',
+    'der', 'die', 'das', 'den', 'dem', 'des', 'ein', 'eine', 'einen', 'einem', 'einer', 'eines',
+    'wie', 'was', 'wo', 'wann', 'warum', 'wieso', 'weshalb', 'wer', 'wen', 'wem', 'wessen', 'welche', 'welcher', 'welches', 'welchen',
+    'ist', 'sind', 'war', 'waren', 'wird', 'werden', 'hat', 'haben', 'hatte', 'hatten',
+    'ich', 'du', 'er', 'sie', 'es', 'wir', 'ihr', 'meiner', 'meinem', 'meinen', 'meine', 'unserer', 'unserem', 'unsere',
+    'noch', 'schon', 'nicht', 'kein', 'keine', 'keinen', 'viel', 'viele', 'alles', 'nichts', 'etwas',
+    'grad', 'minuten', 'sekunden', 'stunden', 'uhr', 'timer', 'wecker', 'danke', 'bitte', 'ja', 'nein', 'nee', 'mal', 'eben', 'lang', 'brauchen'
+}
+
+QUESTION_PREFIXES = (
+    'was ', 'wie ', 'wo ', 'wann ', 'warum ', 'wieso ', 'weshalb ', 'wer ', 'welche ', 'welcher ', 'welches ', 'welchen ',
+    'ist ', 'sind ', 'gibt ', 'hast ', 'kannst ', 'lies ', 'zeige ', 'öffne ', 'starte ', 'spiel ', 'stelle ', 'stell '
+)
+
+def is_valid_shopping_command(text):
+    t = text.strip().lower()
+    if t.endswith('?'):
+        return False
+    if any(t.startswith(q) for q in QUESTION_PREFIXES):
+        return False
+    for p in [
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:setz(?:e)?|pack(?:e)?|schreib(?:e)?|füg(?:e)?|tu)\s+(.+?)\s+(?:auf|zu|zur|in|an|der)\s+(?:die|meine|unsere|den|der|das)?\s*(?:einkaufsliste|einkaufszettel|liste|zettel|bring(?:\s*liste)?)(?:\s*hinzu|\s*drauf)?$',
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:lösch(?:e)?|entfern(?:e)?|streich(?:e)?)\s+(.+?)\s+(?:von|aus|von\s+der|von\s+den|von\s+unserer|von\s+meiner)\s+(?:der|meiner|unserer|den|die)?\s*(?:einkaufsliste|einkaufszettel|liste|zettel|bring(?:\s*liste)?)$',
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:nimm|tu)\s+(.+?)\s+(?:von|aus)\s+(?:der|den|meiner|unserer)\s+(?:einkaufsliste|liste|zettel)\s*runter$',
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?(.+?)\s+(?:von|aus)\s+(?:der|den|meiner|unserer)\s+(?:einkaufsliste|liste|zettel)\s+(?:löschen|entfernen|streichen|runternehmen)$',
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?(.+?)\s+(?:löschen|entfernen|streichen|abhaken)$',
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:wir\s+brauchen\s+noch|wir\s+benötigen\s+noch)\s+(.+)$',
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:kaufe|kauf|besorg|besorge)\s+bitte\s+(.+)$',
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:kaufe|kauf|besorg|besorge)\s+(.+)$',
+        r'^(?:setz(?:e)?|pack(?:e)?|schreib(?:e)?|füg(?:e)?|tu)\s+(.+?)\s+(?:auf|zu|zur|in|der)\s+(?:die|den|meine|unsere|der|das)\s+(?:einkaufsliste|liste|zettel)$'
+    ]:
+        if re.match(p, t, re.IGNORECASE):
+            return True
+    if any(k in t for k in ['einkaufsliste', 'einkaufszettel', 'bring liste', 'bringliste']):
+        if any(v in t for v in ['setz', 'pack', 'schreib', 'füg', 'kauf', 'lösch', 'entfern', 'streich', 'nimm']):
+            return True
+    return False
+
+def is_valid_grocery_item(name, catalog_names):
+    n_clean = name.strip()
+    n_low = n_clean.lower()
+    if not n_clean or len(n_clean) < 2:
+        return False
+    if any(cat.lower() == n_low for cat in catalog_names):
+        return True
+    if n_low in GERMAN_STOPWORDS:
+        return False
+    return True
+
 def detect_operation(raw_text):
     low = raw_text.lower()
-    delete_words = ['lösch', 'lösche', 'entfern', 'entferne', 'streich', 'streiche', 'nimm', 'runter', 'weg']
+    delete_words = ['lösch', 'lösche', 'entfern', 'entferne', 'streich', 'streiche', 'nimm', 'runter', 'weg', 'löschen', 'entfernen', 'streichen']
     for w in delete_words:
         if w in low:
             return 'TO_RECENTLY'
@@ -405,10 +455,12 @@ def parse_items(raw_text, catalog_names):
             split_names = smart_split_consecutive(name, catalog_names)
             for sn in split_names:
                 matched_name = match_catalog_name(sn, catalog_names)
-                items.append({'name': matched_name, 'specification': ''})
+                if is_valid_grocery_item(matched_name, catalog_names):
+                    items.append({'name': matched_name, 'specification': ''})
         else:
             matched_name = match_catalog_name(name, catalog_names)
-            items.append({'name': matched_name, 'specification': spec})
+            if is_valid_grocery_item(matched_name, catalog_names):
+                items.append({'name': matched_name, 'specification': spec})
             
     return items
 
@@ -458,6 +510,10 @@ def execute_bring_sync(spoken_text):
         print("Kein Text übergeben.")
         return
     
+    if not is_valid_shopping_command(spoken_text):
+        print(f"[SKIP] Kein gültiger Einkaufslisten-Befehl: '{spoken_text}'")
+        return
+    
     op = detect_operation(spoken_text)
     email, password, list_name = get_credentials()
     auth = authenticate()
@@ -466,7 +522,7 @@ def execute_bring_sync(spoken_text):
     
     items = parse_items(spoken_text, catalog_names)
     if not items:
-        print("Keine Artikel extrahiert.")
+        print("[SKIP] Keine gültigen Einkaufsartikel extrahiert.")
         return
     
     changes = []
