@@ -342,10 +342,9 @@ def match_catalog_name(query_name, catalog_names):
     """
     Intelligenter, generischer Abgleich gegen alle Bring-Katalog-Artikel:
     1. Exakter Match (case-insensitive)
-    2. Compound Match (z. B. "Wurst Aufschnitt" -> "Wurstaufschnitt", "Oliven Öl" -> "Olivenöl")
-    3. Linguistischer Wortstamm-Match (Plural <-> Singular, z. B. Erdbeeren -> Erdbeere)
-    4. Whole Word Match (wenn Katalogname exakt als ganzes Wort in query vorkommt)
-    5. Fallback: Saubere Groß-/Kleinschreibung (Title Case)
+    2. Compound Match (z. B. "Wurst Aufschnitt" -> "Wurstaufschnitt", "Frisch Käse" -> "Frischkäse")
+    3. Linguistischer Wortstamm-Match (Singularisierung / Pluralabgleich bei Ein-Wort Queries)
+    4. Fallback: Saubere Groß-/Kleinschreibung (Title Case)
     """
     q_clean = query_name.strip()
     q_low = q_clean.lower()
@@ -357,24 +356,19 @@ def match_catalog_name(query_name, catalog_names):
         if cat.lower() == q_low:
             return cat
 
-    # 2. Compound Match
+    # 2. Compound Match (z. B. "Wurst Aufschnitt" -> "Wurstaufschnitt")
     for cat in catalog_names:
         if cat.lower().replace(" ", "") == q_compound:
             return cat
 
-    # 3. Wortstamm Match (Singularisierung / Pluralabgleich)
-    if len(q_stem) >= 3:
+    # 3. Wortstamm Match (Singularisierung / Pluralabgleich bei Ein-Wort Queries)
+    if len(q_stem) >= 3 and " " not in q_low:
         for cat in catalog_names:
             c_stem = stem_german(cat)
             if c_stem == q_stem:
                 return cat
 
-    # 4. Whole Word Token Match (NUR als ganzes Wort, niemals "Milch" -> "Heumilch"!)
-    for cat in catalog_names:
-        if re.search(rf'\b{re.escape(cat.lower())}\b', q_low):
-            return cat
-
-    # 5. Fallback: Saubere Großschreibung (Title Case)
+    # 4. Fallback: Saubere Großschreibung (Title Case)
     words = [w.capitalize() for w in q_clean.split()]
     return " ".join(words)
 
@@ -387,25 +381,27 @@ GROCERY_ADJECTIVES = {
     'gemischte', 'gemischter', 'gemischtes', 'stille', 'stiller', 'stilles',
     'scharfe', 'scharfer', 'scharfes', 'süße', 'süßer', 'süßes', 'milde', 'milder', 'mildes',
     'feine', 'feiner', 'feines', 'grobe', 'grober', 'grobes', 'schwarze', 'schwarzer', 'schwarzes',
-    'weiße', 'weißer', 'weißes', 'helle', 'heller', 'helles', 'dunkle', 'dunkler', 'dunkles'
+    'weiße', 'weißer', 'weißes', 'helle', 'heller', 'helles', 'dunkle', 'dunkler', 'dunkles',
+    'gefrorene', 'gefrorener', 'gefrorenes', 'tiefgekühlte', 'tiefgekühlter', 'tiefgekühltes'
 }
 
 COMPOUND_PREFIXES = {
     'oliven', 'sonnenblumen', 'raps', 'kokos', 'mandel', 'soja', 'hafer', 'dinkel',
     'puder', 'vanille', 'back', 'kakao', 'kakaopulver', 'vollmilch', 'zartbitter', 'schoko',
-    'mineral', 'erdnuss', 'haselnuss', 'walnuss', 'kräuter', 'knoblauch', 'chili',
+    'mineral', 'erdnuss', 'haselnuss', 'walnuss', 'cashew', 'kräuter', 'knoblauch', 'chili',
     'balsamico', 'weizen', 'roggen', 'mais', 'tiefkühl', 'tk',
-    'puten', 'rinder', 'schweine', 'truthahn', 'kalbs', 'geflügel', 'kirsch',
-    'strauch', 'rispen', 'suppen', 'gewürz', 'koch', 'brat',
-    'schafs', 'ziegen', 'hütten', 'mager',
+    'puten', 'rinder', 'schweine', 'truthahn', 'kalbs', 'lamm', 'geflügel', 'kirsch',
+    'strauch', 'rispen', 'stauden', 'suppen', 'gewürz', 'koch', 'brat',
+    'schafs', 'ziegen', 'hütten', 'mager', 'frisch',
     'apfel', 'orangen', 'trauben', 'multi', 'multivitamin', 'zitronen', 'erdbeer',
-    'himbeer', 'blaubeer', 'heidelbeer', 'toiletten', 'küchen',
+    'himbeer', 'blaubeer', 'heidelbeer', 'pfefferminz', 'kamillen', 'fenchel',
+    'toiletten', 'klo', 'küchen', 'alu', 'frischhalte', 'gefrier',
     'spül', 'spülmaschinen', 'wasch', 'putz', 'müll'
 }
 
 DEPENDENT_SUFFIXES = {
     'aufschnitt', 'geschnetzeltes', 'hackfleisch', 'filet', 'schnitzel', 'kotelett',
-    'flocken', 'tabs', 'stäbchen', 'beutel', 'papier', 'paste', 'pulver'
+    'flocken', 'tabs', 'stäbchen', 'beutel', 'papier', 'paste', 'pulver', 'folie', 'rollen'
 }
 
 VALID_BASE_COMPOUNDS = {
@@ -417,7 +413,9 @@ VALID_BASE_COMPOUNDS = {
     'kaffeesahne', 'kräuterquark', 'speisequark', 'naturjoghurt', 'fruchtjoghurt',
     'nudelsalat', 'kartoffelsalat', 'eiersalat', 'thunfischsalat', 'gurkensalat',
     'tomatenmark', 'currypaste', 'backpulver', 'vanillezucker', 'puderzucker',
-    'vollkornbrot', 'weißbrot', 'toastbrot', 'roggenbrot', 'aufbackbrötchen'
+    'vollkornbrot', 'weißbrot', 'toastbrot', 'roggenbrot', 'aufbackbrötchen',
+    'staudensellerie', 'pfefferminztee', 'kamillentee', 'fencheltee', 'alufolie',
+    'frischhaltefolie', 'küchenrollen', 'backpapier', 'müllbeutel', 'toilettenpapier'
 }
 
 FOREIGN_TERMS = {
