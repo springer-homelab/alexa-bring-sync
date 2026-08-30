@@ -646,7 +646,7 @@ def authenticate():
         'X-BRING-COUNTRY': COUNTRY,
         'Content-Type': 'application/x-www-form-urlencoded'
     })
-    with urllib.request.urlopen(req) as resp:
+    with urllib.request.urlopen(req, timeout=10) as resp:
         data = json.loads(resp.read().decode('utf-8'))
 
     auth_data = {
@@ -659,7 +659,7 @@ def authenticate():
 
     os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
     with open(CACHE_FILE, 'w', encoding='utf-8') as f:
-        json.dump(auth_data, f)
+        json.dump(auth_data, f, ensure_ascii=False, indent=2)
 
     return auth_data
 
@@ -680,7 +680,7 @@ def get_target_list_uuid(auth, target_name):
         'X-BRING-PUBLIC-USER-UUID': auth['publicUuid']
     }
     req = urllib.request.Request(f"{API_BASE}/bringusers/{auth['uuid']}/lists", headers=headers)
-    with urllib.request.urlopen(req) as resp:
+    with urllib.request.urlopen(req, timeout=10) as resp:
         data = json.loads(resp.read().decode('utf-8'))
         lists = data.get('lists', [])
         for l in lists:
@@ -716,11 +716,12 @@ def get_cached_catalog(auth, list_uuid):
     try:
         url = f"{API_BASE}/v2/bringlists/{list_uuid}/details"
         req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req) as resp:
+        with urllib.request.urlopen(req, timeout=10) as resp:
             items = json.loads(resp.read().decode('utf-8'))
             names = [i.get('itemId') for i in items if i.get('itemId')]
+            os.makedirs(os.path.dirname(CATALOG_CACHE_FILE), exist_ok=True)
             with open(CATALOG_CACHE_FILE, 'w', encoding='utf-8') as f:
-                json.dump(names, f)
+                json.dump(names, f, ensure_ascii=False, indent=2)
             return names
     except Exception:
         return []
@@ -729,6 +730,7 @@ def fetch_active_bring_items():
     """
     Holt alle aktiven Einkaufsartikel von Bring! und speichert sie als JSON-Array in .bring_active.json.
     Dient als Datenquelle für den Home Assistant Sensor sensor.bring_active_items.
+    Inklusive automatischer Token-Erneuerung bei 401 Unauthorized.
     """
     try:
         email, password, list_name = get_credentials()
@@ -747,20 +749,36 @@ def fetch_active_bring_items():
 
         url = f"{API_BASE}/v2/bringlists/{list_uuid}"
         req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req) as resp:
-            data = json.loads(resp.read().decode('utf-8'))
-            raw_purchase = data.get('purchase') or (data.get('items', {}).get('purchase') if isinstance(data.get('items'), dict) else []) or []
-            items = []
-            for item in raw_purchase:
-                name = item.get('name') or item.get('itemId')
-                spec = item.get('specification') or ''
-                full = f"{name} ({spec})".strip() if spec else name.strip()
-                items.append(full)
-            with open(ACTIVE_ITEMS_FILE, 'w', encoding='utf-8') as f:
-                json.dump(items, f, ensure_ascii=False)
-            res = {'items': items, 'count': len(items)}
-            print(json.dumps(res, ensure_ascii=False))
-            return items
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read().decode('utf-8'))
+        except urllib.error.HTTPError as e:
+            if e.code == 401:
+                if os.path.exists(CACHE_FILE):
+                    os.remove(CACHE_FILE)
+                auth = authenticate()
+                headers['Authorization'] = f"{auth['token_type']} {auth['access_token']}"
+                req = urllib.request.Request(url, headers=headers)
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    data = json.loads(resp.read().decode('utf-8'))
+            else:
+                raise
+
+        raw_purchase = data.get('purchase') or (data.get('items', {}).get('purchase') if isinstance(data.get('items'), dict) else []) or []
+        items = []
+        for item in raw_purchase:
+            name = item.get('name') or item.get('itemId')
+            spec = item.get('specification') or ''
+            full = f"{name} ({spec})".strip() if spec else name.strip()
+            items.append(full)
+
+        os.makedirs(os.path.dirname(ACTIVE_ITEMS_FILE), exist_ok=True)
+        with open(ACTIVE_ITEMS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(items, f, ensure_ascii=False, indent=2)
+
+        res = {'items': items, 'count': len(items)}
+        print(json.dumps(res, ensure_ascii=False))
+        return items
     except Exception as e:
         print(json.dumps({'items': [], 'count': 0, 'error': str(e)}))
         return []
@@ -773,6 +791,7 @@ def fetch_active_bring_items():
 def execute_bring_sync(spoken_text):
     """
     Führt die vollständige Synchronisation eines erfassten Sprachbefehls zu Bring! aus.
+    Inklusive automatischer Token-Erneuerung bei 401 Unauthorized und Timeout-Absicherung.
     """
     if not spoken_text or not spoken_text.strip():
         print("Kein Text übergeben.")
@@ -820,7 +839,7 @@ def execute_bring_sync(spoken_text):
     url = f"{API_BASE}/v2/bringlists/{list_uuid}/items"
     req = urllib.request.Request(url, data=payload, headers=headers, method='PUT')
     try:
-        with urllib.request.urlopen(req) as resp:
+        with urllib.request.urlopen(req, timeout=10) as resp:
             print(f"[OK] Bring Sync erfolgreich ({op}): {items}")
             fetch_active_bring_items()
     except urllib.error.HTTPError as e:
@@ -830,7 +849,7 @@ def execute_bring_sync(spoken_text):
             auth = authenticate()
             headers['Authorization'] = f"{auth['token_type']} {auth['access_token']}"
             req = urllib.request.Request(url, data=payload, headers=headers, method='PUT')
-            with urllib.request.urlopen(req) as resp2:
+            with urllib.request.urlopen(req, timeout=10) as resp2:
                 print(f"[OK Retry] Bring Sync erfolgreich ({op}): {items}")
                 fetch_active_bring_items()
         else:
