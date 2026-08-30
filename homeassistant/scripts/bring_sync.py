@@ -578,7 +578,19 @@ def parse_items(raw_text, catalog_names):
     norm = normalize_spoken_german(raw_text)
     cleaned = strip_command_phrases(norm)
     
-    first_split = re.split(r'\s+(?:und|sowie|\+)\s+|,\s*', cleaned, flags=re.IGNORECASE)
+    # 1. Wenn der gesamte Ausdruck direkt einem Katalogartikel entspricht (z. B. "Erbsen und Möhren", "Salz und Pfeffer")
+    is_catalog_item = False
+    cleaned_low = cleaned.lower()
+    for cat in catalog_names:
+        clow = cat.lower()
+        if clow == cleaned_low or clow.replace(" ", "") == cleaned_low.replace(" ", ""):
+            is_catalog_item = True
+            break
+
+    if is_catalog_item:
+        first_split = [cleaned]
+    else:
+        first_split = re.split(r'\s+(?:und|sowie|\+)\s+|,\s*', cleaned, flags=re.IGNORECASE)
     
     raw_parts = []
     split_pattern = rf'(?<=[a-zA-ZäöüÄÖÜß])\s+(?=\d+(?:[.,]\d+)?\s+(?:(?:{UNITS_PATTERN})\s+)?[a-zA-ZäöüÄÖÜß])'
