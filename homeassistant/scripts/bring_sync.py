@@ -1030,7 +1030,21 @@ def smart_split_consecutive(text, catalog_names):
         w = words[i]
         w_low = w.lower()
 
-        # Führende Mengenangabe (z. B. '2 erdbeeren', '1 kiste sprudel')
+        # Führende Mengenangabe (z. B. '2 erdbeeren', '1 kiste sprudel', '1l traubensaft', '500g hackfleisch')
+        # Fall A: Zahl mit angehängter Einheit (z. B. '1l', '500g', '2kg')
+        units_pat = '|'.join(sorted(UNITS_LIST, key=len, reverse=True))
+        if re.match(rf'^\d+(?:[.,]\d+)?(?:{units_pat})$', w_low):
+            if i + 1 < len(words):
+                rem_phrase = " ".join(words[i+1:])
+                sub_parsed = smart_split_consecutive(rem_phrase, catalog_names)
+                if sub_parsed:
+                    results.append(f"{w} {sub_parsed[0]}")
+                    results.extend(sub_parsed[1:])
+                else:
+                    results.append(w)
+                break
+
+        # Fall B: Reine Zahl (z. B. '1', '2')
         if re.match(r'^\d+(?:[.,]\d+)?$', w_low):
             if i + 2 < len(words) and words[i+1].lower() in UNITS_LIST:
                 rem_phrase = " ".join(words[i+2:])
