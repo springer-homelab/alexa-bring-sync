@@ -495,10 +495,13 @@ VALID_BASE_COMPOUNDS = {
 # Fremdwörter und internationale Bezeichnungen, die getrennt bleiben müssen
 FOREIGN_TERMS = {
     'gustavo gusto', 'dr oetker', 'dr. oetker', 'ben and jerrys', 'ben & jerrys', 'haagen dazs',
-    'ritter sport', 'ferrero rocher', 'mon cheri', 'kinder bueno', 'kinder riegel',
-    'kinder country', 'kinder pingui', 'milch schnitte', 'coca cola', 'coke zero',
-    'pepsi max', 'red bull', 'monster energy', 'paulaner spezi', 'san pellegrino',
-    'funny frisch', 'mini babybel',
+    'ritter sport', 'ferrero rocher', 'mon cheri', 'mon chéri', 'kinder bueno', 'kinder riegel',
+    'kinder country', 'kinder pingui', 'kinder maxi king', 'kinder joy', 'milch schnitte', 'coca cola',
+    'coca-cola', 'coke zero', 'pepsi max', 'red bull', 'monster energy', 'paulaner spezi', 'san pellegrino',
+    'funny frisch', 'funny-frisch', 'mini babybel', 'fritz kola', 'fritz-kola', 'fritz limo',
+    'club mate', 'mio mio', 'mio mio mate', 'fuze tea', 'yogi tea', 'hohes c', 'true fruits',
+    'oro di parma', 'coppenrath & wiese', 'coppenrath und wiese', 'head & shoulders', 'head and shoulders',
+    'blend-a-med', 'blend a med', 'oral-b', 'oral b',
     'pollo fino', 'creme fraiche', 'crème fraîche', 'sour cream', 'cream cheese',
     'peanut butter', 'curry paste', 'pulled pork', 'ice tea', 'hot dog', 'french dressing',
     'sweet chili', 'sweet sour', 'barbecue sauce', 'bbq sauce', 'maple syrup',
@@ -507,106 +510,154 @@ FOREIGN_TERMS = {
     'sushi reis', 'basmati reis', 'jasmin reis', 'mie nudeln', 'udon nudeln', 'ramen nudeln',
     'pesto genovese', 'pesto rosso', 'parmigiano reggiano', 'grana padano', 'pecorino romano',
     'prosciutto di parma', 'serrano schinken', 'iberico schinken', 'chicken nuggets', 'chicken wings',
-    'ginger ale', 'tonic water', 'club mate', 'cold brew', 'chai latte', 'balsamico essig'
+    'ginger ale', 'tonic water', 'cold brew', 'chai latte', 'balsamico essig'
 }
 
-# Bekannte 2-Wort Markennamen und Produktlinien
-BRAND_PAIRS = {
-    'gustavo gusto', 'dr oetker', 'dr. oetker', 'ben and jerrys', 'ben & jerrys', 'haagen dazs',
-    'ritter sport', 'ferrero rocher', 'mon cheri', 'kinder bueno', 'kinder riegel',
-    'kinder country', 'kinder pingui', 'milch schnitte', 'coca cola', 'coke zero',
-    'pepsi max', 'red bull', 'monster energy', 'paulaner spezi', 'san pellegrino',
-    'funny frisch', 'mini babybel', 'chili cheese', 'sour cream', 'sweet chili'
-}
-
-# Basis-Substantive, die an Markennamen angehängt werden (z. B. 'Gustavo Gusto Pizza', 'Dr Oetker Pizza')
-BASE_NOUN_EXTENSIONS = {
-    'pizza', 'eis', 'chips', 'sauce', 'soße', 'dressing', 'nudeln', 'pasta', 'spaghetti', 'penne',
-    'käse', 'schokolade', 'joghurt', 'milch', 'kaffee', 'tee', 'wasser', 'bier', 'wein', 'saft',
-    'brötchen', 'brot', 'baguette', 'wurst', 'hackfleisch', 'filet', 'schnitzel', 'salat',
-    'creme', 'dip', 'tabs', 'papier', 'tücher', 'kapseln', 'bohnen', 'pulver', 'margarine',
-    'butter', 'ketchup', 'senf', 'mayo', 'mayonnaise', 'spezi', 'cola', 'riegel', 'pralinen'
-}
-
-# Bekannte Markennamen und ihre saubere Duden-Schreibweise
-BRAND_MAP = {
-    'gustavo gusto': 'Gustavo Gusto',
-    'gusto gustavo': 'Gustavo Gusto',
-    'dr oetker': 'Dr. Oetker',
-    'dr. oetker': 'Dr. Oetker',
-    'doktor oetker': 'Dr. Oetker',
-    'wagner': 'Wagner',
-    'ben and jerrys': "Ben & Jerry's",
-    'ben und jerrys': "Ben & Jerry's",
-    'ben & jerrys': "Ben & Jerry's",
-    'haagen dazs': 'Häagen-Dazs',
-    'häagen dazs': 'Häagen-Dazs',
-    'ritter sport': 'Ritter Sport',
-    'milka': 'Milka',
-    'ferrero rocher': 'Ferrero Rocher',
-    'mon cheri': 'Mon Chéri',
+# Eigenständige Markenprodukte, die nicht aufgeteilt werden sollen
+STANDALONE_PRODUCTS = {
+    'coca cola zero': 'Coca-Cola Zero',
+    'coca-cola zero': 'Coca-Cola Zero',
+    'coke zero': 'Coke Zero',
+    'pepsi max': 'Pepsi Max',
+    'paulaner spezi': 'Paulaner Spezi',
+    'red bull': 'Red Bull',
+    'monster energy': 'Monster Energy',
+    'fritz kola': 'Fritz-Kola',
+    'fritz-kola': 'Fritz-Kola',
+    'club mate': 'Club-Mate',
+    'mio mio mate': 'Mio Mio Mate',
     'kinder bueno': 'Kinder Bueno',
     'kinder riegel': 'Kinder Riegel',
     'kinder country': 'Kinder Country',
     'kinder pingui': 'Kinder Pingui',
-    'milch schnitte': 'Milchschnitte',
-    'coca cola': 'Coca Cola',
-    'coke zero': 'Coke Zero',
-    'pepsi max': 'Pepsi Max',
-    'pepsi': 'Pepsi',
-    'red bull': 'Red Bull',
-    'monster energy': 'Monster Energy',
-    'paulaner spezi': 'Paulaner Spezi',
-    'san pellegrino': 'San Pellegrino',
-    'funny frisch': 'Funny Frisch',
-    'pringles': 'Pringles',
-    'almette': 'Almette',
-    'philadelphia': 'Philadelphia',
-    'miree': 'Miree',
-    'kerrygold': 'Kerrygold',
-    'rama': 'Rama',
-    'becel': 'Becel',
-    'bresso': 'Bresso',
-    'babybel': 'Babybel',
-    'mini babybel': 'Mini Babybel',
-    'kiri': 'Kiri',
-    'de cecco': 'De Cecco',
-    'barilla': 'Barilla',
-    'buitoni': 'Buitoni',
-    'miracoli': 'Mirácoli',
-    'maggi': 'Maggi',
-    'knorr': 'Knorr',
-    'thomy': 'Thomy',
-    'heinz': 'Heinz'
+    'kinder maxi king': 'Kinder Maxi King',
+    'kinder joy': 'Kinder Joy',
+    'kinder schokolade': 'Kinder Schokolade',
+    'ferrero rocher': 'Ferrero Rocher',
+    'mon cheri': 'Mon Chéri',
+    'mon chéri': 'Mon Chéri',
+    'ritter sport': 'Ritter Sport',
+    'funny frisch': 'Funny-Frisch',
+    'funny-frisch': 'Funny-Frisch',
+    'mini babybel': 'Mini Babybel'
 }
+
+# Bekannte Markennamen und ihre saubere Duden-Schreibweise
+BRAND_MAP = {
+    # Getränke: Softdrinks, Eistee, Energy
+    'coca cola': 'Coca-Cola', 'coca-cola': 'Coca-Cola', 'coke zero': 'Coke Zero', 'coca cola zero': 'Coca-Cola Zero',
+    'pepsi max': 'Pepsi Max', 'pepsi': 'Pepsi', 'fanta': 'Fanta', 'sprite': 'Sprite',
+    'mezzo mix': 'Mezzo Mix', 'schwip schwap': 'Schwip Schwap', 'paulaner spezi': 'Paulaner Spezi', 'spezi': 'Spezi',
+    'bionade': 'Bionade', 'fritz kola': 'Fritz-Kola', 'fritz-kola': 'Fritz-Kola', 'fritz limo': 'Fritz Limo',
+    'club mate': 'Club-Mate', 'mio mio': 'Mio Mio', 'mio mio mate': 'Mio Mio Mate',
+    'red bull': 'Red Bull', 'monster energy': 'Monster Energy', 'monster': 'Monster', 'rockstar': 'Rockstar', 'effect': 'Effect',
+    'fuze tea': 'Fuze Tea', 'lipton': 'Lipton', 'arizona': 'AriZona',
+
+    # Getränke: Wasser & Saft
+    'gerolsteiner': 'Gerolsteiner', 'volvic': 'Volvic', 'vittel': 'Vittel', 'evian': 'Evian',
+    'san pellegrino': 'San Pellegrino', 'adelholzener': 'Adelholzener', 'rhönsprudel': 'RhönSprudel',
+    'apollinaris': 'Apollinaris', 'black forest': 'Black Forest',
+    'hohes c': 'Hohes C', 'granini': 'Granini', 'valensina': 'Valensina', 'pfanner': 'Pfanner',
+    'amecke': 'Amecke', 'innocent': 'Innocent', 'true fruits': 'True Fruits', 'rauch': 'Rauch',
+
+    # Getränke: Bier & Wein
+    'krombacher': 'Krombacher', 'bitburger': 'Bitburger', 'warsteiner': 'Warsteiner',
+    'becks': "Beck's", "beck's": "Beck's", 'paulaner': 'Paulaner', 'erdinger': 'Erdinger',
+    'franziskaner': 'Franziskaner', 'augustiner': 'Augustiner', 'tegernseer': 'Tegernseer',
+    'rothaus': 'Rothaus', 'heineken': 'Heineken', 'corona': 'Corona', 'desperados': 'Desperados',
+    'astra': 'Astra', 'jever': 'Jever', 'veltins': 'Veltins', 'hasseröder': 'Hasseröder',
+    'oettinger': 'Oettinger', 'schöfferhofer': 'Schöfferhofer', 'guinness': 'Guinness', 'flensburger': 'Flensburger',
+
+    # Heißgetränke & Pflanzendrinks
+    'tchibo': 'Tchibo', 'jacobs': 'Jacobs', 'dallmayr': 'Dallmayr', 'lavazza': 'Lavazza',
+    'segafredo': 'Segafredo', 'melitta': 'Melitta', 'nespresso': 'Nespresso', 'senseo': 'Senseo',
+    'dolce gusto': 'Dolce Gusto', 'teekanne': 'Teekanne', 'messmer': 'Meßmer', 'meßmer': 'Meßmer',
+    'yogi tea': 'Yogi Tea', 'kaba': 'Kaba', 'nesquik': 'Nesquik', 'ovomaltine': 'Ovomaltine',
+    'oatly': 'Oatly', 'alpro': 'Alpro', 'bärenmarke': 'Bärenmarke', 'weihenstephan': 'Weihenstephan',
+    'landliebe': 'Landliebe', 'müllermilch': 'Müllermilch',
+
+    # Pizza, Tiefkühl, Fertiggerichte
+    'gustavo gusto': 'Gustavo Gusto', 'gusto gustavo': 'Gustavo Gusto',
+    'dr oetker': 'Dr. Oetker', 'dr. oetker': 'Dr. Oetker', 'doktor oetker': 'Dr. Oetker',
+    'wagner': 'Wagner', 'original wagner': 'Original Wagner',
+    'frosta': 'Frosta', 'iglo': 'Iglo', 'mccain': 'McCain', 'coppenrath & wiese': 'Coppenrath & Wiese',
+    'coppenrath und wiese': 'Coppenrath & Wiese',
+    'ben and jerrys': "Ben & Jerry's", 'ben und jerrys': "Ben & Jerry's", 'ben & jerrys': "Ben & Jerry's",
+    'haagen dazs': 'Häagen-Dazs', 'häagen dazs': 'Häagen-Dazs',
+    'magnum': 'Magnum', 'cornetto': 'Cornetto', 'langnese': 'Langnese',
+
+    # Süßwaren & Snacks
+    'ritter sport': 'Ritter Sport', 'milka': 'Milka', 'lindt': 'Lindt',
+    'ferrero rocher': 'Ferrero Rocher', 'mon cheri': 'Mon Chéri', 'mon chéri': 'Mon Chéri',
+    'kinder bueno': 'Kinder Bueno', 'kinder riegel': 'Kinder Riegel', 'kinder country': 'Kinder Country',
+    'kinder pingui': 'Kinder Pingui', 'kinder maxi king': 'Kinder Maxi King', 'kinder schokolade': 'Kinder Schokolade',
+    'kinder joy': 'Kinder Joy', 'raffaello': 'Raffaello', 'giotto': 'Giotto', 'giottos': 'Giotto',
+    'nutella': 'Nutella', 'duplo': 'Duplo', 'hanuta': 'Hanuta', 'toffifee': 'Toffifee', 'knoppers': 'Knoppers',
+    'haribo': 'Haribo', 'katjes': 'Katjes', 'trolli': 'Trolli', 'nimm 2': 'Nimm 2',
+    'chio': 'Chio', 'funny frisch': 'Funny-Frisch', 'funny-frisch': 'Funny-Frisch', 'pringles': 'Pringles',
+    'lorenz': 'Lorenz', 'ültje': 'Ültje', 'ueltje': 'Ültje',
+    'leibniz': 'Leibniz', 'bahlsen': 'Bahlsen', 'prinzenrolle': 'Prinzenrolle', 'prinzen rolle': 'Prinzenrolle',
+    'oreo': 'Oreo', 'kitkat': 'KitKat', 'kit kat': 'KitKat', 'twix': 'Twix', 'snickers': 'Snickers',
+    'mars': 'Mars', 'bounty': 'Bounty', 'milky way': 'Milky Way', 'm&ms': 'M&Ms', 'm&m': 'M&Ms',
+    'milch schnitte': 'Milchschnitte', 'milchschnitte': 'Milchschnitte',
+
+    # Molkerei, Butter & Käse
+    'philadelphia': 'Philadelphia', 'almette': 'Almette', 'miree': 'Miree', 'bresso': 'Bresso',
+    'exquisa': 'Exquisa', 'brunch': 'Brunch', 'kerrygold': 'Kerrygold', 'rama': 'Rama',
+    'becel': 'Becel', 'meggle': 'Meggle', 'lätta': 'Lätta', 'laetta': 'Lätta',
+    'leerdammer': 'Leerdammer', 'babybel': 'Babybel', 'mini babybel': 'Mini Babybel',
+    'kiri': 'Kiri', 'zott': 'Zott', 'zottarella': 'Zottarella', 'monte': 'Monte',
+    'ehrmann': 'Ehrmann', 'grand dessert': 'Grand Dessert', 'danone': 'Danone',
+    'activia': 'Activia', 'actimel': 'Actimel', 'fruchtzwerge': 'Fruchtzwerge', 'froop': 'Froop',
+
+    # Pasta, Saucen, Feinkost, Konserven
+    'barilla': 'Barilla', 'de cecco': 'De Cecco', 'buitoni': 'Buitoni', 'miracoli': 'Mirácoli', 'mirácoli': 'Mirácoli',
+    'maggi': 'Maggi', 'knorr': 'Knorr', 'thomy': 'Thomy', 'heinz': 'Heinz', 'kraft': 'Kraft',
+    'kühne': 'Kühne', 'hengstenberg': 'Hengstenberg', 'bonduelle': 'Bonduelle', 'erasco': 'Erasco',
+    'birkel': 'Birkel', 'mutti': 'Mutti', 'oro di parma': 'Oro di Parma', 'saupiquet': 'Saupiquet', 'appel': 'Appel',
+
+    # Drogerie & Haushalt
+    'tempo': 'Tempo', 'zewa': 'Zewa', 'hakle': 'Hakle', 'ariel': 'Ariel', 'persil': 'Persil',
+    'spee': 'Spee', 'lenor': 'Lenor', 'perwoll': 'Perwoll', 'frosch': 'Frosch', 'pril': 'Pril',
+    'fairy': 'Fairy', 'somat': 'Somat', 'finish': 'Finish', 'calgon': 'Calgon',
+    'meister proper': 'Meister Proper', 'bref': 'Bref', 'cillit bang': 'Cillit Bang', 'domestos': 'Domestos',
+    'viss': 'Viss', 'sagrotan': 'Sagrotan', 'nivea': 'Nivea', 'dove': 'Dove', 'palmolive': 'Palmolive',
+    'garnier': 'Garnier', 'head & shoulders': 'Head & Shoulders', 'head and shoulders': 'Head & Shoulders',
+    'schauma': 'Schauma', 'colgate': 'Colgate', 'blend-a-med': 'Blend-a-med', 'blend a med': 'Blend-a-med',
+    'sensodyne': 'Sensodyne', 'elmex': 'Elmex', 'aronal': 'Aronal', 'oral-b': 'Oral-B', 'oral b': 'Oral-B',
+    'gillette': 'Gillette', 'wilkinson': 'Wilkinson', 'pampers': 'Pampers'
+}
+
+BRAND_PAIRS = {k for k in BRAND_MAP.keys() if ' ' in k}
 
 def extract_brand_item(query_name, existing_spec=''):
     """
     Trennt Markennamen dynamisch vom Lebensmittel-Substantiv ab, damit Bring! das passende Icon anzeigt:
     z. B. 'Gustavo Gusto Pizza' -> Name: 'Pizza' (🍕 Icon), Spec: 'Gustavo Gusto'
     z. B. 'Doktor Oetker Backmischung' -> Name: 'Backmischung' (🧁 Icon), Spec: 'Dr. Oetker'
-    z. B. 'Doktor Oetker Pizza' -> Name: 'Pizza' (🍕 Icon), Spec: 'Dr. Oetker'
-    z. B. 'Barilla Pesto' -> Name: 'Pesto' (🫙 Icon), Spec: 'Barilla'
     z. B. 'Barilla Spaghetti' -> Name: 'Spaghetti' (🍝 Icon), Spec: 'Barilla'
-    Wird nur der Markenname ohne Nomen genannt (z. B. 'Ritter Sport'), bleibt der Markenname unverändert stehen.
+    z. B. 'Mutti Tomatenmark' -> Name: 'Tomatenmark' (🥫 Icon), Spec: 'Mutti'
+    Wird nur der Markenname/Produktname genannt (z. B. 'Ritter Sport', 'Coca-Cola Zero', 'Red Bull'), bleibt der Name sauber erhalten.
     """
     q_low = query_name.lower().strip()
-    
-    # 1. Prüfe Brand + Nomen (z. B. 'Gustavo Gusto Pizza', 'Doktor Oetker Backmischung')
-    for brand_key, brand_display in BRAND_MAP.items():
+    if q_low in STANDALONE_PRODUCTS:
+        return STANDALONE_PRODUCTS[q_low], existing_spec
+
+    for brand_key in sorted(BRAND_MAP.keys(), key=len, reverse=True):
+        brand_display = BRAND_MAP[brand_key]
+        if q_low == brand_key:
+            return brand_display, existing_spec
+
         if q_low.startswith(brand_key):
             remainder = q_low[len(brand_key):].strip()
             if remainder and len(remainder) >= 2:
-                cat_name = remainder.capitalize()
+                cat_name = " ".join([w.capitalize() for w in remainder.split()])
                 spec = f"{existing_spec} {brand_display}".strip() if existing_spec else brand_display
                 return cat_name, spec
-
-    # 2. Prüfe Nomen + Brand (z. B. 'Pizza Gustavo Gusto', 'Backmischung Dr. Oetker')
-    for brand_key, brand_display in BRAND_MAP.items():
-        if q_low.endswith(brand_key):
+        elif q_low.endswith(brand_key):
             noun_part = q_low[:-len(brand_key)].strip()
             if noun_part and len(noun_part) >= 2:
-                cat_name = noun_part.capitalize()
+                cat_name = " ".join([w.capitalize() for w in noun_part.split()])
                 spec = f"{existing_spec} {brand_display}".strip() if existing_spec else brand_display
                 return cat_name, spec
 
@@ -615,17 +666,52 @@ def extract_brand_item(query_name, existing_spec=''):
 def is_brand_extension(words, i):
     """
     Erkennt mehrteilige Marken- und Produktkombinationen dynamisch:
-    - 4 Wörter: 'Ben and Jerrys Eis'
-    - 3 Wörter: 'Gustavo Gusto Pizza', 'Dr. Oetker Backmischung', 'Dr. Oetker Pizza'
+    - Standalone Produkte: 'coca cola zero', 'red bull'
+    - 3-Wort Marke + Adjektiv + Nomen: 'oro di parma passierte tomaten'
+    - 2-Wort Marke + Nomen: 'gustavo gusto pizza', 'dr oetker backmischung'
+    - 1-Wort Marke + Adjektiv + Nomen: 'krombacher alkoholfreies bier'
+    - 1-Wort Marke + Nomen: 'barilla spaghetti', 'mutti tomatenmark'
     """
+    # 1. Standalone Produkt (z. B. 'coca cola zero', 'red bull')
+    if i + 2 < len(words):
+        tri = f"{words[i].lower()} {words[i+1].lower()} {words[i+2].lower()}"
+        if tri in STANDALONE_PRODUCTS:
+            return 3, f"{words[i]} {words[i+1]} {words[i+2]}"
+    if i + 1 < len(words):
+        pair = f"{words[i].lower()} {words[i+1].lower()}"
+        if pair in STANDALONE_PRODUCTS:
+            return 2, f"{words[i]} {words[i+1]}"
+
+    # 2. 3-Wort Marke + Adjektiv + Nomen
+    if i + 4 < len(words):
+        tri = f"{words[i].lower()} {words[i+1].lower()} {words[i+2].lower()}"
+        if tri in BRAND_MAP and words[i+3].lower() in GROCERY_ADJECTIVES:
+            return 5, f"{words[i]} {words[i+1]} {words[i+2]} {words[i+3]} {words[i+4]}"
+    # 3. 3-Wort Marke + Nomen
     if i + 3 < len(words):
         tri = f"{words[i].lower()} {words[i+1].lower()} {words[i+2].lower()}"
-        if tri in BRAND_PAIRS or tri.replace(" ", "") in BRAND_PAIRS or tri in BRAND_MAP:
+        if tri in BRAND_MAP:
             return 4, f"{words[i]} {words[i+1]} {words[i+2]} {words[i+3]}"
+    # 4. 2-Wort Marke + Adjektiv + Nomen
+    if i + 3 < len(words):
+        pair = f"{words[i].lower()} {words[i+1].lower()}"
+        if pair in BRAND_MAP and words[i+2].lower() in GROCERY_ADJECTIVES:
+            return 4, f"{words[i]} {words[i+1]} {words[i+2]} {words[i+3]}"
+    # 5. 2-Wort Marke + Nomen
     if i + 2 < len(words):
         pair = f"{words[i].lower()} {words[i+1].lower()}"
-        if pair in BRAND_PAIRS or pair.replace(" ", "") in BRAND_PAIRS or pair in BRAND_MAP:
+        if pair in BRAND_MAP:
             return 3, f"{words[i]} {words[i+1]} {words[i+2]}"
+    # 6. 1-Wort Marke + Adjektiv + Nomen
+    if i + 2 < len(words):
+        single = words[i].lower().strip()
+        if single in BRAND_MAP and words[i+1].lower() in GROCERY_ADJECTIVES:
+            return 3, f"{words[i]} {words[i+1]} {words[i+2]}"
+    # 7. 1-Wort Marke + Nomen
+    if i + 1 < len(words):
+        single = words[i].lower().strip()
+        if single in BRAND_MAP:
+            return 2, f"{words[i]} {words[i+1]}"
     return 0, None
 
 def is_multiword_pair(w1, w2, catalog_names):
