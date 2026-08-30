@@ -28,9 +28,10 @@ COUNTRY = 'DE'
 
 def stem_german(word):
     """
-    Generischer deutscher Stammformen-Algorithmus:
-    Normalisiert Umlaute und entfernt typische Pluralendungen (-en, -ern, -er, -e, -s, -n).
-    Funktioniert für alle deutschen Substantive (z. B. Äpfel -> apfel, Bananen -> banan).
+    Generischer deutscher Stammformen-Algorithmus (nur für internen Abgleich):
+    Erzeugt einen gemeinsamen Vergleichs-Schlüssel für Einzahl und Mehrzahl
+    (z. B. 'Bananen' und 'Banane' -> 'banan', 'Äpfel' und 'Apfel' -> 'apfel').
+    Auf Bring! landet immer der vollständige, korrekte Name (z. B. 'Bananen' oder 'Äpfel').
     """
     w = word.lower().strip()
     w = w.replace('ä', 'a').replace('ö', 'o').replace('ü', 'u').replace('ß', 'ss')
