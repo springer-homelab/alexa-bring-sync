@@ -110,24 +110,28 @@ def strip_command_phrases(text):
         r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:nimm|tu)\s+(.+?)\s+(?:von|aus)\s+(?:der|den|meiner|unserer)\s+(?:einkaufsliste|liste|zettel)\s*runter$',
         r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:lösch(?:e)?|entfern(?:e)?|streich(?:e)?)\s+(.+)$',
 
-        # Suffix Löschbefehle (z. B. "Karotten von der Liste löschen", "Milch entfernen", "Aprikosen streichen")
+        # Suffix Löschbefehle
         r'^(?:alexa,?\s*)?(?:bitte\s*)?(.+?)\s+(?:von|aus)\s+(?:der|den|meiner|unserer)\s+(?:einkaufsliste|liste|zettel)\s+(?:löschen|entfernen|streichen|runternehmen)$',
         r'^(?:alexa,?\s*)?(?:bitte\s*)?(.+?)\s+(?:löschen|entfernen|streichen|abhaken)$',
 
+        # Suffix Hinzufügebefehle (z. B. "Milch und Käse auf die Liste schreiben", "Zwiebeln zur Einkaufsliste hinzufügen")
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?(.+?)\s+(?:auf|zu|zur|in|an)\s+(?:die|meine|unsere|den|der|das|meinen|unseren)?\s*(?:einkaufsliste|einkaufszettel|liste|zettel|bring(?:\s*liste)?)\s*(?:schreiben|setzen|packen|hinzufügen|draufpacken|draufsetzen|drauftun)$',
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?(.+?)\s+(?:hinzufügen|dazuschreiben|draufpacken|draufsetzen)$',
+
         # Prefix Hinzufügebefehle
-        r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:setz(?:e)?|pack(?:e)?|schreib(?:e)?|füg(?:e)?|für|tu|pack)\s+(.+?)\s+(?:auf|zu|zur|in|an|der)\s+(?:die|meine|unsere|den|der|das)?\s*(?:einkaufsliste|einkaufszettel|liste|zettel|bring(?:\s*liste)?)(?:\s*hinzu|\s*drauf)?$',
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:setz(?:e)?|pack(?:e)?|schreib(?:e)?|füg(?:e)?|für|tu|pack)\s+(?:bitte\s+)?(?:noch\s+)?(.+?)\s+(?:auf|zu|zur|in|an|der)\s+(?:die|meine|unsere|den|der|das|meinen|unseren)?\s*(?:einkaufsliste|einkaufszettel|liste|zettel|bring(?:\s*liste)?)(?:\s*hinzu|\s*drauf)?$',
         r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:wir\s+brauchen\s+noch|kauf\s+bitte|kauf(?:en)?|besorg(?:e)?)\s+(.+)$',
         r'^(?:alexa,?\s*)?(?:sag|sage|frage|öffne)\s+(?:meinem?\s+)?(?:einkaufszettel|einkaufsliste|bring|liste)(?::|\s+)?\s*(.+)$',
-        r'^(?:setz(?:e)?|pack(?:e)?|schreib(?:e)?|füg(?:e)?|für|tu)\s+(.+?)(?:\s+(?:auf|zu|zur|in|der)\s+(?:die|den|meine|unsere|der|das)\s+(?:einkaufsliste|liste|zettel))?$'
+        r'^(?:setz(?:e)?|pack(?:e)?|schreib(?:e)?|füg(?:e)?|für|tu)\s+(?:bitte\s+)?(?:noch\s+)?(.+?)(?:\s+(?:auf|zu|zur|in|der)\s+(?:die|den|meine|unsere|der|das|meinen)\s+(?:einkaufsliste|liste|zettel))?$'
     ]
     for p in patterns:
         m = re.match(p, t, re.IGNORECASE)
         if m:
             t = m.group(1)
             break
-    t = re.sub(r'^(?:noch|bitte|mal|eben|schnell)\s+', '', t, flags=re.IGNORECASE)
-    t = re.sub(r'\s+(?:auf|zu|zur|in|an|der|den|die|das|meine|unsere)?\s*(?:die|meine|unsere|den|der|das)?\s*(?:einkaufsliste|einkaufszettel|liste|zettel|bring(?:\s*liste)?)(?:\s*hinzu|\s*drauf|\s*ab)?$', '', t, flags=re.IGNORECASE)
-    t = re.sub(r'\s+(?:zur|zu|auf|an|für|hinzu|drauf|runter|weg|bitte|danke|noch|löschen|entfernen|streichen)$', '', t, flags=re.IGNORECASE)
+    t = re.sub(r'^(?:alexa,?\s*)?(?:noch|bitte|mal|eben|schnell)\s+', '', t, flags=re.IGNORECASE)
+    t = re.sub(r'\s+(?:auf|zu|zur|in|an|der|den|die|das|meine|unsere|meinen)?\s*(?:die|meine|unsere|den|der|das|meinen)?\s*(?:einkaufsliste|einkaufszettel|liste|zettel|bring(?:\s*liste)?)(?:\s*hinzu|\s*drauf|\s*ab)?$', '', t, flags=re.IGNORECASE)
+    t = re.sub(r'\s+(?:zur|zu|auf|an|für|hinzu|drauf|runter|weg|bitte|danke|noch|löschen|entfernen|streichen|schreiben|packen|setzen)$', '', t, flags=re.IGNORECASE)
     return t.strip()
 
 GERMAN_STOPWORDS = {
@@ -235,6 +239,7 @@ def extract_specification(text):
         name = m.group(2).strip()
         spec = re.sub(r'(\d+(?:\.\d+)?)\s*gramm\b', r'\1g', spec, flags=re.IGNORECASE)
         spec = re.sub(r'(\d+(?:\.\d+)?)\s*kilo(?:gramm)?\b', r'\1kg', spec, flags=re.IGNORECASE)
+        spec = re.sub(r'(\d+(?:\.\d+)?)\s*milliliter\b', r'\1ml', spec, flags=re.IGNORECASE)
         spec = re.sub(r'(\d+(?:\.\d+)?)\s*liter\b', r'\1l', spec, flags=re.IGNORECASE)
         spec = re.sub(r'(\d+(?:\.\d+)?)\s*prozent\b', r'\1%', spec, flags=re.IGNORECASE)
         name = re.sub(r'^(?:die|das|der|den|dem|des|ein|eine|einen|einem|einer)\s+', '', name, flags=re.IGNORECASE).strip()
@@ -419,7 +424,9 @@ GROCERY_ADJECTIVES = {
     'feine', 'feiner', 'feines', 'grobe', 'grober', 'grobes', 'schwarze', 'schwarzer', 'schwarzes',
     'weiße', 'weißer', 'weißes', 'helle', 'heller', 'helles', 'dunkle', 'dunkler', 'dunkles',
     'gefrorene', 'gefrorener', 'gefrorenes', 'tiefgekühlte', 'tiefgekühlter', 'tiefgekühltes',
-    'bio', 'freiland', 'vegan', 'vegane', 'veganer', 'veganes', 'vegetarisch', 'vegetarische', 'vegetarisches',
+    'bio', 'freiland', 'vegan', 'vegane', 'veganer', 'veganes', 'veganen',
+    'vegetarisch', 'vegetarische', 'vegetarischer', 'vegetarisches', 'vegetarischen',
+    'pflanzlich', 'pflanzliche', 'pflanzlicher', 'pflanzliches',
     'laktosefrei', 'laktosefreie', 'laktosefreies', 'glutenfrei', 'glutenfreie', 'glutenfreies',
     'alkoholfrei', 'alkoholfreie', 'alkoholfreier', 'alkoholfreies', 'alkoholfreien',
     'koffeinfrei', 'koffeinfreie', 'koffeinfreier', 'koffeinfreies', 'koffeinfreien',
