@@ -399,7 +399,10 @@ GROCERY_ADJECTIVES = {
     'scharfe', 'scharfer', 'scharfes', 'süße', 'süßer', 'süßes', 'milde', 'milder', 'mildes',
     'feine', 'feiner', 'feines', 'grobe', 'grober', 'grobes', 'schwarze', 'schwarzer', 'schwarzes',
     'weiße', 'weißer', 'weißes', 'helle', 'heller', 'helles', 'dunkle', 'dunkler', 'dunkles',
-    'gefrorene', 'gefrorener', 'gefrorenes', 'tiefgekühlte', 'tiefgekühlter', 'tiefgekühltes'
+    'gefrorene', 'gefrorener', 'gefrorenes', 'tiefgekühlte', 'tiefgekühlter', 'tiefgekühltes',
+    'bio', 'freiland', 'vegan', 'vegane', 'veganer', 'veganes', 'vegetarisch', 'vegetarische', 'vegetarisches',
+    'laktosefrei', 'laktosefreie', 'laktosefreies', 'glutenfrei', 'glutenfreie', 'glutenfreies',
+    'regional', 'regionale', 'regionales', 'asiatische', 'asiatischer'
 }
 
 COMPOUND_PREFIXES = {
