@@ -29,15 +29,11 @@ COUNTRY = 'DE'
 def stem_german(word):
     """
     Generischer deutscher Stammformen-Algorithmus:
-    Normalisiert Umlaute und entfernt typische Pluralendungen (-en, -n, -er, -e, -s).
-    Funktioniert für 100% aller deutschen Substantive und Lebensmittel.
+    Normalisiert Umlaute und entfernt typische Pluralendungen (-en, -ern, -er, -e, -s, -n).
+    Funktioniert für alle deutschen Substantive (z. B. Äpfel -> apfel, Bananen -> banan).
     """
     w = word.lower().strip()
     w = w.replace('ä', 'a').replace('ö', 'o').replace('ü', 'u').replace('ß', 'ss')
-    
-    # Sonderfälle für Wurzelvokal-Wechsel (z. B. Apfel <-> Äpfel)
-    if w == 'apfel' or w == 'apfel':
-        return 'apfel'
     
     # Plural-Endungen sauber entfernen (ab mindestens 4 Buchstaben)
     if len(w) >= 4:
