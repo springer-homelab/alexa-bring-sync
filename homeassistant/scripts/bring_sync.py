@@ -455,7 +455,13 @@ VALID_BASE_COMPOUNDS = {
 FOREIGN_TERMS = {
     'pollo fino', 'creme fraiche', 'crème fraîche', 'sour cream', 'cream cheese',
     'peanut butter', 'curry paste', 'pulled pork', 'ice tea', 'hot dog', 'french dressing',
-    'sweet chili', 'sweet sour', 'barbecue sauce', 'bbq sauce', 'maple syrup'
+    'sweet chili', 'sweet sour', 'barbecue sauce', 'bbq sauce', 'maple syrup',
+    'tortilla chips', 'nacho chips', 'taco shells', 'salsa verde', 'salsa dip',
+    'teriyaki sauce', 'sriracha sauce', 'sweet chili sauce', 'garam masala', 'tikka masala',
+    'sushi reis', 'basmati reis', 'jasmin reis', 'mie nudeln', 'udon nudeln', 'ramen nudeln',
+    'pesto genovese', 'pesto rosso', 'parmigiano reggiano', 'grana padano', 'pecorino romano',
+    'prosciutto di parma', 'serrano schinken', 'iberico schinken', 'chicken nuggets', 'chicken wings',
+    'ginger ale', 'tonic water', 'club mate', 'cold brew', 'chai latte'
 }
 
 def is_multiword_pair(w1, w2, catalog_names):
