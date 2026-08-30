@@ -306,7 +306,7 @@ UNITS_LIST = [
     'stk', 'stück',
     'flasche', 'flaschen',
     'dose', 'dosen',
-    'bund',
+    'bund', 'bunt',
     'beutel',
     'glas', 'gläser',
     'scheibe', 'scheiben',
@@ -784,11 +784,11 @@ def parse_items(raw_text, catalog_names):
         if not rp:
             continue
         name, spec = extract_specification(rp)
-        if not spec:
-            split_names = smart_split_consecutive(name, catalog_names)
-            for sn in split_names:
+        split_names = smart_split_consecutive(name, catalog_names)
+        if len(split_names) > 1:
+            for i, sn in enumerate(split_names):
                 matched_name = match_catalog_name(sn, catalog_names)
-                final_name, final_spec = extract_brand_item(matched_name, '')
+                final_name, final_spec = extract_brand_item(matched_name, spec if i == 0 else '')
                 if is_valid_grocery_item(final_name, catalog_names):
                     items.append({'name': final_name, 'specification': final_spec})
         else:
