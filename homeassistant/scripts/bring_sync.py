@@ -399,13 +399,14 @@ def format_specification(spec_str):
 
 def extract_specification(text):
     """
-    Trennt Mengenangaben (z. B. '2kg', '5m', '3.5%', '2 Kartuschen', '1 Kiste') vom Artikelnamen ab.
+    Trennt Mengenangaben (z. B. '2kg', '5m', '3.5%', '2 Kartuschen', '1 Kiste', 'Cola 1 Kiste', 'Bananen 3') ab.
+    Unterstützt sowohl führende ('1 Kiste Cola') als auch nachgestellte Mengenangaben ('Cola 1 Kiste').
     Entfernt führende deutsche Artikel ('die Milch' -> 'Milch').
     """
     t = text.strip()
     t = re.sub(r'^(?:die|das|der|den|dem|des|ein|eine|einen|einem|einer)\s+', '', t, flags=re.IGNORECASE).strip()
 
-    # Muster 1: Ziffer + Einheit (z. B. '500 Gramm Hackfleisch', '5 Meter Kabel', '1 Kiste Sprudel')
+    # Muster 1: Ziffer + Einheit AM ANFANG (z. B. '1 Kiste Sprudel', '500g Hackfleisch')
     pattern_unit = rf'^\s*(\d+(?:[.,]\d+)?\s*(?:{UNITS_PATTERN}))\s+(?:von\s+(?:den|der|dem|meinen)?\s*)?(.+)$'
     m = re.match(pattern_unit, t, re.IGNORECASE)
     if m:
@@ -415,13 +416,30 @@ def extract_specification(text):
         name = re.sub(r'^(?:die|das|der|den|dem|des|ein|eine|einen|einem|einer)\s+', '', name, flags=re.IGNORECASE).strip()
         return name, spec
 
-    # Muster 2: Reine Zahl am Anfang (z. B. '6 Eier', '3 Gurken')
+    # Muster 2: Reine Zahl AM ANFANG (z. B. '6 Eier', '3 Gurken')
     pattern_plain = r'^\s*(\d+(?:[.,]\d+)?)\s+(?:von\s+(?:den|der|dem)?\s*)?([a-zA-ZäöüÄÖÜß].+)$'
     m = re.match(pattern_plain, t, re.IGNORECASE)
     if m:
         spec = m.group(1).strip()
         name = m.group(2).strip()
         name = re.sub(r'^(?:die|das|der|den|dem|des|ein|eine|einen|einem|einer)\s+', '', name, flags=re.IGNORECASE).strip()
+        return name, spec
+
+    # Muster 3: Mengenangabe mit Einheit AM ENDE (z. B. 'Cola 1 Kiste', 'Hackfleisch 500g')
+    pattern_end_unit = rf'^(.+?)\s+(\d+(?:[.,]\d+)?\s*(?:{UNITS_PATTERN}))$'
+    m = re.match(pattern_end_unit, t, re.IGNORECASE)
+    if m:
+        name = m.group(1).strip()
+        raw_spec = m.group(2).strip()
+        spec = format_specification(raw_spec)
+        return name, spec
+
+    # Muster 4: Reine Zahl AM ENDE (z. B. 'Bananen 3', 'Gurken 2')
+    pattern_end_plain = r'^([a-zA-ZäöüÄÖÜß\s\.\&\-\']+?)\s+(\d+(?:[.,]\d+)?)$'
+    m = re.match(pattern_end_plain, t, re.IGNORECASE)
+    if m:
+        name = m.group(1).strip()
+        spec = m.group(2).strip()
         return name, spec
 
     return t, ''
@@ -813,67 +831,84 @@ def extract_brand_item(query_name, existing_spec=''):
 
     return query_name, existing_spec
 
+COMMON_STT_TYPOS = {
+    'bankmischung': 'backmischung',
+    'küche': 'kiste',
+    'bunt': 'bund'
+}
+
 def is_brand_token(token):
     """
     Prüft, ob ein Wort eine Marke ist oder der Beginn eines mehrteiligen Markennamens.
     """
     tok = token.lower().strip()
-    return any(k == tok or k.startswith(tok + ' ') for k in BRAND_MAP.keys())
+    return any(k == tok or k.startswith(tok + ' ') for k in BRAND_MAP.keys()) or tok in UNAMBIGUOUS_BRAND_CATEGORIES or tok in ['cola', 'fanta', 'sprite', 'spezi', 'bier', 'wasser']
 
 def is_brand_extension(words, i):
     """
     Erkennt mehrteilige Marken- und Produktkombinationen dynamisch:
-    - Standalone Produkte: 'coca cola zero', 'red bull'
     - 3-Wort Marke + Adjektiv + Nomen: 'oro di parma passierte tomaten'
+    - 3-Wort Marke + Nomen: 'coppenrath und wiese apfelkuchen'
+    - 2-Wort Marke + Adjektiv + Nomen: 'dr oetker vegane pizza'
     - 2-Wort Marke + Nomen: 'dr oetker backmischung', 'gustavo gusto pizza'
     - 1-Wort Marke + Adjektiv + Nomen: 'krombacher alkoholfreies bier'
     - 1-Wort Marke + Nomen: 'barilla spaghetti', 'mutti tomatenmark'
-    Verhindert das Zusammenziehen aufeinanderfolgender Marken (z. B. 'Persil' + 'Ritter Sport').
+    - Standalone Produkte: 'coca cola zero', 'red bull', 'ritter sport'
+    Verhindert das Zusammenziehen aufeinanderfolgender Marken (z. B. 'Persil' + 'Ritter Sport')
+    und das Konsumieren von Mengenangaben als Nomen (z. B. 'Cola' + '1 Kiste').
     """
     w_low = words[i].lower().strip()
 
-    # 1. Standalone / Mehrwort-Marke (z. B. 'ritter sport', 'coca cola zero', 'red bull', 'dr oetker')
+    # 1. 3-Wort Marke + Adjektiv + Nomen (5 Wörter) -> z. B. 'oro di parma passierte tomaten'
+    if i + 4 < len(words):
+        tri = f"{w_low} {words[i+1].lower()} {words[i+2].lower()}"
+        next_tok = words[i+4].lower().strip()
+        if tri in BRAND_MAP and words[i+3].lower() in GROCERY_ADJECTIVES and not is_brand_token(words[i+4]) and not re.match(r'^\d', next_tok) and next_tok not in UNITS_LIST:
+            return 5, f"{words[i]} {words[i+1]} {words[i+2]} {words[i+3]} {words[i+4]}"
+
+    # 2. 3-Wort Marke + Nomen (4 Wörter)
+    if i + 3 < len(words):
+        tri = f"{w_low} {words[i+1].lower()} {words[i+2].lower()}"
+        next_tok = words[i+3].lower().strip()
+        if tri in BRAND_MAP and not is_brand_token(words[i+3]) and not re.match(r'^\d', next_tok) and next_tok not in UNITS_LIST:
+            return 4, f"{words[i]} {words[i+1]} {words[i+2]} {words[i+3]}"
+
+    # 3. 2-Wort Marke + Adjektiv + Nomen (4 Wörter)
+    if i + 3 < len(words):
+        pair = f"{w_low} {words[i+1].lower()}"
+        next_tok = words[i+3].lower().strip()
+        if pair in BRAND_MAP and words[i+2].lower() in GROCERY_ADJECTIVES and not is_brand_token(words[i+3]) and not re.match(r'^\d', next_tok) and next_tok not in UNITS_LIST:
+            return 4, f"{words[i]} {words[i+1]} {words[i+2]} {words[i+3]}"
+
+    # 4. 2-Wort Marke + Nomen (3 Wörter) -> z. B. 'gustavo gusto pizza', 'doktor oetker backmischung'
+    if i + 2 < len(words):
+        pair = f"{w_low} {words[i+1].lower()}"
+        next_tok = words[i+2].lower().strip()
+        if pair in BRAND_MAP and not is_brand_token(words[i+2]) and not re.match(r'^\d', next_tok) and next_tok not in UNITS_LIST:
+            return 3, f"{words[i]} {words[i+1]} {words[i+2]}"
+
+    # 5. 1-Wort Marke + Adjektiv + Nomen (3 Wörter) -> z. B. 'krombacher alkoholfreies bier'
+    if i + 2 < len(words):
+        next_tok = words[i+2].lower().strip()
+        if w_low in BRAND_MAP and words[i+1].lower() in GROCERY_ADJECTIVES and not is_brand_token(words[i+2]) and not re.match(r'^\d', next_tok) and next_tok not in UNITS_LIST:
+            return 3, f"{words[i]} {words[i+1]} {words[i+2]}"
+
+    # 6. 1-Wort Marke + Nomen (2 Wörter) -> z. B. 'barilla spaghetti', 'mutti tomatenmark'
+    if i + 1 < len(words):
+        next_tok = words[i+1].lower().strip()
+        if w_low in BRAND_MAP and not is_brand_token(words[i+1]) and not re.match(r'^\d', next_tok) and next_tok not in UNITS_LIST:
+            return 2, f"{words[i]} {words[i+1]}"
+
+    # 7. Standalone / Mehrwort-Marke alleinstehend (3 Wörter)
     if i + 2 < len(words):
         tri = f"{w_low} {words[i+1].lower()} {words[i+2].lower()}"
         if tri in STANDALONE_PRODUCTS or tri in BRAND_MAP:
             return 3, f"{words[i]} {words[i+1]} {words[i+2]}"
+
+    # 8. Standalone / Mehrwort-Marke alleinstehend (2 Wörter) -> z. B. 'ritter sport', 'red bull', 'dr oetker'
     if i + 1 < len(words):
         pair = f"{w_low} {words[i+1].lower()}"
         if pair in STANDALONE_PRODUCTS or pair in BRAND_MAP:
-            return 2, f"{words[i]} {words[i+1]}"
-
-    # 2. 3-Wort Marke + Adjektiv + Nomen
-    if i + 4 < len(words):
-        tri = f"{w_low} {words[i+1].lower()} {words[i+2].lower()}"
-        if tri in BRAND_MAP and words[i+3].lower() in GROCERY_ADJECTIVES and not is_brand_token(words[i+4]):
-            return 5, f"{words[i]} {words[i+1]} {words[i+2]} {words[i+3]} {words[i+4]}"
-
-    # 3. 3-Wort Marke + Nomen
-    if i + 3 < len(words):
-        tri = f"{w_low} {words[i+1].lower()} {words[i+2].lower()}"
-        if tri in BRAND_MAP and not is_brand_token(words[i+3]):
-            return 4, f"{words[i]} {words[i+1]} {words[i+2]} {words[i+3]}"
-
-    # 4. 2-Wort Marke + Adjektiv + Nomen
-    if i + 3 < len(words):
-        pair = f"{w_low} {words[i+1].lower()}"
-        if pair in BRAND_MAP and words[i+2].lower() in GROCERY_ADJECTIVES and not is_brand_token(words[i+3]):
-            return 4, f"{words[i]} {words[i+1]} {words[i+2]} {words[i+3]}"
-
-    # 5. 2-Wort Marke + Nomen (z. B. 'dr oetker backmischung', 'gustavo gusto pizza')
-    if i + 2 < len(words):
-        pair = f"{w_low} {words[i+1].lower()}"
-        if pair in BRAND_MAP and not is_brand_token(words[i+2]):
-            return 3, f"{words[i]} {words[i+1]} {words[i+2]}"
-
-    # 6. 1-Wort Marke + Adjektiv + Nomen (z. B. 'krombacher alkoholfreies bier')
-    if i + 2 < len(words):
-        if w_low in BRAND_MAP and words[i+1].lower() in GROCERY_ADJECTIVES and not is_brand_token(words[i+2]):
-            return 3, f"{words[i]} {words[i+1]} {words[i+2]}"
-
-    # 7. 1-Wort Marke + Nomen (z. B. 'barilla spaghetti', 'mutti tomatenmark')
-    if i + 1 < len(words):
-        if w_low in BRAND_MAP and not is_brand_token(words[i+1]):
             return 2, f"{words[i]} {words[i+1]}"
 
     return 0, None
@@ -948,7 +983,7 @@ def smart_split_consecutive(text, catalog_names):
     """
     Zerlegt unverbundene Listen ('Milch Butter Brot') und fälschlich zusammengezogene
     Wörter ('schraubenbohrmaschine'), während mehrteilige Begriffe
-    ('Saure Sahne', 'Puten Brust', '8er Dübel', 'Gustavo Gusto Pizza') geschützt und zusammengehalten werden.
+    ('Saure Sahne', 'Puten Brust', '8er Dübel', 'Gustavo Gusto Pizza', 'Cola 1 Kiste') geschützt und zusammengehalten werden.
     """
     t = text.strip()
     words = t.split()
@@ -960,20 +995,48 @@ def smart_split_consecutive(text, catalog_names):
         clow = cat.lower()
         if clow == low or clow == low.replace(" ", ""):
             return [t]
-    if low in FOREIGN_TERMS or low.replace(" ", "") in FOREIGN_TERMS or low in BRAND_PAIRS or low.replace(" ", "") in BRAND_PAIRS:
+    if low in FOREIGN_TERMS or low.replace(" ", "") in FOREIGN_TERMS or low in BRAND_MAP or low in STANDALONE_PRODUCTS:
         return [t]
 
     results = []
     i = 0
     while i < len(words):
-        # 1. Prüfe mehrteilige Marken-Kombinationen (3- oder 4-Wort-Begriffe)
+        w = words[i]
+        w_low = w.lower()
+
+        # Führende Mengenangabe (z. B. '2 erdbeeren', '1 kiste sprudel')
+        if re.match(r'^\d+(?:[.,]\d+)?$', w_low):
+            if i + 2 < len(words) and words[i+1].lower() in UNITS_LIST:
+                rem_phrase = " ".join(words[i+2:])
+                sub_parsed = smart_split_consecutive(rem_phrase, catalog_names)
+                if sub_parsed:
+                    results.append(f"{w} {words[i+1]} {sub_parsed[0]}")
+                    results.extend(sub_parsed[1:])
+                else:
+                    results.append(f"{w} {words[i+1]}")
+                break
+            elif i + 1 < len(words):
+                rem_phrase = " ".join(words[i+1:])
+                sub_parsed = smart_split_consecutive(rem_phrase, catalog_names)
+                if sub_parsed:
+                    results.append(f"{w} {sub_parsed[0]}")
+                    results.extend(sub_parsed[1:])
+                else:
+                    results.append(f"{w}")
+                break
+
+        # 1. Prüfe mehrteilige Marken-Kombinationen
         consumed, brand_phrase = is_brand_extension(words, i)
         if consumed > 0:
+            rem = words[i+consumed:]
+            if len(rem) >= 2 and re.match(r'^\d+(?:[.,]\d+)?$', rem[0].lower()) and rem[1].lower() in UNITS_LIST:
+                results.append(f"{brand_phrase} {rem[0]} {rem[1]}")
+                i += consumed + 2
+                continue
             results.append(brand_phrase)
             i += consumed
             continue
 
-        w = words[i]
         # 2. Prüfe 2-Wort-Paar
         if i + 1 < len(words):
             next_w = words[i + 1]
@@ -981,6 +1044,14 @@ def smart_split_consecutive(text, catalog_names):
                 results.append(f"{w} {next_w}")
                 i += 2
                 continue
+
+        # 3. Prüfe nachgestellte Mengenangabe bei regulärem Nomen (z. B. 'cola' + '1 kiste')
+        rem = words[i+1:]
+        if len(rem) >= 2 and re.match(r'^\d+(?:[.,]\d+)?$', rem[0].lower()) and rem[1].lower() in UNITS_LIST:
+            results.append(f"{w} {rem[0]} {rem[1]}")
+            i += 3
+            continue
+
         results.append(w)
         i += 1
 
@@ -1051,49 +1122,48 @@ def parse_items(raw_text, catalog_names):
     Haupt-Parser: Zerlegt einen gesprochenen Satz in eine Liste von Bring!-Einkaufsartikeln.
     Rückgabe: Liste von Dictionaries [{'name': '...', 'specification': '...'}, ...]
     """
+    if not raw_text or not isinstance(raw_text, str):
+        return []
+
     norm = normalize_spoken_german(raw_text)
     cleaned = strip_command_phrases(norm)
+    if not cleaned:
+        return []
+
+    # Phonetische STT-Tippfehler korrigieren
+    for typo, repl in COMMON_STT_TYPOS.items():
+        cleaned = re.sub(rf'\b{typo}\b', repl, cleaned, flags=re.IGNORECASE)
 
     # Prüfe, ob der gesamte Ausdruck direkt einem Katalogartikel entspricht (z. B. 'Erbsen und Möhren', 'Salz und Pfeffer')
-    is_catalog_item = False
     cleaned_low = cleaned.lower()
     for cat in catalog_names:
         clow = cat.lower()
         if clow == cleaned_low or clow.replace(" ", "") == cleaned_low.replace(" ", ""):
-            is_catalog_item = True
-            break
+            return [{'name': cat, 'specification': ''}]
 
-    if is_catalog_item:
-        first_split = [cleaned]
-    else:
-        first_split = re.split(r'\s+(?:und|sowie|\+)\s+|,\s*', cleaned, flags=re.IGNORECASE)
+    # 1. Split an 'und', 'sowie', ','
+    first_split = re.split(r'\s+(?:und|sowie|\+)\s+|,\s*', cleaned, flags=re.IGNORECASE)
 
-    raw_parts = []
-    split_pattern = rf'(?<=[a-zA-ZäöüÄÖÜß])\s+(?=\d+(?:[.,]\d+)?\s+(?:(?:{UNITS_PATTERN})\s+)?[a-zA-ZäöüÄÖÜß])'
+    # 2. Split an Ziffern mit Einheiten
+    units_pattern = '|'.join(sorted(UNITS_LIST, key=len, reverse=True))
+    split_pattern = rf'(?<=[a-zA-ZäöüÄÖÜß])\s+(?=\d+(?:[.,]\d+)?\s+(?:(?:{units_pattern})\s+)[a-zA-ZäöüÄÖÜß]+|\d+(?:[.,]\d+)?\s+(?!(?:{units_pattern})\b)[a-zA-ZäöüÄÖÜß]+)'
+    split_regex_smart = re.compile(split_pattern, re.IGNORECASE)
+
+    chunks = []
     for fs in first_split:
         fs = fs.strip()
         if not fs:
             continue
-        subparts = re.split(split_pattern, fs, flags=re.IGNORECASE)
-        for sp in subparts:
-            sp = sp.strip()
-            if sp:
-                raw_parts.append(sp)
+        splits = split_regex_smart.split(fs)
+        chunks.extend([s.strip() for s in splits if s.strip()])
 
     items = []
-    for rp in raw_parts:
-        rp = rp.strip()
-        if not rp:
-            continue
-        name, spec = extract_specification(rp)
-        split_names = smart_split_consecutive(name, catalog_names)
-        if len(split_names) > 1:
-            for i, sn in enumerate(split_names):
-                matched_name = match_catalog_name(sn, catalog_names)
-                final_name, final_spec = extract_brand_item(matched_name, spec if i == 0 else '')
-                if is_valid_grocery_item(final_name, catalog_names):
-                    items.append({'name': final_name, 'specification': final_spec})
-        else:
+    for chunk in chunks:
+        sub_items = smart_split_consecutive(chunk, catalog_names)
+        for sub in sub_items:
+            name, spec = extract_specification(sub)
+            if not name:
+                continue
             matched_name = match_catalog_name(name, catalog_names)
             final_name, final_spec = extract_brand_item(matched_name, spec)
             if is_valid_grocery_item(final_name, catalog_names):
