@@ -47,7 +47,10 @@ def stem_german(word):
 def normalize_spoken_german(text):
     t = text.strip()
 
-    # 1. Brüche und gemischte Zahlen (z. B. "ein halbes kilo" -> 0.5kg, "anderthalb" -> 1.5)
+    # 1. Null und Zahlwörter
+    t = re.sub(r'\bnull\b', '0', t, flags=re.IGNORECASE)
+
+    # 2. Brüche und traditionelle Maßeinheiten (z. B. "ein halbes kilo" -> 0.5kg, "anderthalb" -> 1.5, "ein pfund" -> 500g)
     fraction_map = [
         (r'\banderthalb\b|\beineinhalb\b', '1.5'),
         (r'\bzweieinhalb\b', '2.5'),
@@ -55,20 +58,24 @@ def normalize_spoken_german(text):
         (r'\bviereinhalb\b', '4.5'),
         (r'\bfünfeinhalb\b', '5.5'),
         (r'\bdreiviertel\b|\bdrei\s*viertel\b', '0.75'),
+        (r'(?:\bein\s+)?halbes\s+dutzend\b', '6'),
+        (r'(?:\bein\s+)?dutzend\b', '12'),
+        (r'(?:\bein\s+)?halbes\s+pfund\b', '250g'),
+        (r'(?:\bein\s+)?pfund\b', '500g'),
         (r'(?:\bein\s+)?halbes\b|(?:\bein\s+)?halber\b|(?:\bein\s+)?halb\b|(?:\beine\s+)?halbe\b', '0.5'),
         (r'(?:\bein\s+)?viertel\b', '0.25')
     ]
     for pattern, val in fraction_map:
         t = re.sub(pattern, val, t, flags=re.IGNORECASE)
 
-    # 2. Hunderter & Tausender (z. B. "zweihundertfünfzig" -> "200 50", "fünfhundert" -> "500")
+    # 3. Hunderter & Tausender (z. B. "zweihundertfünfzig" -> "200 50", "fünfhundert" -> "500")
     hundred_prefixes = {'ein': 100, 'zwei': 200, 'drei': 300, 'vier': 400, 'fünf': 500, 'sechs': 600, 'sieben': 700, 'acht': 800, 'neun': 900}
     for h_name, h_val in hundred_prefixes.items():
         t = re.sub(rf'\b{h_name}\s*hundert', f'{h_val} ', t, flags=re.IGNORECASE)
     t = re.sub(r'\bhundert\b', '100 ', t, flags=re.IGNORECASE)
     t = re.sub(r'\btausend\b', '1000 ', t, flags=re.IGNORECASE)
 
-    # 3. Zweistellige Zahlen (z. B. "zweiundzwanzig" -> 22, "fünfunddreißig" -> 35)
+    # 4. Zweistellige Zahlen (z. B. "zweiundzwanzig" -> 22, "fünfunddreißig" -> 35)
     ones = {'ein': 1, 'zwei': 2, 'drei': 3, 'vier': 4, 'fünf': 5, 'sechs': 6, 'sieben': 7, 'acht': 8, 'neun': 9}
     tens = {'zwanzig': 20, 'dreißig': 30, 'vierzig': 40, 'fünfzig': 50, 'sechzig': 60, 'siebzig': 70, 'achtzig': 80, 'neunzig': 90}
     for one_k, one_v in ones.items():
@@ -77,7 +84,7 @@ def normalize_spoken_german(text):
             total = one_v + ten_v
             t = re.sub(rf'\b{compound}\b', str(total), t, flags=re.IGNORECASE)
 
-    # 4. Einzelne Zahlwörter
+    # 5. Einzelne Zahlwörter
     word_to_num = {
         'zwanzig': '20', 'dreißig': '30', 'vierzig': '40', 'fünfzig': '50', 'sechzig': '60', 'siebzig': '70', 'achtzig': '80', 'neunzig': '90',
         'dreizehn': '13', 'vierzehn': '14', 'fünfzehn': '15', 'sechzehn': '16', 'siebzehn': '17', 'achtzehn': '18', 'neunzehn': '19',
@@ -87,8 +94,11 @@ def normalize_spoken_german(text):
     for w, n in word_to_num.items():
         t = re.sub(rf'\b{w}\b', str(n), t, flags=re.IGNORECASE)
 
-    # 5. Addition von Hunderter + Zehner/Einer (z. B. "200 50" -> 250, "100 25" -> 125)
+    # 6. Addition von Hunderter + Zehner/Einer (z. B. "200 50" -> 250, "100 25" -> 125)
     t = re.sub(r'\b(\d{1,4}00)\s+(\d{1,2})\b', lambda m: str(int(m.group(1)) + int(m.group(2))), t)
+
+    # 7. Gesprochene Dezimalzahlen (z. B. "2 komma 5" -> "2.5", "0 komma 5" -> "0.5", "1 punkt 5" -> "1.5")
+    t = re.sub(r'\b(\d+)\s*(?:komma|punkt|,|\.)\s*(\d+)\b', r'\1.\2', t, flags=re.IGNORECASE)
 
     return t.strip()
 
@@ -212,14 +222,17 @@ UNITS_PATTERN = '|'.join(sorted(UNITS_LIST, key=len, reverse=True))
 
 def extract_specification(text):
     t = text.strip()
+    t = re.sub(r'^(?:die|das|der|den|dem|des|ein|eine|einen|einem|einer)\s+', '', t, flags=re.IGNORECASE).strip()
+    
     pattern_unit = rf'^\s*(\d+(?:[.,]\d+)?\s*(?:{UNITS_PATTERN}))\s+(?:von\s+(?:den|der|dem|meinen)?\s*)?(.+)$'
     m = re.match(pattern_unit, t, re.IGNORECASE)
     if m:
         spec = m.group(1).strip()
         name = m.group(2).strip()
-        spec = re.sub(r'(\d+)\s*gramm\b', r'\1g', spec, flags=re.IGNORECASE)
-        spec = re.sub(r'(\d+)\s*kilo(?:gramm)?\b', r'\1kg', spec, flags=re.IGNORECASE)
-        spec = re.sub(r'(\d+)\s*liter\b', r'\1l', spec, flags=re.IGNORECASE)
+        spec = re.sub(r'(\d+(?:\.\d+)?)\s*gramm\b', r'\1g', spec, flags=re.IGNORECASE)
+        spec = re.sub(r'(\d+(?:\.\d+)?)\s*kilo(?:gramm)?\b', r'\1kg', spec, flags=re.IGNORECASE)
+        spec = re.sub(r'(\d+(?:\.\d+)?)\s*liter\b', r'\1l', spec, flags=re.IGNORECASE)
+        name = re.sub(r'^(?:die|das|der|den|dem|des|ein|eine|einen|einem|einer)\s+', '', name, flags=re.IGNORECASE).strip()
         return name, spec
 
     pattern_plain = r'^\s*(\d+(?:[.,]\d+)?)\s+(?:von\s+(?:den|der|dem)?\s*)?([a-zA-ZäöüÄÖÜß].+)$'
@@ -227,6 +240,7 @@ def extract_specification(text):
     if m:
         spec = m.group(1).strip()
         name = m.group(2).strip()
+        name = re.sub(r'^(?:die|das|der|den|dem|des|ein|eine|einen|einem|einer)\s+', '', name, flags=re.IGNORECASE).strip()
         return name, spec
 
     return t, ''
