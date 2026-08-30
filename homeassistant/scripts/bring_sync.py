@@ -630,24 +630,167 @@ BRAND_MAP = {
 
 BRAND_PAIRS = {k for k in BRAND_MAP.keys() if ' ' in k}
 
+# Eindeutige Monoprodukt-Marken (nur wenn KEIN Substantiv genannt wurde, um das perfekte Bring!-Icon zu erhalten)
+UNAMBIGUOUS_BRAND_CATEGORIES = {
+    # Bier
+    'augustiner': ('Bier', 'Augustiner'),
+    'krombacher': ('Bier', 'Krombacher'),
+    'bitburger': ('Bier', 'Bitburger'),
+    'warsteiner': ('Bier', 'Warsteiner'),
+    'becks': ('Bier', "Beck's"),
+    "beck's": ('Bier', "Beck's"),
+    'erdinger': ('Bier', 'Erdinger'),
+    'franziskaner': ('Bier', 'Franziskaner'),
+    'tegernseer': ('Bier', 'Tegernseer'),
+    'rothaus': ('Bier', 'Rothaus'),
+    'heineken': ('Bier', 'Heineken'),
+    'corona': ('Bier', 'Corona'),
+    'desperados': ('Bier', 'Desperados'),
+    'astra': ('Bier', 'Astra'),
+    'jever': ('Bier', 'Jever'),
+    'veltins': ('Bier', 'Veltins'),
+    'hasseröder': ('Bier', 'Hasseröder'),
+    'oettinger': ('Bier', 'Oettinger'),
+    'schöfferhofer': ('Bier', 'Schöfferhofer'),
+    'flensburger': ('Bier', 'Flensburger'),
+    'guinness': ('Bier', 'Guinness'),
+
+    # Wasser
+    'gerolsteiner': ('Mineralwasser', 'Gerolsteiner'),
+    'volvic': ('Wasser', 'Volvic'),
+    'vittel': ('Wasser', 'Vittel'),
+    'evian': ('Wasser', 'Evian'),
+    'san pellegrino': ('Mineralwasser', 'San Pellegrino'),
+    'adelholzener': ('Mineralwasser', 'Adelholzener'),
+    'rhönsprudel': ('Mineralwasser', 'RhönSprudel'),
+    'apollinaris': ('Mineralwasser', 'Apollinaris'),
+    'black forest': ('Wasser', 'Black Forest'),
+
+    # Softdrinks & Energy
+    'coca cola': ('Cola', 'Coca-Cola'),
+    'coca-cola': ('Cola', 'Coca-Cola'),
+    'coke zero': ('Cola', 'Coke Zero'),
+    'coca cola zero': ('Cola', 'Coca-Cola Zero'),
+    'pepsi': ('Cola', 'Pepsi'),
+    'pepsi max': ('Cola', 'Pepsi Max'),
+    'fanta': ('Limonade', 'Fanta'),
+    'sprite': ('Limonade', 'Sprite'),
+    'mezzo mix': ('Spezi', 'Mezzo Mix'),
+    'schwip schwap': ('Spezi', 'Schwip Schwap'),
+    'paulaner spezi': ('Spezi', 'Paulaner Spezi'),
+    'bionade': ('Limonade', 'Bionade'),
+    'fritz kola': ('Cola', 'Fritz-Kola'),
+    'fritz-kola': ('Cola', 'Fritz-Kola'),
+    'fritz limo': ('Limonade', 'Fritz Limo'),
+    'club mate': ('Eistee', 'Club-Mate'),
+    'mio mio mate': ('Eistee', 'Mio Mio Mate'),
+    'red bull': ('Energy Drink', 'Red Bull'),
+    'monster energy': ('Energy Drink', 'Monster Energy'),
+    'monster': ('Energy Drink', 'Monster'),
+    'rockstar': ('Energy Drink', 'Rockstar'),
+    'effect': ('Energy Drink', 'Effect'),
+
+    # Saft
+    'hohes c': ('Saft', 'Hohes C'),
+    'granini': ('Saft', 'Granini'),
+    'valensina': ('Saft', 'Valensina'),
+    'amecke': ('Saft', 'Amecke'),
+    'innocent': ('Smoothie', 'Innocent'),
+    'true fruits': ('Smoothie', 'True Fruits'),
+
+    # Kaffee & Tee
+    'lavazza': ('Kaffee', 'Lavazza'),
+    'dallmayr': ('Kaffee', 'Dallmayr'),
+    'melitta': ('Kaffee', 'Melitta'),
+    'tchibo': ('Kaffee', 'Tchibo'),
+    'segafredo': ('Kaffee', 'Segafredo'),
+    'nespresso': ('Kaffeekapseln', 'Nespresso'),
+    'senseo': ('Kaffeepads', 'Senseo'),
+    'dolce gusto': ('Kaffeekapseln', 'Dolce Gusto'),
+    'teekanne': ('Tee', 'Teekanne'),
+    'messmer': ('Tee', 'Meßmer'),
+    'meßmer': ('Tee', 'Meßmer'),
+    'yogi tea': ('Tee', 'Yogi Tea'),
+    'oatly': ('Hafermilch', 'Oatly'),
+
+    # Süßigkeiten & Snacks
+    'ritter sport': ('Schokolade', 'Ritter Sport'),
+    'milka': ('Schokolade', 'Milka'),
+    'lindt': ('Schokolade', 'Lindt'),
+    'ferrero rocher': ('Pralinen', 'Ferrero Rocher'),
+    'mon cheri': ('Pralinen', 'Mon Chéri'),
+    'mon chéri': ('Pralinen', 'Mon Chéri'),
+    'kinder bueno': ('Schokoriegel', 'Kinder Bueno'),
+    'kinder riegel': ('Schokoriegel', 'Kinder Riegel'),
+    'kinder country': ('Schokoriegel', 'Kinder Country'),
+    'kinder pingui': ('Milchschnitte', 'Kinder Pingui'),
+    'kinder maxi king': ('Milchschnitte', 'Kinder Maxi King'),
+    'kinder schokolade': ('Schokolade', 'Kinder Schokolade'),
+    'raffaello': ('Pralinen', 'Raffaello'),
+    'giotto': ('Pralinen', 'Giotto'),
+    'nutella': ('Nutella', ''),
+    'duplo': ('Schokoriegel', 'Duplo'),
+    'hanuta': ('Waffeln', 'Hanuta'),
+    'toffifee': ('Pralinen', 'Toffifee'),
+    'knoppers': ('Waffeln', 'Knoppers'),
+    'haribo': ('Gummibärchen', 'Haribo'),
+    'katjes': ('Gummibärchen', 'Katjes'),
+    'trolli': ('Gummibärchen', 'Trolli'),
+    'nimm 2': ('Bonbons', 'Nimm 2'),
+    'pringles': ('Chips', 'Pringles'),
+    'funny frisch': ('Chips', 'Funny-Frisch'),
+    'funny-frisch': ('Chips', 'Funny-Frisch'),
+    'chio': ('Chips', 'Chio'),
+    'prinzenrolle': ('Kekse', 'Prinzenrolle'),
+    'oreo': ('Kekse', 'Oreo'),
+    'kitkat': ('Schokoriegel', 'KitKat'),
+    'twix': ('Schokoriegel', 'Twix'),
+    'snickers': ('Schokoriegel', 'Snickers'),
+    'mars': ('Schokoriegel', 'Mars'),
+    'bounty': ('Schokoriegel', 'Bounty'),
+    'm&ms': ('Schokolinsen', 'M&Ms'),
+
+    # Drogerie & Hygiene
+    'tempo': ('Taschentücher', 'Tempo'),
+    'zewa': ('Küchenrollen', 'Zewa'),
+    'hakle': ('Toilettenpapier', 'Hakle'),
+    'pampers': ('Windeln', 'Pampers'),
+    'persil': ('Waschmittel', 'Persil'),
+    'ariel': ('Waschmittel', 'Ariel'),
+    'spee': ('Waschmittel', 'Spee'),
+    'perwoll': ('Waschmittel', 'Perwoll'),
+    'lenor': ('Weichspüler', 'Lenor'),
+    'frosch': ('Reiniger', 'Frosch'),
+    'pril': ('Spülmittel', 'Pril'),
+    'fairy': ('Spülmittel', 'Fairy'),
+    'somat': ('Spülmaschinentabs', 'Somat'),
+    'finish': ('Spülmaschinentabs', 'Finish'),
+    'calgon': ('Wasserenthärter', 'Calgon'),
+    'meister proper': ('Allzweckreiniger', 'Meister Proper'),
+    'sagrotan': ('Desinfektionsmittel', 'Sagrotan'),
+    'nivea': ('Duschgel', 'Nivea'),
+    'dove': ('Duschgel', 'Dove'),
+    'head & shoulders': ('Shampoo', 'Head & Shoulders'),
+    'schauma': ('Shampoo', 'Schauma'),
+    'colgate': ('Zahnpasta', 'Colgate'),
+    'blend-a-med': ('Zahnpasta', 'Blend-a-med'),
+    'sensodyne': ('Zahnpasta', 'Sensodyne'),
+    'elmex': ('Zahnpasta', 'Elmex'),
+    'gillette': ('Rasierklingen', 'Gillette')
+}
+
 def extract_brand_item(query_name, existing_spec=''):
     """
     Trennt Markennamen dynamisch vom Lebensmittel-Substantiv ab, damit Bring! das passende Icon anzeigt:
-    z. B. 'Gustavo Gusto Pizza' -> Name: 'Pizza' (🍕 Icon), Spec: 'Gustavo Gusto'
-    z. B. 'Doktor Oetker Backmischung' -> Name: 'Backmischung' (🧁 Icon), Spec: 'Dr. Oetker'
-    z. B. 'Barilla Spaghetti' -> Name: 'Spaghetti' (🍝 Icon), Spec: 'Barilla'
-    z. B. 'Mutti Tomatenmark' -> Name: 'Tomatenmark' (🥫 Icon), Spec: 'Mutti'
-    Wird nur der Markenname/Produktname genannt (z. B. 'Ritter Sport', 'Coca-Cola Zero', 'Red Bull'), bleibt der Name sauber erhalten.
+    1. Explizites Nomen + Marke (z. B. 'Gustavo Gusto Pizza' -> Name: 'Pizza' 🍕, Spec: 'Gustavo Gusto')
+    2. Eindeutige Monoprodukt-Marke ohne Nomen (z. B. 'Augustiner' -> Name: 'Bier' 🍺, Spec: 'Augustiner')
+    3. Mehrdeutige Marke ohne Nomen (z. B. 'Dr. Oetker') -> Name: 'Dr. Oetker' (bleibt ohne Raten erhalten)
     """
     q_low = query_name.lower().strip()
-    if q_low in STANDALONE_PRODUCTS:
-        return STANDALONE_PRODUCTS[q_low], existing_spec
 
+    # 1. Explizites Nomen + Marke (z. B. 'Barilla Spaghetti', 'Mutti Tomatenmark', 'Dr. Oetker Backmischung')
     for brand_key in sorted(BRAND_MAP.keys(), key=len, reverse=True):
         brand_display = BRAND_MAP[brand_key]
-        if q_low == brand_key:
-            return brand_display, existing_spec
-
         if q_low.startswith(brand_key):
             remainder = q_low[len(brand_key):].strip()
             if remainder and len(remainder) >= 2:
@@ -661,57 +804,81 @@ def extract_brand_item(query_name, existing_spec=''):
                 spec = f"{existing_spec} {brand_display}".strip() if existing_spec else brand_display
                 return cat_name, spec
 
+    # 2. Eindeutige Monoprodukt-Marke ohne Nomen -> Icon-Kategorie zuweisen!
+    if q_low in UNAMBIGUOUS_BRAND_CATEGORIES:
+        cat_name, brand_display = UNAMBIGUOUS_BRAND_CATEGORIES[q_low]
+        spec = f"{existing_spec} {brand_display}".strip() if existing_spec else brand_display
+        return cat_name, spec
+
+    # 3. Mehrdeutige Marke ohne Nomen -> Name sauber formatiert stehen lassen
+    if q_low in BRAND_MAP:
+        return BRAND_MAP[q_low], existing_spec
+
     return query_name, existing_spec
+
+def is_brand_token(token):
+    """
+    Prüft, ob ein Wort eine Marke ist oder der Beginn eines mehrteiligen Markennamens.
+    """
+    tok = token.lower().strip()
+    return any(k == tok or k.startswith(tok + ' ') for k in BRAND_MAP.keys())
 
 def is_brand_extension(words, i):
     """
     Erkennt mehrteilige Marken- und Produktkombinationen dynamisch:
     - Standalone Produkte: 'coca cola zero', 'red bull'
     - 3-Wort Marke + Adjektiv + Nomen: 'oro di parma passierte tomaten'
-    - 2-Wort Marke + Nomen: 'gustavo gusto pizza', 'dr oetker backmischung'
+    - 2-Wort Marke + Nomen: 'dr oetker backmischung', 'gustavo gusto pizza'
     - 1-Wort Marke + Adjektiv + Nomen: 'krombacher alkoholfreies bier'
     - 1-Wort Marke + Nomen: 'barilla spaghetti', 'mutti tomatenmark'
+    Verhindert das Zusammenziehen aufeinanderfolgender Marken (z. B. 'Persil' + 'Ritter Sport').
     """
-    # 1. Standalone Produkt (z. B. 'coca cola zero', 'red bull')
+    w_low = words[i].lower().strip()
+
+    # 1. Standalone / Mehrwort-Marke (z. B. 'ritter sport', 'coca cola zero', 'red bull', 'dr oetker')
     if i + 2 < len(words):
-        tri = f"{words[i].lower()} {words[i+1].lower()} {words[i+2].lower()}"
-        if tri in STANDALONE_PRODUCTS:
+        tri = f"{w_low} {words[i+1].lower()} {words[i+2].lower()}"
+        if tri in STANDALONE_PRODUCTS or tri in BRAND_MAP:
             return 3, f"{words[i]} {words[i+1]} {words[i+2]}"
     if i + 1 < len(words):
-        pair = f"{words[i].lower()} {words[i+1].lower()}"
-        if pair in STANDALONE_PRODUCTS:
+        pair = f"{w_low} {words[i+1].lower()}"
+        if pair in STANDALONE_PRODUCTS or pair in BRAND_MAP:
             return 2, f"{words[i]} {words[i+1]}"
 
     # 2. 3-Wort Marke + Adjektiv + Nomen
     if i + 4 < len(words):
-        tri = f"{words[i].lower()} {words[i+1].lower()} {words[i+2].lower()}"
-        if tri in BRAND_MAP and words[i+3].lower() in GROCERY_ADJECTIVES:
+        tri = f"{w_low} {words[i+1].lower()} {words[i+2].lower()}"
+        if tri in BRAND_MAP and words[i+3].lower() in GROCERY_ADJECTIVES and not is_brand_token(words[i+4]):
             return 5, f"{words[i]} {words[i+1]} {words[i+2]} {words[i+3]} {words[i+4]}"
+
     # 3. 3-Wort Marke + Nomen
     if i + 3 < len(words):
-        tri = f"{words[i].lower()} {words[i+1].lower()} {words[i+2].lower()}"
-        if tri in BRAND_MAP:
+        tri = f"{w_low} {words[i+1].lower()} {words[i+2].lower()}"
+        if tri in BRAND_MAP and not is_brand_token(words[i+3]):
             return 4, f"{words[i]} {words[i+1]} {words[i+2]} {words[i+3]}"
+
     # 4. 2-Wort Marke + Adjektiv + Nomen
     if i + 3 < len(words):
-        pair = f"{words[i].lower()} {words[i+1].lower()}"
-        if pair in BRAND_MAP and words[i+2].lower() in GROCERY_ADJECTIVES:
+        pair = f"{w_low} {words[i+1].lower()}"
+        if pair in BRAND_MAP and words[i+2].lower() in GROCERY_ADJECTIVES and not is_brand_token(words[i+3]):
             return 4, f"{words[i]} {words[i+1]} {words[i+2]} {words[i+3]}"
-    # 5. 2-Wort Marke + Nomen
+
+    # 5. 2-Wort Marke + Nomen (z. B. 'dr oetker backmischung', 'gustavo gusto pizza')
     if i + 2 < len(words):
-        pair = f"{words[i].lower()} {words[i+1].lower()}"
-        if pair in BRAND_MAP:
+        pair = f"{w_low} {words[i+1].lower()}"
+        if pair in BRAND_MAP and not is_brand_token(words[i+2]):
             return 3, f"{words[i]} {words[i+1]} {words[i+2]}"
-    # 6. 1-Wort Marke + Adjektiv + Nomen
+
+    # 6. 1-Wort Marke + Adjektiv + Nomen (z. B. 'krombacher alkoholfreies bier')
     if i + 2 < len(words):
-        single = words[i].lower().strip()
-        if single in BRAND_MAP and words[i+1].lower() in GROCERY_ADJECTIVES:
+        if w_low in BRAND_MAP and words[i+1].lower() in GROCERY_ADJECTIVES and not is_brand_token(words[i+2]):
             return 3, f"{words[i]} {words[i+1]} {words[i+2]}"
-    # 7. 1-Wort Marke + Nomen
+
+    # 7. 1-Wort Marke + Nomen (z. B. 'barilla spaghetti', 'mutti tomatenmark')
     if i + 1 < len(words):
-        single = words[i].lower().strip()
-        if single in BRAND_MAP:
+        if w_low in BRAND_MAP and not is_brand_token(words[i+1]):
             return 2, f"{words[i]} {words[i+1]}"
+
     return 0, None
 
 def is_multiword_pair(w1, w2, catalog_names):
