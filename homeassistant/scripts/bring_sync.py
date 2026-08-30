@@ -129,6 +129,14 @@ def normalize_spoken_german(text):
     # 7. Gesprochene Dezimalzahlen (z. B. '2 komma 5' -> '2.5', '0 komma 5' -> '0.5', '1 punkt 5' -> '1.5')
     t = re.sub(r'\b(\d+)\s*(?:komma|punkt|,|\.)\s*(\d+)\b', r'\1.\2', t, flags=re.IGNORECASE)
 
+    # 8. Markennamen & Titel normalisieren (z. B. 'Doktor Oetker' -> 'Dr. Oetker', 'Ben und Jerrys' -> 'Ben and Jerrys')
+    t = re.sub(r'\bdoktor\s+oetker\b', 'Dr. Oetker', t, flags=re.IGNORECASE)
+    t = re.sub(r'\bdr\s+oetker\b', 'Dr. Oetker', t, flags=re.IGNORECASE)
+    t = re.sub(r'\bgusto\s+gustavo\b', 'Gustavo Gusto', t, flags=re.IGNORECASE)
+    t = re.sub(r'\bben\s+(?:und|and|&)\s+jerrys\b', 'Ben and Jerrys', t, flags=re.IGNORECASE)
+    t = re.sub(r'\bhäagen\s+dazs\b|\bhaagen\s+dazs\b', 'Haagen Dazs', t, flags=re.IGNORECASE)
+    t = re.sub(r'\bmilch\s+schnitte\b', 'Milchschnitte', t, flags=re.IGNORECASE)
+
     return t.strip()
 
 
@@ -407,6 +415,11 @@ VALID_BASE_COMPOUNDS = {
 
 # Fremdwörter und internationale Bezeichnungen, die getrennt bleiben müssen
 FOREIGN_TERMS = {
+    'gustavo gusto', 'dr oetker', 'dr. oetker', 'ben and jerrys', 'ben & jerrys', 'haagen dazs',
+    'ritter sport', 'ferrero rocher', 'mon cheri', 'kinder bueno', 'kinder riegel',
+    'kinder country', 'kinder pingui', 'milch schnitte', 'coca cola', 'coke zero',
+    'pepsi max', 'red bull', 'monster energy', 'paulaner spezi', 'san pellegrino',
+    'funny frisch', 'mini babybel',
     'pollo fino', 'creme fraiche', 'crème fraîche', 'sour cream', 'cream cheese',
     'peanut butter', 'curry paste', 'pulled pork', 'ice tea', 'hot dog', 'french dressing',
     'sweet chili', 'sweet sour', 'barbecue sauce', 'bbq sauce', 'maple syrup',
@@ -417,6 +430,124 @@ FOREIGN_TERMS = {
     'prosciutto di parma', 'serrano schinken', 'iberico schinken', 'chicken nuggets', 'chicken wings',
     'ginger ale', 'tonic water', 'club mate', 'cold brew', 'chai latte', 'balsamico essig'
 }
+
+# Bekannte 2-Wort Markennamen und Produktlinien
+BRAND_PAIRS = {
+    'gustavo gusto', 'dr oetker', 'dr. oetker', 'ben and jerrys', 'ben & jerrys', 'haagen dazs',
+    'ritter sport', 'ferrero rocher', 'mon cheri', 'kinder bueno', 'kinder riegel',
+    'kinder country', 'kinder pingui', 'milch schnitte', 'coca cola', 'coke zero',
+    'pepsi max', 'red bull', 'monster energy', 'paulaner spezi', 'san pellegrino',
+    'funny frisch', 'mini babybel', 'chili cheese', 'sour cream', 'sweet chili'
+}
+
+# Basis-Substantive, die an Markennamen angehängt werden (z. B. 'Gustavo Gusto Pizza', 'Dr Oetker Pizza')
+BASE_NOUN_EXTENSIONS = {
+    'pizza', 'eis', 'chips', 'sauce', 'soße', 'dressing', 'nudeln', 'pasta', 'spaghetti', 'penne',
+    'käse', 'schokolade', 'joghurt', 'milch', 'kaffee', 'tee', 'wasser', 'bier', 'wein', 'saft',
+    'brötchen', 'brot', 'baguette', 'wurst', 'hackfleisch', 'filet', 'schnitzel', 'salat',
+    'creme', 'dip', 'tabs', 'papier', 'tücher', 'kapseln', 'bohnen', 'pulver', 'margarine',
+    'butter', 'ketchup', 'senf', 'mayo', 'mayonnaise', 'spezi', 'cola', 'riegel', 'pralinen'
+}
+
+# Bekannte Markennamen und ihre saubere Duden-Schreibweise
+BRAND_MAP = {
+    'gustavo gusto': 'Gustavo Gusto',
+    'gusto gustavo': 'Gustavo Gusto',
+    'dr oetker': 'Dr. Oetker',
+    'dr. oetker': 'Dr. Oetker',
+    'doktor oetker': 'Dr. Oetker',
+    'wagner': 'Wagner',
+    'ben and jerrys': "Ben & Jerry's",
+    'ben und jerrys': "Ben & Jerry's",
+    'ben & jerrys': "Ben & Jerry's",
+    'haagen dazs': 'Häagen-Dazs',
+    'häagen dazs': 'Häagen-Dazs',
+    'ritter sport': 'Ritter Sport',
+    'milka': 'Milka',
+    'ferrero rocher': 'Ferrero Rocher',
+    'mon cheri': 'Mon Chéri',
+    'kinder bueno': 'Kinder Bueno',
+    'kinder riegel': 'Kinder Riegel',
+    'kinder country': 'Kinder Country',
+    'kinder pingui': 'Kinder Pingui',
+    'milch schnitte': 'Milchschnitte',
+    'coca cola': 'Coca Cola',
+    'coke zero': 'Coke Zero',
+    'pepsi max': 'Pepsi Max',
+    'pepsi': 'Pepsi',
+    'red bull': 'Red Bull',
+    'monster energy': 'Monster Energy',
+    'paulaner spezi': 'Paulaner Spezi',
+    'san pellegrino': 'San Pellegrino',
+    'funny frisch': 'Funny Frisch',
+    'pringles': 'Pringles',
+    'almette': 'Almette',
+    'philadelphia': 'Philadelphia',
+    'miree': 'Miree',
+    'kerrygold': 'Kerrygold',
+    'rama': 'Rama',
+    'becel': 'Becel',
+    'bresso': 'Bresso',
+    'babybel': 'Babybel',
+    'mini babybel': 'Mini Babybel',
+    'kiri': 'Kiri',
+    'de cecco': 'De Cecco',
+    'barilla': 'Barilla',
+    'buitoni': 'Buitoni',
+    'miracoli': 'Mirácoli',
+    'maggi': 'Maggi',
+    'knorr': 'Knorr',
+    'thomy': 'Thomy',
+    'heinz': 'Heinz'
+}
+
+def extract_brand_item(query_name, existing_spec=''):
+    """
+    Trennt Markennamen dynamisch vom Lebensmittel-Substantiv ab, damit Bring! das passende Icon anzeigt:
+    z. B. 'Gustavo Gusto Pizza' -> Name: 'Pizza' (🍕 Icon), Spec: 'Gustavo Gusto'
+    z. B. 'Doktor Oetker Backmischung' -> Name: 'Backmischung' (🧁 Icon), Spec: 'Dr. Oetker'
+    z. B. 'Doktor Oetker Pizza' -> Name: 'Pizza' (🍕 Icon), Spec: 'Dr. Oetker'
+    z. B. 'Barilla Pesto' -> Name: 'Pesto' (🫙 Icon), Spec: 'Barilla'
+    z. B. 'Barilla Spaghetti' -> Name: 'Spaghetti' (🍝 Icon), Spec: 'Barilla'
+    Wird nur der Markenname ohne Nomen genannt (z. B. 'Ritter Sport'), bleibt der Markenname unverändert stehen.
+    """
+    q_low = query_name.lower().strip()
+    
+    # 1. Prüfe Brand + Nomen (z. B. 'Gustavo Gusto Pizza', 'Doktor Oetker Backmischung')
+    for brand_key, brand_display in BRAND_MAP.items():
+        if q_low.startswith(brand_key):
+            remainder = q_low[len(brand_key):].strip()
+            if remainder and len(remainder) >= 2:
+                cat_name = remainder.capitalize()
+                spec = f"{existing_spec} {brand_display}".strip() if existing_spec else brand_display
+                return cat_name, spec
+
+    # 2. Prüfe Nomen + Brand (z. B. 'Pizza Gustavo Gusto', 'Backmischung Dr. Oetker')
+    for brand_key, brand_display in BRAND_MAP.items():
+        if q_low.endswith(brand_key):
+            noun_part = q_low[:-len(brand_key)].strip()
+            if noun_part and len(noun_part) >= 2:
+                cat_name = noun_part.capitalize()
+                spec = f"{existing_spec} {brand_display}".strip() if existing_spec else brand_display
+                return cat_name, spec
+
+    return query_name, existing_spec
+
+def is_brand_extension(words, i):
+    """
+    Erkennt mehrteilige Marken- und Produktkombinationen dynamisch:
+    - 4 Wörter: 'Ben and Jerrys Eis'
+    - 3 Wörter: 'Gustavo Gusto Pizza', 'Dr. Oetker Backmischung', 'Dr. Oetker Pizza'
+    """
+    if i + 3 < len(words):
+        tri = f"{words[i].lower()} {words[i+1].lower()} {words[i+2].lower()}"
+        if tri in BRAND_PAIRS or tri.replace(" ", "") in BRAND_PAIRS or tri in BRAND_MAP:
+            return 4, f"{words[i]} {words[i+1]} {words[i+2]} {words[i+3]}"
+    if i + 2 < len(words):
+        pair = f"{words[i].lower()} {words[i+1].lower()}"
+        if pair in BRAND_PAIRS or pair.replace(" ", "") in BRAND_PAIRS or pair in BRAND_MAP:
+            return 3, f"{words[i]} {words[i+1]} {words[i+2]}"
+    return 0, None
 
 def is_multiword_pair(w1, w2, catalog_names):
     """
@@ -432,8 +563,8 @@ def is_multiword_pair(w1, w2, catalog_names):
         if clow == full_space or clow == full_compound:
             return True
 
-    # 2. Fremdwort-Treffer (z. B. 'Pollo fino', 'Creme Fraiche')
-    if full_space in FOREIGN_TERMS or full_compound in FOREIGN_TERMS:
+    # 2. Fremdwort-Treffer (z. B. 'Pollo fino', 'Creme Fraiche', 'Gustavo Gusto')
+    if full_space in FOREIGN_TERMS or full_compound in FOREIGN_TERMS or full_space in BRAND_PAIRS or full_compound in BRAND_PAIRS:
         return True
 
     # 3. Bekanntes Basis-Kompositum (z. B. 'Wurstaufschnitt', 'Salatgurke')
@@ -471,7 +602,7 @@ def split_compound_of_known_items(word, catalog_names):
             return [word]
     if w_low in VALID_BASE_COMPOUNDS or w_low.replace(" ", "") in VALID_BASE_COMPOUNDS:
         return [word]
-    if w_low in FOREIGN_TERMS or w_low.replace(" ", "") in FOREIGN_TERMS:
+    if w_low in FOREIGN_TERMS or w_low.replace(" ", "") in FOREIGN_TERMS or w_low in BRAND_PAIRS or w_low.replace(" ", "") in BRAND_PAIRS:
         return [word]
 
     for cat1 in catalog_names:
@@ -488,7 +619,7 @@ def smart_split_consecutive(text, catalog_names):
     """
     Zerlegt unverbundene Listen ('Milch Butter Brot') und fälschlich zusammengezogene
     Wörter ('schraubenbohrmaschine'), während mehrteilige Begriffe
-    ('Saure Sahne', 'Puten Brust', '8er Dübel') geschützt und zusammengehalten werden.
+    ('Saure Sahne', 'Puten Brust', '8er Dübel', 'Gustavo Gusto Pizza') geschützt und zusammengehalten werden.
     """
     t = text.strip()
     words = t.split()
@@ -500,13 +631,21 @@ def smart_split_consecutive(text, catalog_names):
         clow = cat.lower()
         if clow == low or clow == low.replace(" ", ""):
             return [t]
-    if low in FOREIGN_TERMS or low.replace(" ", "") in FOREIGN_TERMS:
+    if low in FOREIGN_TERMS or low.replace(" ", "") in FOREIGN_TERMS or low in BRAND_PAIRS or low.replace(" ", "") in BRAND_PAIRS:
         return [t]
 
     results = []
     i = 0
     while i < len(words):
+        # 1. Prüfe mehrteilige Marken-Kombinationen (3- oder 4-Wort-Begriffe)
+        consumed, brand_phrase = is_brand_extension(words, i)
+        if consumed > 0:
+            results.append(brand_phrase)
+            i += consumed
+            continue
+
         w = words[i]
+        # 2. Prüfe 2-Wort-Paar
         if i + 1 < len(words):
             next_w = words[i + 1]
             if is_multiword_pair(w, next_w, catalog_names):
@@ -622,12 +761,14 @@ def parse_items(raw_text, catalog_names):
             split_names = smart_split_consecutive(name, catalog_names)
             for sn in split_names:
                 matched_name = match_catalog_name(sn, catalog_names)
-                if is_valid_grocery_item(matched_name, catalog_names):
-                    items.append({'name': matched_name, 'specification': ''})
+                final_name, final_spec = extract_brand_item(matched_name, '')
+                if is_valid_grocery_item(final_name, catalog_names):
+                    items.append({'name': final_name, 'specification': final_spec})
         else:
             matched_name = match_catalog_name(name, catalog_names)
-            if is_valid_grocery_item(matched_name, catalog_names):
-                items.append({'name': matched_name, 'specification': spec})
+            final_name, final_spec = extract_brand_item(matched_name, spec)
+            if is_valid_grocery_item(final_name, catalog_names):
+                items.append({'name': final_name, 'specification': final_spec})
 
     return items
 
