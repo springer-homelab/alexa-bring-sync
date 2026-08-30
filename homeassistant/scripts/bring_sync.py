@@ -375,9 +375,9 @@ COMPOUND_PREFIXES = {
     'puder', 'vanille', 'back', 'kakao', 'kakaopulver', 'vollmilch', 'zartbitter', 'schoko',
     'mineral', 'erdnuss', 'haselnuss', 'walnuss', 'cashew', 'kräuter', 'knoblauch', 'chili',
     'balsamico', 'weizen', 'roggen', 'mais', 'tiefkühl', 'tk',
-    'puten', 'rinder', 'schweine', 'truthahn', 'kalbs', 'lamm', 'geflügel', 'kirsch',
-    'strauch', 'rispen', 'stauden', 'suppen', 'gewürz', 'koch', 'brat',
-    'schafs', 'ziegen', 'hütten', 'mager', 'frisch',
+    'puten', 'rinder', 'schweine', 'truthahn', 'kalbs', 'lamm', 'geflügel', 'hähnchen', 'hühner', 'fisch', 'lachs', 'thunfisch', 'garnelen',
+    'kirsch', 'strauch', 'rispen', 'stauden', 'suppen', 'gewürz', 'koch', 'brat',
+    'schafs', 'ziegen', 'hütten', 'mager', 'frisch', 'trocken', 'hart', 'weich', 'voll',
     'apfel', 'orangen', 'trauben', 'multi', 'multivitamin', 'zitronen', 'erdbeer',
     'himbeer', 'blaubeer', 'heidelbeer', 'pfefferminz', 'kamillen', 'fenchel',
     'toiletten', 'klo', 'küchen', 'alu', 'frischhalte', 'gefrier',
@@ -415,7 +415,7 @@ FOREIGN_TERMS = {
     'sushi reis', 'basmati reis', 'jasmin reis', 'mie nudeln', 'udon nudeln', 'ramen nudeln',
     'pesto genovese', 'pesto rosso', 'parmigiano reggiano', 'grana padano', 'pecorino romano',
     'prosciutto di parma', 'serrano schinken', 'iberico schinken', 'chicken nuggets', 'chicken wings',
-    'ginger ale', 'tonic water', 'club mate', 'cold brew', 'chai latte'
+    'ginger ale', 'tonic water', 'club mate', 'cold brew', 'chai latte', 'balsamico essig'
 }
 
 def is_multiword_pair(w1, w2, catalog_names):
