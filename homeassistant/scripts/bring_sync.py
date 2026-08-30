@@ -336,30 +336,82 @@ UNITS_LIST = [
 
 UNITS_PATTERN = '|'.join(sorted(UNITS_LIST, key=len, reverse=True))
 
+NOUN_UNITS = {
+    'kiste': 'Kiste', 'kisten': 'Kisten',
+    'kasten': 'Kasten', 'kästen': 'Kästen',
+    'bund': 'Bund', 'bunt': 'Bund',
+    'packung': 'Packung', 'packungen': 'Packungen', 'pkg': 'Pkg.', 'pack': 'Pack', 'packs': 'Packs', 'pck': 'Pck.', 'paket': 'Paket', 'pakete': 'Pakete',
+    'flasche': 'Flasche', 'flaschen': 'Flaschen',
+    'dose': 'Dose', 'dosen': 'Dosen',
+    'beutel': 'Beutel',
+    'glas': 'Glas', 'gläser': 'Gläser',
+    'scheibe': 'Scheibe', 'scheiben': 'Scheiben',
+    'tüte': 'Tüte', 'tüten': 'Tüten',
+    'becher': 'Becher',
+    'zehe': 'Zehe', 'zehen': 'Zehen',
+    'knolle': 'Knolle', 'knollen': 'Knollen',
+    'tafel': 'Tafel', 'tafeln': 'Tafeln',
+    'tube': 'Tube', 'tuben': 'Tuben', 'kartusche': 'Kartusche', 'kartuschen': 'Kartuschen',
+    'stange': 'Stange', 'stangen': 'Stangen',
+    'zweig': 'Zweig', 'zweige': 'Zweige',
+    'rolle': 'Rolle', 'rollen': 'Rollen',
+    'karton': 'Karton', 'kartons': 'Kartons',
+    'portion': 'Portion', 'portionen': 'Portionen',
+    'paar': 'Paar',
+    'schale': 'Schale', 'schalen': 'Schalen',
+    'netz': 'Netz', 'netze': 'Netze',
+    'steige': 'Steige', 'steigen': 'Steigen',
+    'sack': 'Sack', 'säcke': 'Säcke',
+    'eimer': 'Eimer',
+    'kanister': 'Kanister',
+    'stück': 'Stück', 'stk': 'Stück',
+    'zoll': 'Zoll'
+}
+
+def format_specification(spec_str):
+    """
+    Formatiert die Mengenangabe nach Duden-Regeln:
+    - Metrische Einheiten: kurz & klein (z. B. '500g', '2l', '250ml')
+    - Deutsche Gebinde/Substantive: großgeschrieben (z. B. '1 Kiste', '2 Bund', '3 Flaschen')
+    """
+    if not spec_str:
+        return ''
+    s = spec_str.strip()
+    s = re.sub(r'(\d+(?:\.\d+)?)\s*gramm\b', r'\1g', s, flags=re.IGNORECASE)
+    s = re.sub(r'(\d+(?:\.\d+)?)\s*kilo(?:gramm)?\b', r'\1kg', s, flags=re.IGNORECASE)
+    s = re.sub(r'(\d+(?:\.\d+)?)\s*milliliter\b', r'\1ml', s, flags=re.IGNORECASE)
+    s = re.sub(r'(\d+(?:\.\d+)?)\s*liter\b', r'\1l', s, flags=re.IGNORECASE)
+    s = re.sub(r'(\d+(?:\.\d+)?)\s*meter\b', r'\1m', s, flags=re.IGNORECASE)
+    s = re.sub(r'(\d+(?:\.\d+)?)\s*(?:zentimeter|centimeter)\b', r'\1cm', s, flags=re.IGNORECASE)
+    s = re.sub(r'(\d+(?:\.\d+)?)\s*millimeter\b', r'\1mm', s, flags=re.IGNORECASE)
+    s = re.sub(r'(\d+(?:\.\d+)?)\s*quadratmeter\b', r'\1qm', s, flags=re.IGNORECASE)
+    s = re.sub(r'(\d+(?:\.\d+)?)\s*prozent\b', r'\1%', s, flags=re.IGNORECASE)
+
+    words = s.split()
+    formatted_words = []
+    for w in words:
+        w_low = w.lower()
+        if w_low in NOUN_UNITS:
+            formatted_words.append(NOUN_UNITS[w_low])
+        else:
+            formatted_words.append(w)
+    return " ".join(formatted_words)
+
 def extract_specification(text):
     """
-    Trennt Mengenangaben (z. B. '2kg', '5m', '3.5%', '2 Kartuschen') vom Artikelnamen ab.
+    Trennt Mengenangaben (z. B. '2kg', '5m', '3.5%', '2 Kartuschen', '1 Kiste') vom Artikelnamen ab.
     Entfernt führende deutsche Artikel ('die Milch' -> 'Milch').
     """
     t = text.strip()
     t = re.sub(r'^(?:die|das|der|den|dem|des|ein|eine|einen|einem|einer)\s+', '', t, flags=re.IGNORECASE).strip()
 
-    # Muster 1: Ziffer + Einheit (z. B. '500 Gramm Hackfleisch', '5 Meter Kabel')
+    # Muster 1: Ziffer + Einheit (z. B. '500 Gramm Hackfleisch', '5 Meter Kabel', '1 Kiste Sprudel')
     pattern_unit = rf'^\s*(\d+(?:[.,]\d+)?\s*(?:{UNITS_PATTERN}))\s+(?:von\s+(?:den|der|dem|meinen)?\s*)?(.+)$'
     m = re.match(pattern_unit, t, re.IGNORECASE)
     if m:
-        spec = m.group(1).strip()
+        raw_spec = m.group(1).strip()
         name = m.group(2).strip()
-        # Einheiten sauber vereinheitlichen
-        spec = re.sub(r'(\d+(?:\.\d+)?)\s*gramm\b', r'\1g', spec, flags=re.IGNORECASE)
-        spec = re.sub(r'(\d+(?:\.\d+)?)\s*kilo(?:gramm)?\b', r'\1kg', spec, flags=re.IGNORECASE)
-        spec = re.sub(r'(\d+(?:\.\d+)?)\s*milliliter\b', r'\1ml', spec, flags=re.IGNORECASE)
-        spec = re.sub(r'(\d+(?:\.\d+)?)\s*liter\b', r'\1l', spec, flags=re.IGNORECASE)
-        spec = re.sub(r'(\d+(?:\.\d+)?)\s*meter\b', r'\1m', spec, flags=re.IGNORECASE)
-        spec = re.sub(r'(\d+(?:\.\d+)?)\s*(?:zentimeter|centimeter)\b', r'\1cm', spec, flags=re.IGNORECASE)
-        spec = re.sub(r'(\d+(?:\.\d+)?)\s*millimeter\b', r'\1mm', spec, flags=re.IGNORECASE)
-        spec = re.sub(r'(\d+(?:\.\d+)?)\s*quadratmeter\b', r'\1qm', spec, flags=re.IGNORECASE)
-        spec = re.sub(r'(\d+(?:\.\d+)?)\s*prozent\b', r'\1%', spec, flags=re.IGNORECASE)
+        spec = format_specification(raw_spec)
         name = re.sub(r'^(?:die|das|der|den|dem|des|ein|eine|einen|einem|einer)\s+', '', name, flags=re.IGNORECASE).strip()
         return name, spec
 
