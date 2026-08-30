@@ -340,11 +340,14 @@ def get_cached_catalog(auth, list_uuid):
 
 def match_catalog_name(query_name, catalog_names):
     """
-    Intelligenter, generischer Abgleich gegen alle Bring-Katalog-Artikel:
+    Intelligenter, generischer Abgleich gegen alle Bring-Katalog-Artikel nach Duden-Rechtschreibung:
     1. Exakter Match (case-insensitive)
     2. Compound Match (z. B. "Wurst Aufschnitt" -> "Wurstaufschnitt", "Frisch Käse" -> "Frischkäse")
     3. Linguistischer Wortstamm-Match (Singularisierung / Pluralabgleich bei Ein-Wort Queries)
-    4. Fallback: Saubere Groß-/Kleinschreibung (Title Case)
+    4. Duden-konforme Rechtschreibung:
+       - Fremdwörter -> Getrennt (z. B. 'Pollo Fino', 'Creme Fraiche')
+       - Adjektiv + Substantiv -> Getrennt (z. B. 'Saure Sahne', 'Passierte Tomaten')
+       - Deutsches Nomen-Kompositum -> Zusammengeschrieben (z. B. 'Mandelmilch', 'Apfelsaft', 'Alufolie')
     """
     q_clean = query_name.strip()
     q_low = q_clean.lower()
@@ -356,7 +359,7 @@ def match_catalog_name(query_name, catalog_names):
         if cat.lower() == q_low:
             return cat
 
-    # 2. Compound Match (z. B. "Wurst Aufschnitt" -> "Wurstaufschnitt")
+    # 2. Compound Match (z. B. "Wurst Aufschnitt" -> "Wurstaufschnitt", "Frisch Käse" -> "Frischkäse")
     for cat in catalog_names:
         if cat.lower().replace(" ", "") == q_compound:
             return cat
@@ -368,9 +371,23 @@ def match_catalog_name(query_name, catalog_names):
             if c_stem == q_stem:
                 return cat
 
-    # 4. Fallback: Saubere Großschreibung (Title Case)
-    words = [w.capitalize() for w in q_clean.split()]
-    return " ".join(words)
+    # 4. Fremdwörter -> Getrennt mit Großschreibung
+    if q_low in FOREIGN_TERMS or q_compound in FOREIGN_TERMS:
+        words = [w.capitalize() for w in q_clean.split()]
+        return " ".join(words)
+
+    words = q_clean.split()
+    if len(words) == 2:
+        w1_low = words[0].lower()
+        # 5. Adjektiv + Nomen -> Getrennt (z. B. Saure Sahne, Passierte Tomaten)
+        if w1_low in GROCERY_ADJECTIVES:
+            return f"{words[0].capitalize()} {words[1].capitalize()}"
+        # 6. Deutsches Kompositum (Nomen + Nomen) -> Zusammen (z. B. Mandelmilch, Apfelsaft, Alufolie)
+        return f"{words[0].capitalize()}{words[1].lower()}"
+
+    # Standard Fallback: Saubere Großschreibung
+    res_words = [w.capitalize() for w in words]
+    return " ".join(res_words)
 
 GROCERY_ADJECTIVES = {
     'wiener', 'saure', 'saurer', 'saures', 'rote', 'roter', 'rotes', 'grüne', 'grüner', 'grünes',
