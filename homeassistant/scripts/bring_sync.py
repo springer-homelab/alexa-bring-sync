@@ -212,6 +212,26 @@ UNITS_LIST = [
     'tafel', 'tafeln',
     'tube', 'tuben',
     'stange', 'stangen',
+    'qm', 'quadratmeter',
+    'meter', 'm',
+    'zentimeter', 'centimeter', 'cm',
+    'millimeter', 'mm',
+    'zoll',
+    'packung', 'packungen', 'pkg', 'pack', 'packs', 'pck', 'paket', 'pakete',
+    'stk', 'stück',
+    'flasche', 'flaschen',
+    'dose', 'dosen',
+    'bund',
+    'beutel',
+    'glas', 'gläser',
+    'scheibe', 'scheiben',
+    'kasten', 'kästen', 'kiste', 'kisten',
+    'tüte', 'tüten',
+    'becher',
+    'zehe', 'zehen', 'knolle', 'knollen',
+    'tafel', 'tafeln',
+    'tube', 'tuben', 'kartusche', 'kartuschen',
+    'stange', 'stangen',
     'zweig', 'zweige',
     'rolle', 'rollen',
     'karton', 'kartons',
@@ -223,6 +243,9 @@ UNITS_LIST = [
     'sack', 'säcke',
     'eimer',
     'kanister',
+    'bogen', 'blatt',
+    'latte', 'latten', 'leiste', 'leisten',
+    'brett', 'bretter', 'platte', 'platten',
     '%', 'prozent'
 ]
 
@@ -241,6 +264,10 @@ def extract_specification(text):
         spec = re.sub(r'(\d+(?:\.\d+)?)\s*kilo(?:gramm)?\b', r'\1kg', spec, flags=re.IGNORECASE)
         spec = re.sub(r'(\d+(?:\.\d+)?)\s*milliliter\b', r'\1ml', spec, flags=re.IGNORECASE)
         spec = re.sub(r'(\d+(?:\.\d+)?)\s*liter\b', r'\1l', spec, flags=re.IGNORECASE)
+        spec = re.sub(r'(\d+(?:\.\d+)?)\s*meter\b', r'\1m', spec, flags=re.IGNORECASE)
+        spec = re.sub(r'(\d+(?:\.\d+)?)\s*(?:zentimeter|centimeter)\b', r'\1cm', spec, flags=re.IGNORECASE)
+        spec = re.sub(r'(\d+(?:\.\d+)?)\s*millimeter\b', r'\1mm', spec, flags=re.IGNORECASE)
+        spec = re.sub(r'(\d+(?:\.\d+)?)\s*quadratmeter\b', r'\1qm', spec, flags=re.IGNORECASE)
         spec = re.sub(r'(\d+(?:\.\d+)?)\s*prozent\b', r'\1%', spec, flags=re.IGNORECASE)
         name = re.sub(r'^(?:die|das|der|den|dem|des|ein|eine|einen|einem|einer)\s+', '', name, flags=re.IGNORECASE).strip()
         return name, spec
@@ -403,10 +430,13 @@ def match_catalog_name(query_name, catalog_names):
     words = q_clean.split()
     if len(words) == 2:
         w1_low = words[0].lower()
-        # 5. Adjektiv + Nomen -> Getrennt (z. B. Saure Sahne, Passierte Tomaten)
+        # 5. Numerische Modell-/Größenangaben -> Getrennt (z. B. 8er Dübel, 6er Schrauben)
+        if re.match(r'^\d+er$', w1_low):
+            return f"{words[0]} {words[1].capitalize()}"
+        # 6. Adjektiv + Nomen -> Getrennt (z. B. Saure Sahne, Passierte Tomaten)
         if w1_low in GROCERY_ADJECTIVES:
             return f"{words[0].capitalize()} {words[1].capitalize()}"
-        # 6. Deutsches Kompositum (Nomen + Nomen) -> Zusammen (z. B. Mandelmilch, Apfelsaft, Alufolie)
+        # 7. Deutsches Kompositum (Nomen + Nomen) -> Zusammen (z. B. Mandelmilch, Apfelsaft, Alufolie)
         return f"{words[0].capitalize()}{words[1].lower()}"
 
     # Standard Fallback: Saubere Großschreibung
@@ -551,7 +581,7 @@ def parse_items(raw_text, catalog_names):
     first_split = re.split(r'\s+(?:und|sowie|\+)\s+|,\s*', cleaned, flags=re.IGNORECASE)
     
     raw_parts = []
-    split_pattern = rf'(?<=[a-zA-ZäöüÄÖÜß])\s+(?=\d+(?:[.,]\d+)?\s*(?:(?:{UNITS_PATTERN})\s+)?[a-zA-ZäöüÄÖÜß])'
+    split_pattern = rf'(?<=[a-zA-ZäöüÄÖÜß])\s+(?=\d+(?:[.,]\d+)?\s+(?:(?:{UNITS_PATTERN})\s+)?[a-zA-ZäöüÄÖÜß])'
     for fs in first_split:
         fs = fs.strip()
         if not fs:
