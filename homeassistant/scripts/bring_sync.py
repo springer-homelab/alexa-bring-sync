@@ -147,9 +147,26 @@ def normalize_spoken_german(text):
 def strip_command_phrases(text):
     """
     Entfernt typische deutsche Alexa-Befehlsfloskeln am Anfang und Ende des Satzes
-    (z. B. 'setze ... auf die Einkaufsliste', 'Milch und Käse auf die Liste schreiben').
+    (z. B. 'setze ... auf die Einkaufsliste', 'Milch und Käse auf die Liste schreiben', 'ändere Bananen auf 3').
     """
     t = text.strip()
+
+    # Mengen-Änderungsbefehle (z. B. 'ändere die Menge von Bananen auf 3', 'ändere Bananen auf 3', 'erhöhe Bananen auf 4')
+    for qp in [
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:änder(?:e)?|korrigier(?:e)?|erhöh(?:e)?|setz(?:e)?|pass(?:e)?)\s+(?:(?:die\s+)?(?:menge|anzahl)\s*(?:von|der)?\s+)?(.+?)\s+(?:auf|zu|in|an)\s+(\d+(?:[.,]\d+)?(?:\s*[a-zA-ZäöüÄÖÜß]+)?)$',
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?mach\s+(\d+(?:[.,]\d+)?(?:\s*[a-zA-ZäöüÄÖÜß]+)?)\s+(.+?)\s+draus$',
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?mach\s+aus\s+(.+?)\s+(\d+(?:[.,]\d+)?(?:\s*[a-zA-ZäöüÄÖÜß]+)?)$',
+    ]:
+        qm = re.match(qp, t, re.IGNORECASE)
+        if qm:
+            g1, g2 = qm.group(1).strip(), qm.group(2).strip()
+            if re.match(r'^\d', g1):
+                qty, item = g1, g2
+            else:
+                item, qty = g1, g2
+            item = re.sub(r'^(?:die|das|der|den|dem|meine|unsere)\s+', '', item, flags=re.IGNORECASE).strip()
+            return f"{qty} {item}"
+
     patterns = [
         # Prefix Löschbefehle
         r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:lösch(?:e)?|entfern(?:e)?|streich(?:e)?)\s+(.+?)\s+(?:von|aus|von\s+der|von\s+den|von\s+unserer|von\s+meiner)\s+(?:der|meiner|unserer|den|die)?\s*(?:einkaufsliste|einkaufszettel|liste|zettel|bring(?:\s*liste)?)$',
@@ -210,6 +227,16 @@ def is_valid_shopping_command(text):
         return False
     if any(t.startswith(q) for q in QUESTION_PREFIXES):
         return False
+
+    # Mengen-Änderungsbefehle (z. B. 'ändere die Menge von Bananen auf 3', 'ändere Bananen auf 3', 'erhöhe Bananen auf 4')
+    for qp in [
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:änder(?:e)?|korrigier(?:e)?|erhöh(?:e)?|setz(?:e)?|pass(?:e)?)\s+(?:(?:die\s+)?(?:menge|anzahl)\s*(?:von|der)?\s+)?(.+?)\s+(?:auf|zu|in|an)\s+(\d+(?:[.,]\d+)?(?:\s*[a-zA-ZäöüÄÖÜß]+)?)$',
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?mach\s+(\d+(?:[.,]\d+)?(?:\s*[a-zA-ZäöüÄÖÜß]+)?)\s+(.+?)\s+draus$',
+        r'^(?:alexa,?\s*)?(?:bitte\s*)?mach\s+aus\s+(.+?)\s+(\d+(?:[.,]\d+)?(?:\s*[a-zA-ZäöüÄÖÜß]+)?)$',
+    ]:
+        if re.match(qp, t, re.IGNORECASE):
+            return True
+
     for p in [
         r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:setz(?:e)?|pack(?:e)?|schreib(?:e)?|füg(?:e)?|tu)\s+(.+?)\s+(?:auf|zu|zur|in|an|der)\s+(?:die|meine|unsere|den|der|das)?\s*(?:einkaufsliste|einkaufszettel|liste|zettel|bring(?:\s*liste)?)(?:\s*hinzu|\s*drauf)?$',
         r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:lösch(?:e)?|entfern(?:e)?|streich(?:e)?)\s+(.+?)\s+(?:von|aus|von\s+der|von\s+den|von\s+unserer|von\s+meiner)\s+(?:der|meiner|unserer|den|die)?\s*(?:einkaufsliste|einkaufszettel|liste|zettel|bring(?:\s*liste)?)$',
@@ -224,7 +251,7 @@ def is_valid_shopping_command(text):
         if re.match(p, t, re.IGNORECASE):
             return True
     if any(k in t for k in ['einkaufsliste', 'einkaufszettel', 'bring liste', 'bringliste']):
-        if any(v in t for v in ['setz', 'pack', 'schreib', 'füg', 'kauf', 'lösch', 'entfern', 'streich', 'nimm']):
+        if any(v in t for v in ['setz', 'pack', 'schreib', 'füg', 'kauf', 'lösch', 'entfern', 'streich', 'nimm', 'änder']):
             return True
     return False
 
