@@ -342,12 +342,14 @@ def match_catalog_name(query_name, catalog_names):
     """
     Intelligenter, generischer Abgleich gegen alle Bring-Katalog-Artikel:
     1. Exakter Match (case-insensitive)
-    2. Linguistischer Wortstamm-Match (Plural <-> Singular, z. B. Erdbeeren -> Erdbeere)
-    3. Whole Word Match (wenn Katalogname exakt als ganzes Wort in query vorkommt)
-    4. Fallback: Saubere Groß-/Kleinschreibung (Title Case)
+    2. Compound Match (z. B. "Wurst Aufschnitt" -> "Wurstaufschnitt", "Oliven Öl" -> "Olivenöl")
+    3. Linguistischer Wortstamm-Match (Plural <-> Singular, z. B. Erdbeeren -> Erdbeere)
+    4. Whole Word Match (wenn Katalogname exakt als ganzes Wort in query vorkommt)
+    5. Fallback: Saubere Groß-/Kleinschreibung (Title Case)
     """
     q_clean = query_name.strip()
     q_low = q_clean.lower()
+    q_compound = q_low.replace(" ", "")
     q_stem = stem_german(q_low)
 
     # 1. Exakter Match
@@ -355,19 +357,24 @@ def match_catalog_name(query_name, catalog_names):
         if cat.lower() == q_low:
             return cat
 
-    # 2. Wortstamm Match (Singularisierung / Pluralabgleich)
+    # 2. Compound Match
+    for cat in catalog_names:
+        if cat.lower().replace(" ", "") == q_compound:
+            return cat
+
+    # 3. Wortstamm Match (Singularisierung / Pluralabgleich)
     if len(q_stem) >= 3:
         for cat in catalog_names:
             c_stem = stem_german(cat)
             if c_stem == q_stem:
                 return cat
 
-    # 3. Whole Word Token Match (NUR als ganzes Wort, niemals "Milch" -> "Heumilch"!)
+    # 4. Whole Word Token Match (NUR als ganzes Wort, niemals "Milch" -> "Heumilch"!)
     for cat in catalog_names:
         if re.search(rf'\b{re.escape(cat.lower())}\b', q_low):
             return cat
 
-    # 4. Fallback: Saubere Großschreibung (Title Case)
+    # 5. Fallback: Saubere Großschreibung (Title Case)
     words = [w.capitalize() for w in q_clean.split()]
     return " ".join(words)
 
@@ -378,28 +385,78 @@ GROCERY_ADJECTIVES = {
     'geriebene', 'geriebener', 'geriebenes', 'braune', 'brauner', 'braunes',
     'italienische', 'italienischer', 'italienisches', 'griechische', 'griechischer',
     'gemischte', 'gemischter', 'gemischtes', 'stille', 'stiller', 'stilles',
-    'scharfe', 'scharfer', 'scharfes', 'süße', 'süßer', 'süßes', 'milde', 'milder', 'mildes'
+    'scharfe', 'scharfer', 'scharfes', 'süße', 'süßer', 'süßes', 'milde', 'milder', 'mildes',
+    'feine', 'feiner', 'feines', 'grobe', 'grober', 'grobes', 'schwarze', 'schwarzer', 'schwarzes',
+    'weiße', 'weißer', 'weißes', 'helle', 'heller', 'helles', 'dunkle', 'dunkler', 'dunkles'
 }
 
 COMPOUND_PREFIXES = {
     'oliven', 'sonnenblumen', 'raps', 'kokos', 'mandel', 'soja', 'hafer', 'dinkel',
     'puder', 'vanille', 'back', 'kakao', 'kakaopulver', 'vollmilch', 'zartbitter', 'schoko',
     'mineral', 'erdnuss', 'haselnuss', 'walnuss', 'kräuter', 'knoblauch', 'chili',
-    'balsamico', 'weizen', 'roggen', 'mais', 'tiefkühl', 'tk'
+    'balsamico', 'weizen', 'roggen', 'mais', 'tiefkühl', 'tk',
+    'puten', 'rinder', 'schweine', 'truthahn', 'kalbs', 'geflügel', 'kirsch',
+    'strauch', 'rispen', 'suppen', 'gewürz', 'koch', 'brat',
+    'schafs', 'ziegen', 'hütten', 'mager',
+    'apfel', 'orangen', 'trauben', 'multi', 'multivitamin', 'zitronen', 'erdbeer',
+    'himbeer', 'blaubeer', 'heidelbeer', 'toiletten', 'küchen',
+    'spül', 'spülmaschinen', 'wasch', 'putz', 'müll'
+}
+
+DEPENDENT_SUFFIXES = {
+    'aufschnitt', 'geschnetzeltes', 'hackfleisch', 'filet', 'schnitzel', 'kotelett',
+    'flocken', 'tabs', 'stäbchen', 'beutel', 'papier', 'paste', 'pulver'
+}
+
+VALID_BASE_COMPOUNDS = {
+    'wurstaufschnitt', 'käseaufschnitt', 'salatgurke', 'salatgurken', 'kirschtomaten',
+    'kochschinken', 'bratwurst', 'currywurst', 'leberwurst', 'teewurst', 'fleischwurst',
+    'bockwurst', 'mettwurst', 'feta käse', 'fetakäse', 'frischkäse', 'frisch käse',
+    'schmelzkäse', 'bergkäse', 'hartkäse', 'weichkäse', 'hafermilch', 'mandelmilch',
+    'sojamilch', 'kokosmilch', 'vollmilch', 'heumilch', 'schlagsahne', 'sauresahne',
+    'kaffeesahne', 'kräuterquark', 'speisequark', 'naturjoghurt', 'fruchtjoghurt',
+    'nudelsalat', 'kartoffelsalat', 'eiersalat', 'thunfischsalat', 'gurkensalat',
+    'tomatenmark', 'currypaste', 'backpulver', 'vanillezucker', 'puderzucker',
+    'vollkornbrot', 'weißbrot', 'toastbrot', 'roggenbrot', 'aufbackbrötchen'
 }
 
 FOREIGN_TERMS = {
     'pollo fino', 'creme fraiche', 'crème fraîche', 'sour cream', 'cream cheese',
-    'peanut butter', 'curry paste', 'pulled pork', 'ice tea', 'hot dog', 'french dressing'
+    'peanut butter', 'curry paste', 'pulled pork', 'ice tea', 'hot dog', 'french dressing',
+    'sweet chili', 'sweet sour', 'barbecue sauce', 'bbq sauce', 'maple syrup'
 }
 
 def is_multiword_pair(w1, w2, catalog_names):
-    low1, low2 = w1.lower(), w2.lower()
-    full = f"{low1} {low2}"
-    if any(cat.lower() == full for cat in catalog_names) or full in FOREIGN_TERMS:
+    low1, low2 = w1.lower().strip(), w2.lower().strip()
+    full_space = f"{low1} {low2}"
+    full_compound = f"{low1}{low2}"
+    
+    # 1. Exact catalog match (either space or compound)
+    for cat in catalog_names:
+        clow = cat.lower()
+        if clow == full_space or clow == full_compound:
+            return True
+            
+    # 2. Foreign terms
+    if full_space in FOREIGN_TERMS or full_compound in FOREIGN_TERMS:
         return True
-    if low1 in GROCERY_ADJECTIVES or low1 in COMPOUND_PREFIXES:
+        
+    # 3. Known valid base compound (e.g. Wurstaufschnitt, Salatgurke, Kochschinken)
+    if full_compound in VALID_BASE_COMPOUNDS or full_space in VALID_BASE_COMPOUNDS:
         return True
+        
+    # 4. Adjective + Noun (e.g. Saure Sahne, Passierte Tomaten, Griechischer Joghurt)
+    if low1 in GROCERY_ADJECTIVES:
+        return True
+        
+    # 5. Modifying prefix (e.g. Oliven Öl, Puten Brust, Hafer Milch, Vanille Zucker, Toiletten Papier)
+    if low1 in COMPOUND_PREFIXES:
+        return True
+        
+    # 6. Dependent suffix (e.g. Wurst Aufschnitt, Hähnchen Geschnetzeltes, Spülmaschinen Tabs)
+    if low2 in DEPENDENT_SUFFIXES:
+        return True
+        
     return False
 
 def smart_split_consecutive(text, catalog_names):
@@ -409,7 +466,11 @@ def smart_split_consecutive(text, catalog_names):
         return [t]
 
     low = t.lower()
-    if any(cat.lower() == low for cat in catalog_names) or low in FOREIGN_TERMS:
+    for cat in catalog_names:
+        clow = cat.lower()
+        if clow == low or clow == low.replace(" ", ""):
+            return [t]
+    if low in FOREIGN_TERMS or low.replace(" ", "") in FOREIGN_TERMS:
         return [t]
 
     results = []
