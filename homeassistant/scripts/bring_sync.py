@@ -215,7 +215,11 @@ UNITS_LIST = [
     'paar',
     'schale', 'schalen',
     'netz', 'netze',
-    'steige', 'steigen'
+    'steige', 'steigen',
+    'sack', 'säcke',
+    'eimer',
+    'kanister',
+    '%', 'prozent'
 ]
 
 UNITS_PATTERN = '|'.join(sorted(UNITS_LIST, key=len, reverse=True))
@@ -232,6 +236,7 @@ def extract_specification(text):
         spec = re.sub(r'(\d+(?:\.\d+)?)\s*gramm\b', r'\1g', spec, flags=re.IGNORECASE)
         spec = re.sub(r'(\d+(?:\.\d+)?)\s*kilo(?:gramm)?\b', r'\1kg', spec, flags=re.IGNORECASE)
         spec = re.sub(r'(\d+(?:\.\d+)?)\s*liter\b', r'\1l', spec, flags=re.IGNORECASE)
+        spec = re.sub(r'(\d+(?:\.\d+)?)\s*prozent\b', r'\1%', spec, flags=re.IGNORECASE)
         name = re.sub(r'^(?:die|das|der|den|dem|des|ein|eine|einen|einem|einer)\s+', '', name, flags=re.IGNORECASE).strip()
         return name, spec
 
