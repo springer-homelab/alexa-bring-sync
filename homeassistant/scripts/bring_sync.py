@@ -458,15 +458,42 @@ def is_multiword_pair(w1, w2, catalog_names):
 
     return False
 
+def split_compound_of_known_items(word, catalog_names):
+    """
+    Trennt Wörter, die von Alexas Speech-to-Text fälschlicherweise ohne Leerzeichen
+    zusammengezogen wurden (z. B. 'schraubenbohrmaschine' -> 'Schrauben', 'Bohrmaschine').
+    Schützt echte Katalog-Artikel wie 'Wurstaufschnitt'.
+    """
+    w_low = word.lower().strip()
+    for cat in catalog_names:
+        clow = cat.lower()
+        if clow == w_low or clow.replace(" ", "") == w_low:
+            return [word]
+    if w_low in VALID_BASE_COMPOUNDS or w_low.replace(" ", "") in VALID_BASE_COMPOUNDS:
+        return [word]
+    if w_low in FOREIGN_TERMS or w_low.replace(" ", "") in FOREIGN_TERMS:
+        return [word]
+
+    for cat1 in catalog_names:
+        c1_low = cat1.lower()
+        if len(c1_low) >= 3 and w_low.startswith(c1_low):
+            remainder = w_low[len(c1_low):].strip()
+            for cat2 in catalog_names:
+                c2_low = cat2.lower()
+                if remainder == c2_low:
+                    return [cat1, cat2]
+    return [word]
+
 def smart_split_consecutive(text, catalog_names):
     """
-    Zerlegt unverbundene Listen ('Milch Butter Brot'), während mehrteilige Begriffe
+    Zerlegt unverbundene Listen ('Milch Butter Brot') und fälschlich zusammengezogene
+    Wörter ('schraubenbohrmaschine'), während mehrteilige Begriffe
     ('Saure Sahne', 'Puten Brust', '8er Dübel') geschützt und zusammengehalten werden.
     """
     t = text.strip()
     words = t.split()
     if len(words) <= 1:
-        return [t]
+        return split_compound_of_known_items(t, catalog_names)
 
     low = t.lower()
     for cat in catalog_names:
