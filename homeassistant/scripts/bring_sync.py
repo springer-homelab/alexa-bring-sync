@@ -421,6 +421,12 @@ GROCERY_ADJECTIVES = {
     'gefrorene', 'gefrorener', 'gefrorenes', 'tiefgekühlte', 'tiefgekühlter', 'tiefgekühltes',
     'bio', 'freiland', 'vegan', 'vegane', 'veganer', 'veganes', 'vegetarisch', 'vegetarische', 'vegetarisches',
     'laktosefrei', 'laktosefreie', 'laktosefreies', 'glutenfrei', 'glutenfreie', 'glutenfreies',
+    'alkoholfrei', 'alkoholfreie', 'alkoholfreier', 'alkoholfreies', 'alkoholfreien',
+    'koffeinfrei', 'koffeinfreie', 'koffeinfreier', 'koffeinfreies', 'koffeinfreien',
+    'zuckerfrei', 'zuckerfreie', 'zuckerfreier', 'zuckerfreies', 'zuckerfreien',
+    'fettarm', 'fettarme', 'fettarmer', 'fettarmes', 'fettarmen',
+    'nativ', 'native', 'nativer', 'natives', 'nativen',
+    'kaltgepresst', 'kaltgepresste', 'kaltgepresster', 'kaltgepresstes',
     'regional', 'regionale', 'regionales', 'asiatische', 'asiatischer'
 }
 
