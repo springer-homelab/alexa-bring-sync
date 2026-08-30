@@ -833,8 +833,26 @@ def extract_brand_item(query_name, existing_spec=''):
 
 COMMON_STT_TYPOS = {
     'bankmischung': 'backmischung',
+    'backwäsche': 'backmischung',
+    'backwaesche': 'backmischung',
     'küche': 'kiste',
     'bunt': 'bund'
+}
+
+BEVERAGE_BRANDS = {
+    'fanta', 'sprite', 'cola', 'coca cola', 'coca-cola', 'coke zero', 'coca cola zero',
+    'pepsi', 'pepsi max', 'spezi', 'mezzo mix', 'schwip schwap', 'paulaner spezi',
+    'bionade', 'fritz kola', 'fritz-kola', 'fritz limo', 'club mate', 'mio mio', 'mio mio mate',
+    'red bull', 'monster energy', 'monster', 'rockstar', 'effect',
+    'gerolsteiner', 'volvic', 'vittel', 'evian', 'san pellegrino', 'adelholzener', 'apollinaris', 'rhönsprudel',
+    'hohes c', 'granini', 'valensina', 'innocent', 'true fruits', 'pfanner', 'amecke',
+    'krombacher', 'bitburger', 'warsteiner', 'becks', 'paulaner', 'erdinger', 'augustiner', 'tegernseer'
+}
+
+BEVERAGE_NOUNS = {
+    'limonade', 'limo', 'cola', 'spezi', 'bier', 'pils', 'weizen', 'helles', 'dunkles',
+    'wasser', 'mineralwasser', 'sprudel', 'saft', 'eistee', 'energy drink', 'energydrink',
+    'getränk', 'kasten', 'kiste', 'flasche', 'flaschen', 'dose', 'dosen', 'sixpack', 'träger', 'alkoholfreies bier'
 }
 
 def is_brand_token(token):
@@ -897,7 +915,11 @@ def is_brand_extension(words, i):
     if i + 1 < len(words):
         next_tok = words[i+1].lower().strip()
         if w_low in BRAND_MAP and not is_brand_token(words[i+1]) and not re.match(r'^\d', next_tok) and next_tok not in UNITS_LIST:
-            return 2, f"{words[i]} {words[i+1]}"
+            if w_low in BEVERAGE_BRANDS:
+                if next_tok in BEVERAGE_NOUNS or next_tok in UNITS_LIST:
+                    return 2, f"{words[i]} {words[i+1]}"
+            else:
+                return 2, f"{words[i]} {words[i+1]}"
 
     # 7. Standalone / Mehrwort-Marke alleinstehend (3 Wörter)
     if i + 2 < len(words):
@@ -943,13 +965,17 @@ def is_multiword_pair(w1, w2, catalog_names):
     if low1 in GROCERY_ADJECTIVES:
         return True
 
-    # 6. Bestimmendes Präfix (z. B. 'Puten Brust', 'Hafer Milch', 'Vanille Zucker')
-    if low1 in COMPOUND_PREFIXES:
-        return True
-
-    # 7. Unselbstständiges Suffix (z. B. 'Wurst Aufschnitt', 'Spülmaschinen Tabs')
+    # 6. Unselbstständiges Suffix (z. B. 'Wurst Aufschnitt', 'Spülmaschinen Tabs')
     if low2 in DEPENDENT_SUFFIXES:
         return True
+
+    # 7. Bestimmendes Präfix NUR wenn Folgewort KEIN eigenständiger Katalogartikel ist
+    is_distinct = any(cat.lower() == low2 or cat.lower().replace(" ", "") == low2 for cat in catalog_names)
+    if low1 in COMPOUND_PREFIXES and not is_distinct:
+        if full_compound in VALID_BASE_COMPOUNDS or low2 in DEPENDENT_SUFFIXES:
+            return True
+        if low1 in {'puten', 'rinder', 'schweine', 'hähnchen', 'hafer', 'mandel', 'soja', 'kokos', 'vanille', 'puder', 'back'}:
+            return True
 
     return False
 
