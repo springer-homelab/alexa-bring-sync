@@ -794,42 +794,111 @@ UNAMBIGUOUS_BRAND_CATEGORIES = {
     'gillette': ('Rasierklingen', 'Gillette')
 }
 
+BRING_CANONICAL_SYNONYMS = {
+    'geriebener käse': ('Reibkäse', ''),
+    'geriebener kase': ('Reibkäse', ''),
+    'käse gerieben': ('Reibkäse', ''),
+    'kase gerieben': ('Reibkäse', ''),
+    'streukäse': ('Reibkäse', ''),
+    'gratinkäse': ('Reibkäse', ''),
+    'geriebener gouda': ('Reibkäse', 'Gouda'),
+    'geriebener mozzarella': ('Reibkäse', 'Mozzarella'),
+    'geriebener parmesan': ('Parmesan', 'gerieben'),
+    'toastbrot': ('Toast', ''),
+    'spülmaschinentabs': ('Geschirrtabs', ''),
+    'geschirrspültabs': ('Geschirrtabs', ''),
+    'müllbeutel': ('Müllsäcke', ''),
+    'mülltüten': ('Müllsäcke', ''),
+    'paniermehl': ('Semmelbrösel', ''),
+    'gehackte tomaten': ('Dosentomaten', ''),
+    'stückige tomaten': ('Dosentomaten', ''),
+    'pelati': ('Dosentomaten', ''),
+    'schlagsahne': ('Sahne', ''),
+    'schmand': ('Sauerrahm', '')
+}
+
+GRAIN_STYLE_PREFIXES = ['vollkorn', 'dinkel', 'roggen', 'weizen', 'hartweizen', 'glutenfrei', 'glutenfreie', 'glutenfreies']
+KNOWN_GRAIN_NOUNS = {
+    'spaghetti', 'nudeln', 'penne', 'brot', 'toast', 'mehl', 'reis', 'grieß', 'haferflocken', 'brötchen', 'kekse', 'waffeln', 'teig', 'wraps'
+}
+
+def decompose_grain_style(q_low, existing_spec=''):
+    for prefix in sorted(GRAIN_STYLE_PREFIXES, key=len, reverse=True):
+        rest = None
+        if q_low.startswith(prefix + " "):
+            rest = q_low[len(prefix) + 1:].strip()
+        elif q_low.startswith(prefix) and len(q_low) > len(prefix):
+            rest = q_low[len(prefix):].strip()
+
+        if rest and (rest in KNOWN_GRAIN_NOUNS or len(rest) >= 4):
+            spec_add = prefix.capitalize()
+            spec = f"{existing_spec} {spec_add}".strip() if existing_spec else spec_add
+            return rest, spec
+    return q_low, existing_spec
+
 def extract_brand_item(query_name, existing_spec=''):
     """
-    Trennt Markennamen dynamisch vom Lebensmittel-Substantiv ab, damit Bring! das passende Icon anzeigt:
-    1. Explizites Nomen + Marke (z. B. 'Gustavo Gusto Pizza' -> Name: 'Pizza' 🍕, Spec: 'Gustavo Gusto')
-    2. Eindeutige Monoprodukt-Marke ohne Nomen (z. B. 'Augustiner' -> Name: 'Bier' 🍺, Spec: 'Augustiner')
-    3. Mehrdeutige Marke ohne Nomen (z. B. 'Dr. Oetker') -> Name: 'Dr. Oetker' (bleibt ohne Raten erhalten)
+    Trennt Markennamen und Sorten dynamisch ab und mappt kanonische Begriffe,
+    damit Bring! stets das offizielle Standard-Icon anzeigt:
+    1. Kanonische Synonyme (z. B. 'Geriebener Käse' -> Name: 'Reibkäse' 🧀)
+    2. Explizites Nomen + Marke (z. B. 'Gustavo Gusto Pizza' -> Name: 'Pizza' 🍕, Spec: 'Gustavo Gusto')
+    3. Eindeutige Monoprodukt-Marke ohne Nomen (z. B. 'Augustiner' -> Name: 'Bier' 🍺, Spec: 'Augustiner')
+    4. Getreide- / Sorten-Präfixe (z. B. 'Vollkornspaghetti' -> Name: 'Spaghetti' 🍝, Spec: 'Vollkorn')
+    5. Mehrdeutige Marke ohne Nomen (z. B. 'Dr. Oetker') -> Name: 'Dr. Oetker'
     """
     q_low = query_name.lower().strip()
 
-    # 1. Explizites Nomen + Marke (z. B. 'Barilla Spaghetti', 'Mutti Tomatenmark', 'Dr. Oetker Backmischung')
+    # 1. Direkter Check auf kanonische Bring!-Synonyme (z. B. 'Geriebener Käse' -> 'Reibkäse')
+    if q_low in BRING_CANONICAL_SYNONYMS:
+        canon_name, canon_spec = BRING_CANONICAL_SYNONYMS[q_low]
+        combined_spec = f"{existing_spec} {canon_spec}".strip() if existing_spec else canon_spec
+        return canon_name, combined_spec
+
+    # 2. Explizites Nomen + Marke (z. B. 'Barilla Spaghetti', 'Mutti Tomatenmark')
+    matched_brand = False
+    cur_name = query_name
+    cur_spec = existing_spec
     for brand_key in sorted(BRAND_MAP.keys(), key=len, reverse=True):
         brand_display = BRAND_MAP[brand_key]
         if q_low.startswith(brand_key):
             remainder = q_low[len(brand_key):].strip()
             if remainder and len(remainder) >= 2:
-                cat_name = " ".join([w.capitalize() for w in remainder.split()])
-                spec = f"{existing_spec} {brand_display}".strip() if existing_spec else brand_display
-                return cat_name, spec
+                cur_name = " ".join([w.capitalize() for w in remainder.split()])
+                cur_spec = f"{existing_spec} {brand_display}".strip() if existing_spec else brand_display
+                matched_brand = True
+                break
         elif q_low.endswith(brand_key):
             noun_part = q_low[:-len(brand_key)].strip()
             if noun_part and len(noun_part) >= 2:
-                cat_name = " ".join([w.capitalize() for w in noun_part.split()])
-                spec = f"{existing_spec} {brand_display}".strip() if existing_spec else brand_display
-                return cat_name, spec
+                cur_name = " ".join([w.capitalize() for w in noun_part.split()])
+                cur_spec = f"{existing_spec} {brand_display}".strip() if existing_spec else brand_display
+                matched_brand = True
+                break
 
-    # 2. Eindeutige Monoprodukt-Marke ohne Nomen -> Icon-Kategorie zuweisen!
-    if q_low in UNAMBIGUOUS_BRAND_CATEGORIES:
+    # 3. Eindeutige Monoprodukt-Marke ohne Nomen -> Icon-Kategorie zuweisen!
+    if not matched_brand and q_low in UNAMBIGUOUS_BRAND_CATEGORIES:
         cat_name, brand_display = UNAMBIGUOUS_BRAND_CATEGORIES[q_low]
-        spec = f"{existing_spec} {brand_display}".strip() if existing_spec else brand_display
-        return cat_name, spec
+        combined_spec = f"{existing_spec} {brand_display}".strip() if existing_spec else brand_display
+        return cat_name, combined_spec
 
-    # 3. Mehrdeutige Marke ohne Nomen -> Name sauber formatiert stehen lassen
-    if q_low in BRAND_MAP:
+    # 4. Mehrdeutige Marke ohne Nomen -> Name sauber formatiert stehen lassen
+    if not matched_brand and q_low in BRAND_MAP:
         return BRAND_MAP[q_low], existing_spec
 
-    return query_name, existing_spec
+    # 5. Kanonischer Check nach Markenabspaltung (z. B. 'Kerrygold geriebener Käse')
+    n_low = cur_name.lower().strip()
+    if n_low in BRING_CANONICAL_SYNONYMS:
+        canon_name, canon_spec = BRING_CANONICAL_SYNONYMS[n_low]
+        combined_spec = f"{cur_spec} {canon_spec}".strip() if cur_spec else canon_spec
+        return canon_name, combined_spec
+
+    # 6. Getreide- / Sorten-Präfixe abspalten (z. B. 'Vollkornspaghetti' -> 'Spaghetti' 🍝, Spec: 'Vollkorn')
+    decomp_rest, decomp_spec = decompose_grain_style(n_low, cur_spec)
+    if decomp_rest != n_low:
+        cap_name = " ".join([w.capitalize() for w in decomp_rest.split()])
+        return cap_name, decomp_spec
+
+    return cur_name, cur_spec
 
 COMMON_STT_TYPOS = {
     'bankmischung': 'backmischung',
