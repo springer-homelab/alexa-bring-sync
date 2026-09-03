@@ -1278,7 +1278,21 @@ def parse_items(raw_text, catalog_names):
             if is_valid_grocery_item(final_name, catalog_names):
                 items.append({'name': final_name, 'specification': final_spec})
 
-    return items
+    # Duplikate zusammenführen und reichere Spezifikationen schützen (z. B. 'Vollkornspaghetti Spaghetti' -> 'Spaghetti (Vollkorn)')
+    deduped = {}
+    for item in items:
+        name = item['name']
+        spec = item.get('specification', '').strip()
+        if name not in deduped:
+            deduped[name] = spec
+        else:
+            existing_spec = deduped[name]
+            if not existing_spec and spec:
+                deduped[name] = spec
+            elif existing_spec and spec and spec.lower() not in existing_spec.lower():
+                deduped[name] = f"{existing_spec} {spec}".strip()
+
+    return [{'name': k, 'specification': v} for k, v in deduped.items()]
 
 
 # ==================================================================================================
