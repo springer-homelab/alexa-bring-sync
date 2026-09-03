@@ -795,14 +795,14 @@ UNAMBIGUOUS_BRAND_CATEGORIES = {
 }
 
 BRING_CANONICAL_SYNONYMS = {
-    'geriebener käse': ('Reibkäse', ''),
-    'geriebener kase': ('Reibkäse', ''),
-    'käse gerieben': ('Reibkäse', ''),
-    'kase gerieben': ('Reibkäse', ''),
-    'streukäse': ('Reibkäse', ''),
-    'gratinkäse': ('Reibkäse', ''),
-    'geriebener gouda': ('Reibkäse', 'Gouda'),
-    'geriebener mozzarella': ('Reibkäse', 'Mozzarella'),
+    'geriebener käse': ('Käse', 'gerieben'),
+    'geriebener kase': ('Käse', 'gerieben'),
+    'käse gerieben': ('Käse', 'gerieben'),
+    'kase gerieben': ('Käse', 'gerieben'),
+    'streukäse': ('Käse', 'gerieben'),
+    'gratinkäse': ('Käse', 'gerieben'),
+    'geriebener gouda': ('Käse', 'Gouda gerieben'),
+    'geriebener mozzarella': ('Mozzarella', 'gerieben'),
     'geriebener parmesan': ('Parmesan', 'gerieben'),
     'toastbrot': ('Toast', ''),
     'spülmaschinentabs': ('Geschirrtabs', ''),
