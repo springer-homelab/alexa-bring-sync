@@ -451,27 +451,27 @@ def extract_specification(text):
 
 # Eigenschaftswörter, die mit Nomen getrennt geschrieben werden (z. B. 'Saure Sahne', 'Alkoholfreies Bier')
 GROCERY_ADJECTIVES = {
-    'wiener', 'saure', 'saurer', 'saures', 'rote', 'roter', 'rotes', 'grüne', 'grüner', 'grünes',
-    'frische', 'frischer', 'frisches', 'passierte', 'passierter', 'passiertes',
-    'gehackte', 'gehackter', 'gehacktes', 'getrocknete', 'getrockneter', 'getrocknetes',
-    'geriebene', 'geriebener', 'geriebenes', 'braune', 'brauner', 'braunes',
-    'italienische', 'italienischer', 'italienisches', 'griechische', 'griechischer',
-    'gemischte', 'gemischter', 'gemischtes', 'stille', 'stiller', 'stilles',
-    'scharfe', 'scharfer', 'scharfes', 'süße', 'süßer', 'süßes', 'milde', 'milder', 'mildes',
-    'feine', 'feiner', 'feines', 'grobe', 'grober', 'grobes', 'schwarze', 'schwarzer', 'schwarzes',
-    'weiße', 'weißer', 'weißes', 'helle', 'heller', 'helles', 'dunkle', 'dunkler', 'dunkles',
-    'gefrorene', 'gefrorener', 'gefrorenes', 'tiefgekühlte', 'tiefgekühlter', 'tiefgekühltes',
+    'wiener', 'saure', 'saurer', 'saures', 'sauren', 'rote', 'roter', 'rotes', 'roten', 'grüne', 'grüner', 'grünes', 'grünen',
+    'frische', 'frischer', 'frisches', 'frischen', 'passierte', 'passierter', 'passiertes', 'passierten',
+    'gehackte', 'gehackter', 'gehacktes', 'gehackten', 'getrocknete', 'getrockneter', 'getrocknetes', 'getrockneten',
+    'geriebene', 'geriebener', 'geriebenes', 'geriebenen', 'braune', 'brauner', 'braunes', 'braunen',
+    'italienische', 'italienischer', 'italienisches', 'italienischen', 'griechische', 'griechischer', 'griechisches', 'griechischen',
+    'gemischte', 'gemischter', 'gemischtes', 'gemischten', 'stille', 'stiller', 'stilles', 'stillen',
+    'scharfe', 'scharfer', 'scharfes', 'scharfen', 'süße', 'süßer', 'süßes', 'süßen', 'milde', 'milder', 'mildes', 'milden',
+    'feine', 'feiner', 'feines', 'feinen', 'grobe', 'grober', 'grobes', 'groben', 'schwarze', 'schwarzer', 'schwarzes', 'schwarzen',
+    'weiße', 'weißer', 'weißes', 'weißen', 'helle', 'heller', 'helles', 'hellen', 'dunkle', 'dunkler', 'dunkles', 'dunklen',
+    'gefrorene', 'gefrorener', 'gefrorenes', 'gefrorenen', 'tiefgekühlte', 'tiefgekühlter', 'tiefgekühltes', 'tiefgekühlten',
     'bio', 'freiland', 'vegan', 'vegane', 'veganer', 'veganes', 'veganen',
     'vegetarisch', 'vegetarische', 'vegetarischer', 'vegetarisches', 'vegetarischen',
-    'pflanzlich', 'pflanzliche', 'pflanzlicher', 'pflanzliches',
-    'laktosefrei', 'laktosefreie', 'laktosefreies', 'glutenfrei', 'glutenfreie', 'glutenfreies',
+    'pflanzlich', 'pflanzliche', 'pflanzlicher', 'pflanzliches', 'pflanzlichen',
+    'laktosefrei', 'laktosefreie', 'laktosefreies', 'laktosefreien', 'glutenfrei', 'glutenfreie', 'glutenfreies', 'glutenfreien',
     'alkoholfrei', 'alkoholfreie', 'alkoholfreier', 'alkoholfreies', 'alkoholfreien',
     'koffeinfrei', 'koffeinfreie', 'koffeinfreier', 'koffeinfreies', 'koffeinfreien',
     'zuckerfrei', 'zuckerfreie', 'zuckerfreier', 'zuckerfreies', 'zuckerfreien',
     'fettarm', 'fettarme', 'fettarmer', 'fettarmes', 'fettarmen',
     'nativ', 'native', 'nativer', 'natives', 'nativen',
-    'kaltgepresst', 'kaltgepresste', 'kaltgepresster', 'kaltgepresstes',
-    'regional', 'regionale', 'regionales', 'asiatische', 'asiatischer'
+    'kaltgepresst', 'kaltgepresste', 'kaltgepresster', 'kaltgepresstes', 'kaltgepressten',
+    'regional', 'regionale', 'regionales', 'regionalen', 'asiatische', 'asiatischer', 'asiatischen'
 }
 
 # Bestimmende Nomen-Präfixe für Komposita (z. B. 'Puten Brust' -> 'Putenbrust', 'Hafer Milch' -> 'Hafermilch')
@@ -848,7 +848,26 @@ def extract_brand_item(query_name, existing_spec=''):
     """
     q_low = query_name.lower().strip()
 
-    # 1. Direkter Check auf kanonische Bring!-Synonyme (z. B. 'Geriebener Käse' -> 'Reibkäse')
+    # 0. Gerieben-Muster (z. B. 'geriebener Käse', 'geriebenen Käse', 'geriebener Gouda', 'geriebener Mozzarella')
+    m_gerieben = re.match(r'^geriebene[rnse]?\s+(.+)$', q_low)
+    if m_gerieben:
+        item_part = m_gerieben.group(1).strip()
+        CHEESE_TYPES = {'gouda', 'emmentaler', 'cheddar', 'bergkäse', 'edamer', 'tilsiter', 'butterkäse', 'manchego', 'pecorino'}
+        if item_part in ['käse', 'kase']:
+            spec = f"{existing_spec} gerieben".strip() if existing_spec else "gerieben"
+            return 'Käse', spec
+        elif item_part in CHEESE_TYPES:
+            spec_text = f"{item_part.capitalize()} gerieben"
+            spec = f"{existing_spec} {spec_text}".strip() if existing_spec else spec_text
+            return 'Käse', spec
+        elif item_part in ['mozzarella', 'parmesan']:
+            spec = f"{existing_spec} gerieben".strip() if existing_spec else "gerieben"
+            return item_part.capitalize(), spec
+        else:
+            spec = f"{existing_spec} gerieben".strip() if existing_spec else "gerieben"
+            return item_part.capitalize(), spec
+
+    # 1. Direkter Check auf kanonische Bring!-Synonyme (z. B. 'Toastbrot' -> 'Toast')
     if q_low in BRING_CANONICAL_SYNONYMS:
         canon_name, canon_spec = BRING_CANONICAL_SYNONYMS[q_low]
         combined_spec = f"{existing_spec} {canon_spec}".strip() if existing_spec else canon_spec
