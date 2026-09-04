@@ -34,8 +34,9 @@
 
 1. **Home Assistant** (mind. 2024.1)
 2. **[HACS](https://hacs.xyz/)** (Home Assistant Community Store)
-3. **[Alexa Media Player](https://github.com/alandtse/alexa_media_player)** (via HACS installiert und mit deinem Amazon-Konto verbunden)
-4. Ein aktives **Bring! Konto** (E-Mail & Passwort)
+3. **[Alexa Media Player](https://github.com/alandtse/alexa_media_player)** (via HACS) – zum Erkennen der Spracheingaben auf deinen Amazon Echos.
+4. **[Alexa To-do Lists](https://github.com/lonlazer/ha-alexa-todo-lists)** (via HACS, optional) – falls die interne Amazon Alexa Todo-Liste synchron gehalten werden soll.
+5. Ein aktives **Bring! Konto** (E-Mail & Passwort).
 
 ---
 

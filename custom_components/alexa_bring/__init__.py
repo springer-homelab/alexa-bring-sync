@@ -169,9 +169,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             except Exception as e:
                 _LOGGER.error("Error reconciling Amazon Todo list: %s", str(e))
 
-        coordinator.async_add_listener(reconcile_amazon_todo)
+        def on_coordinator_update():
+            hass.async_create_task(reconcile_amazon_todo())
+
+        remove_coord_listener = coordinator.async_add_listener(on_coordinator_update)
+        hass.data[DOMAIN][entry.entry_id]["listeners"].append(remove_coord_listener)
+
+    # Listen for options updates (device/list changes in UI)
+    entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
     return True
+
+async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Reload config entry when options change."""
+    await hass.config_entries.async_reload(entry.entry_id)
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""

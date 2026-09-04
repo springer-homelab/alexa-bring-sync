@@ -1,8 +1,9 @@
-# Secrets, Auth & Environment
+# Secrets, Auth & Cache
 secrets.yaml
 .env
 bring_auth_cache.json
 bring_catalog_cache.json
+bring_vocab_cache.json
 .storage/
 
 # Python
@@ -14,11 +15,10 @@ __pycache__/
 env/
 venv/
 .venv/
+*.log
 
-# Google Apps Script Clasp
-.clasp.json
-.claspignore
-
-# OS Specific
+# OS & Editor
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
