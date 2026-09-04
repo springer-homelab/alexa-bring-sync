@@ -252,8 +252,15 @@ class NLUParsingEngine:
             'spülmaschinentabs': ('Geschirrtabs', ''), 'geschirrspültabs': ('Geschirrtabs', ''),
             'müllbeutel': ('Müllsäcke', ''), 'mülltüten': ('Müllsäcke', ''),
             'paniermehl': ('Semmelbrösel', ''), 'gehackte tomaten': ('Dosentomaten', ''),
+            'passierte tomaten': ('Dosentomaten', ''),
             'stückige tomaten': ('Dosentomaten', ''), 'pelati': ('Dosentomaten', ''),
-            'schlagsahne': ('Sahne', ''), 'schmand': ('Sauerrahm', '')
+            'schlagsahne': ('Sahne', ''), 'schmand': ('Sauerrahm', ''),
+            'topfen': ('Quark', ''), 'karfiol': ('Blumenkohl', ''), 'faschiertes': ('Hackfleisch', ''),
+            'paradeiser': ('Tomaten', ''), 'erdäpfel': ('Kartoffeln', ''), 'erdaepfel': ('Kartoffeln', ''),
+            'schlagobers': ('Sahne', ''), 'marillen': ('Aprikosen', ''), 'marille': ('Aprikosen', ''),
+            'champignons': ('Pilze', ''), 'schwämme': ('Pilze', ''), 'schwammerl': ('Pilze', ''),
+            'semmeln': ('Brötchen', ''), 'semmel': ('Brötchen', ''),
+            'klopapier': ('Toilettenpapier', '')
         })
         
         self.cat_head_nouns = vocab.get('cat_head_nouns', {
@@ -387,8 +394,12 @@ class NLUParsingEngine:
         t = re.sub(r'\bnull\b', '0', t, flags=re.IGNORECASE)
 
         fraction_map = [
-            (r'\banderthalb\b|\beineinhalb\b', '1.5'), (r'\bzweieinhalb\b', '2.5'), (r'\bdreieinhalb\b', '3.5'),
-            (r'\bviereinhalb\b', '4.5'), (r'\bfünfeinhalb\b', '5.5'), (r'\bdreiviertel\b|\bdrei\s*viertel\b', '0.75'),
+            (r'\banderthalb\b|\beineinhalb\b|\bein\s+einhalb\b', '1.5'),
+            (r'\bzweieinhalb\b|\bzwei\s+einhalb\b', '2.5'),
+            (r'\bdreieinhalb\b|\bdrei\s+einhalb\b', '3.5'),
+            (r'\bviereinhalb\b|\bvier\s+einhalb\b', '4.5'),
+            (r'\bfünfeinhalb\b|\bfünf\s+einhalb\b', '5.5'),
+            (r'\bdreiviertel\b|\bdrei\s*viertel\b', '0.75'),
             (r'(?:\bein\s+)?halbes\s+dutzend\b', '6'), (r'(?:\bein\s+)?dutzend\b', '12'),
             (r'(?:\bein\s+)?halbes\s+pfund\b', '250g'), (r'(?:\bein\s+)?pfund\b', '500g'),
             (r'(?:\bein\s+)?halbes\b|(?:\bein\s+)?halber\b|(?:\bein\s+)?halb\b|(?:\beine\s+)?halbe\b', '0.5'),
@@ -421,7 +432,7 @@ class NLUParsingEngine:
             t = re.sub(rf'\b{w}\b', str(n), t, flags=re.IGNORECASE)
 
         t = re.sub(r'\b(\d{1,4}00)\s+(\d{1,2})\b', lambda m: str(int(m.group(1)) + int(m.group(2))), t)
-        t = re.sub(r'\b(\d+)\s*(?:komma|punkt|,|\.)\s*(\d+)\b', r'\1.\2', t, flags=re.IGNORECASE)
+        t = re.sub(r'(?<=\d)\s*(?:komma|punkt|,)\s*(?=\d)', '.', t, flags=re.IGNORECASE)
 
         t = re.sub(r'\bdoktor\s+oetker\b', 'Dr. Oetker', t, flags=re.IGNORECASE)
         t = re.sub(r'\bdr\s+oetker\b', 'Dr. Oetker', t, flags=re.IGNORECASE)
@@ -476,14 +487,14 @@ class NLUParsingEngine:
         if not spec_str:
             return ''
         s = spec_str.strip()
-        s = re.sub(r'(\d+(?:\.\d+)?)\s*gramm\b', r'\1g', s, flags=re.IGNORECASE)
-        s = re.sub(r'(\d+(?:\.\d+)?)\s*kilo(?:gramm)?\b', r'\1kg', s, flags=re.IGNORECASE)
-        s = re.sub(r'(\d+(?:\.\d+)?)\s*milliliter\b', r'\1ml', s, flags=re.IGNORECASE)
-        s = re.sub(r'(\d+(?:\.\d+)?)\s*liter\b', r'\1l', s, flags=re.IGNORECASE)
-        s = re.sub(r'(\d+(?:\.\d+)?)\s*meter\b', r'\1m', s, flags=re.IGNORECASE)
-        s = re.sub(r'(\d+(?:\.\d+)?)\s*(?:zentimeter|centimeter)\b', r'\1cm', s, flags=re.IGNORECASE)
-        s = re.sub(r'(\d+(?:\.\d+)?)\s*millimeter\b', r'\1mm', s, flags=re.IGNORECASE)
-        s = re.sub(r'(\d+(?:\.\d+)?)\s*quadratmeter\b', r'\1qm', s, flags=re.IGNORECASE)
+        s = re.sub(r'(\d+(?:\.\d+)?)\s*(?:kilo(?:gramm)?|kg)\b', r'\1kg', s, flags=re.IGNORECASE)
+        s = re.sub(r'(\d+(?:\.\d+)?)\s*(?:gramm|g)\b', r'\1g', s, flags=re.IGNORECASE)
+        s = re.sub(r'(\d+(?:\.\d+)?)\s*(?:milliliter|ml)\b', r'\1ml', s, flags=re.IGNORECASE)
+        s = re.sub(r'(\d+(?:\.\d+)?)\s*(?:liter|l)\b', r'\1l', s, flags=re.IGNORECASE)
+        s = re.sub(r'(\d+(?:\.\d+)?)\s*(?:meter|m)\b', r'\1m', s, flags=re.IGNORECASE)
+        s = re.sub(r'(\d+(?:\.\d+)?)\s*(?:zentimeter|centimeter|cm)\b', r'\1cm', s, flags=re.IGNORECASE)
+        s = re.sub(r'(\d+(?:\.\d+)?)\s*(?:millimeter|mm)\b', r'\1mm', s, flags=re.IGNORECASE)
+        s = re.sub(r'(\d+(?:\.\d+)?)\s*(?:quadratmeter|qm)\b', r'\1qm', s, flags=re.IGNORECASE)
         s = re.sub(r'(\d+(?:\.\d+)?)\s*prozent\b', r'\1%', s, flags=re.IGNORECASE)
 
         words = s.split()
@@ -736,6 +747,8 @@ class NLUParsingEngine:
                 return [word]
         if w_low in self.valid_base_compounds or w_low.replace(" ", "") in self.valid_base_compounds:
             return [word]
+        if w_low in self.compound_protected_items or w_low.replace(" ", "") in self.compound_protected_items:
+            return [word]
         if w_low in self.foreign_terms or w_low.replace(" ", "") in self.foreign_terms or w_low in self.brand_pairs or w_low.replace(" ", "") in self.brand_pairs:
             return [word]
 
@@ -743,12 +756,12 @@ class NLUParsingEngine:
             c1_low = cat1.lower()
             if len(c1_low) >= 3 and w_low.startswith(c1_low):
                 remainder = w_low[len(c1_low):].strip()
-                if remainder in self.cat_head_nouns:
-                    return [word]
                 for cat2 in catalog_names:
                     c2_low = cat2.lower()
                     if remainder == c2_low:
                         return [cat1, cat2]
+                if remainder in self.cat_head_nouns:
+                    return [word]
         return [word]
 
     def smart_split_consecutive(self, text: str, catalog_names: list[str]) -> list[str]:
@@ -784,6 +797,7 @@ class NLUParsingEngine:
             if re.match(rf'^\d+(?:[.,]\d+)?(?:{self.units_pattern})$', w_low):
                 if i + 1 < len(words):
                     rem_phrase = " ".join(words[i+1:])
+                    rem_phrase = re.sub(r'^(?:von\s+(?:den|der|dem|des|meinen|meiner|die|das)?\s*)', '', rem_phrase, flags=re.IGNORECASE).strip()
                     sub_parsed = self.smart_split_consecutive(rem_phrase, catalog_names)
                     if sub_parsed:
                         results.append(f"{w} {sub_parsed[0]}")
@@ -795,6 +809,7 @@ class NLUParsingEngine:
             if re.match(r'^\d+(?:[.,]\d+)?$', w_low):
                 if i + 2 < len(words) and words[i+1].lower() in self.units_list:
                     rem_phrase = " ".join(words[i+2:])
+                    rem_phrase = re.sub(r'^(?:von\s+(?:den|der|dem|des|meinen|meiner|die|das)?\s*)', '', rem_phrase, flags=re.IGNORECASE).strip()
                     sub_parsed = self.smart_split_consecutive(rem_phrase, catalog_names)
                     if sub_parsed:
                         results.append(f"{w} {words[i+1]} {sub_parsed[0]}")
@@ -804,6 +819,7 @@ class NLUParsingEngine:
                     break
                 elif i + 1 < len(words):
                     rem_phrase = " ".join(words[i+1:])
+                    rem_phrase = re.sub(r'^(?:von\s+(?:den|der|dem|des|meinen|meiner|die|das)?\s*)', '', rem_phrase, flags=re.IGNORECASE).strip()
                     sub_parsed = self.smart_split_consecutive(rem_phrase, catalog_names)
                     if sub_parsed:
                         results.append(f"{w} {sub_parsed[0]}")
@@ -835,6 +851,10 @@ class NLUParsingEngine:
                 results.append(f"{w} {rem[0]} {rem[1]}")
                 i += 3
                 continue
+            if len(rem) == 1 and re.match(r'^\d+(?:[.,]\d+)?$', rem[0].lower()):
+                results.append(f"{w} {rem[0]}")
+                i += 2
+                continue
 
             results.append(w)
             i += 1
@@ -860,6 +880,11 @@ class NLUParsingEngine:
                 c_stem = self._stem_german(cat)
                 if c_stem == q_stem:
                     return cat
+
+        if q_low in self.standalone_products:
+            return self.standalone_products[q_low]
+        if q_low.replace('-', ' ') in self.standalone_products:
+            return self.standalone_products[q_low.replace('-', ' ')]
 
         if q_low in self.foreign_terms or q_compound in self.foreign_terms:
             words = [w.capitalize() for w in q_clean.split()]
@@ -925,7 +950,8 @@ class NLUParsingEngine:
             'mehl': 'Zutaten & Gewürze', 'öl': 'Zutaten & Gewürze', 'essig': 'Zutaten & Gewürze',
             'gewürze': 'Zutaten & Gewürze', 'kräuter': 'Obst & Gemüse', 'salat': 'Obst & Gemüse',
             'obst': 'Obst & Gemüse', 'gemüse': 'Obst & Gemüse', 'tomaten': 'Obst & Gemüse',
-            'waschmittel': 'Haushalt', 'spülmittel': 'Haushalt', 'toilettenpapier': 'Haushalt',
+            'blumenkohl': 'Obst & Gemüse', 'kartoffeln': 'Obst & Gemüse', 'aprikosen': 'Obst & Gemüse', 'pilze': 'Obst & Gemüse',
+            'geschirrtabs': 'Haushalt', 'müllsäcke': 'Haushalt', 'waschmittel': 'Haushalt', 'spülmittel': 'Haushalt', 'toilettenpapier': 'Haushalt',
             'taschentücher': 'Pflege & Gesundheit', 'zahnpasta': 'Pflege & Gesundheit', 'shampoo': 'Pflege & Gesundheit',
         }
 
@@ -951,8 +977,12 @@ class NLUParsingEngine:
             return canon_name, _get_sec(canon_name)
 
         # 3. Unambiguous brand categories
+        low_norm = low.replace('-', ' ')
         if low in self.unambiguous_brand_categories:
             cat_icon, _ = self.unambiguous_brand_categories[low]
+            return cat_icon, _get_sec(cat_icon)
+        if low_norm in self.unambiguous_brand_categories:
+            cat_icon, _ = self.unambiguous_brand_categories[low_norm]
             return cat_icon, _get_sec(cat_icon)
 
         # 4. Compound suffix match (e.g. Nutellakekse -> Kekse, Dosenwurst -> Wurst)
@@ -1071,7 +1101,8 @@ class NLUParsingEngine:
                                 break
 
                 low_name = name.lower().strip()
-                if low_name in self.bring_canonical_synonyms:
+                catalog_lows = {c.lower() for c in catalog_names}
+                if low_name not in catalog_lows and low_name in self.bring_canonical_synonyms:
                     canon_name, canon_spec = self.bring_canonical_synonyms[low_name]
                     final_name = canon_name
                     final_spec = f"{spec} {canon_spec}".strip() if spec else canon_spec
@@ -1110,3 +1141,18 @@ def detect_operation(raw_text: str) -> str:
     if ('hak' in low or 'hake' in low) and ('ab' in low or 'weg' in low):
         return 'TO_RECENTLY'
     return 'TO_PURCHASE'
+
+def is_voice_question(raw_text: str) -> bool:
+    """Check if the spoken phrase is an inquiry or non-shopping command rather than an intent."""
+    raw = raw_text.lower().strip()
+    return raw.startswith(('was ', 'wie ', 'wo ', 'wann ', 'warum ', 'wieso ', 'weshalb ', 'wer ', 'welche ', 'ist ', 'sind ', 'gibt ', 'hast ', 'kannst ', 'lies ', 'zeige ', 'öffne ', 'starte ', 'spiel ', 'stelle ', 'stell ')) or raw.endswith('?')
+
+def has_shopping_intent(raw_text: str) -> bool:
+    """Check if the phrase contains intent keywords for grocery list operations."""
+    raw = raw_text.lower().strip()
+    return (
+        'einkaufsliste' in raw or 'einkaufszettel' in raw or 'bring liste' in raw or 'bringliste' in raw
+        or 'auf die liste' in raw or 'auf den zettel' in raw or 'von der liste' in raw or 'von dem zettel' in raw or 'von meiner liste' in raw
+        or 'abhaken' in raw or 'abgehakt' in raw or 'erledigt' in raw
+        or raw.startswith(('setze ', 'setz ', 'packe ', 'pack ', 'schreibe ', 'schreib ', 'füge ', 'füg ', 'hake ', 'hak ', 'lösche ', 'lösch ', 'entferne ', 'entfern ', 'streiche ', 'streich ', 'kaufe ', 'kauf ', 'wir brauchen noch ', 'wir benötigen noch '))
+    )

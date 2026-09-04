@@ -14,7 +14,7 @@ from homeassistant.helpers.event import async_track_state_change_event
 
 from .const import DOMAIN, CONF_LIST_NAME, SERVICE_SYNC_TEXT, ATTR_SPOKEN_TEXT, CONF_MEDIA_PLAYERS, CONF_TODO_LIST
 from .bring_api import BringAPI
-from .nlu_parser import NLUParsingEngine, detect_operation
+from .nlu_parser import NLUParsingEngine, detect_operation, is_voice_question, has_shopping_intent
 from .coordinator import BringDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -126,16 +126,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 if not raw:
                     return
                 
-                is_question = raw.startswith(('was ', 'wie ', 'wo ', 'wann ', 'warum ', 'wieso ', 'weshalb ', 'wer ', 'welche ', 'ist ', 'sind ', 'gibt ', 'hast ', 'kannst ', 'lies ', 'zeige ', 'öffne ', 'starte ', 'spiel ', 'stelle ', 'stell ')) or raw.endswith('?')
-                
-                has_shopping_intent = (
-                    'einkaufsliste' in raw or 'einkaufszettel' in raw or 'bring liste' in raw or 'bringliste' in raw
-                    or 'auf die liste' in raw or 'auf den zettel' in raw or 'von der liste' in raw or 'von dem zettel' in raw or 'von meiner liste' in raw
-                    or 'abhaken' in raw or 'abgehakt' in raw or 'erledigt' in raw
-                    or raw.startswith(('setze ', 'setz ', 'packe ', 'pack ', 'schreibe ', 'schreib ', 'füge ', 'füg ', 'hake ', 'hak ', 'lösche ', 'lösch ', 'entferne ', 'entfern ', 'streiche ', 'streich ', 'kaufe ', 'kauf ', 'wir brauchen noch ', 'wir benötigen noch '))
-                )
-                
-                if not is_question and has_shopping_intent:
+                if not is_voice_question(raw) and has_shopping_intent(raw):
                     summary = new_state.attributes.get("last_called_summary", "").replace('"', '').replace("'", "")
                     now = time.time()
                     if summary.lower() == last_processed["summary"] and (now - last_processed["time"]) < 3.0:
