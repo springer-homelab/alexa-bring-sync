@@ -1,0 +1,11 @@
+sync_spoken_text:
+  name: Sync Spoken Text
+  description: Verarbeitet einen gesprochenen Einkaufs-Sprachbefehl über die NLU-Engine und synchronisiert ihn zu Bring!.
+  fields:
+    spoken_text:
+      name: Gesprochener Text
+      description: Der ungefilterte Text des Sprachbefehls von Alexa.
+      required: true
+      example: "2 Bananen und Hafermilch auf die Einkaufsliste"
+      selector:
+        text:
