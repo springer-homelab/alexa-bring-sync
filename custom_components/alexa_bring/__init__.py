@@ -1,4 +1,6 @@
 """The Alexa-Bring! Sync integration."""
+from __future__ import annotations
+
 import logging
 import time
 import voluptuous as vol
@@ -62,6 +64,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if not text:
             return
             
+        coordinator.last_spoken_text = text
+        coordinator.last_action = "sync_spoken_text"
         op = detect_operation(text)
         catalog = await api.get_catalog()
         parsed_items = nlu_engine.parse_items(text, catalog)
@@ -140,6 +144,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     last_processed["time"] = now
 
                     _LOGGER.info("Intercepted Alexa shopping intent: %s", summary)
+                    coordinator.last_spoken_text = summary
+                    coordinator.last_action = "voice_command"
                     # Trigger sync
                     hass.async_create_task(
                         hass.services.async_call(DOMAIN, SERVICE_SYNC_TEXT, {ATTR_SPOKEN_TEXT: summary})

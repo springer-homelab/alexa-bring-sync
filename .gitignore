@@ -17,6 +17,7 @@ env/
 venv/
 .venv/
 *.log
+.pytest_cache/
 
 # OS & Editor
 .DS_Store

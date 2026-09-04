@@ -1,6 +1,8 @@
 """Config flow for Alexa-Bring! Sync integration."""
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -23,7 +25,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
     }
 )
 
-def get_devices_schema(options: dict = None) -> vol.Schema:
+def get_devices_schema(options: dict[str, Any] | None = None) -> vol.Schema:
     """Return the schema for device selection."""
     if options is None:
         options = {}
@@ -44,7 +46,7 @@ def get_devices_schema(options: dict = None) -> vol.Schema:
         }
     )
 
-async def validate_input(hass: HomeAssistant, data: dict) -> Dict[str, Any]:
+async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
     """Validate the user input allows us to connect."""
     session = async_get_clientsession(hass)
     cache_dir = hass.config.path(".storage")
@@ -72,12 +74,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize."""
-        self.user_data = {}
+        self.user_data: dict[str, Any] = {}
 
     async def async_step_user(
-        self, user_input: Optional[Dict[str, Any]] = None
+        self, user_input: dict[str, Any] | None = None
     ) -> config_entries.ConfigFlowResult:
         """Handle the initial step."""
         if self._async_current_entries():
@@ -104,7 +106,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_devices(
-        self, user_input: Optional[Dict[str, Any]] = None
+        self, user_input: dict[str, Any] | None = None
     ) -> config_entries.ConfigFlowResult:
         """Handle the device selection step."""
         if user_input is not None:

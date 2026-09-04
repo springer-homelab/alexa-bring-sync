@@ -1,11 +1,13 @@
 """Bring! API Client (Async) for Home Assistant."""
+from __future__ import annotations
+
 import logging
 import json
 import os
 import asyncio
 import uuid
 import aiohttp
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Any
 
 from .const import API_BASE, API_KEY, CLIENT, APPLICATION, COUNTRY
 
@@ -14,24 +16,24 @@ _LOGGER = logging.getLogger(__name__)
 class BringAPI:
     """Async Bring! API Client."""
 
-    def __init__(self, session: aiohttp.ClientSession, email: str, password: str, list_name: str, cache_dir: str):
+    def __init__(self, session: aiohttp.ClientSession, email: str, password: str, list_name: str, cache_dir: str) -> None:
         self.session = session
         self.email = email
         self.password = password
         self.list_name = list_name
         self.cache_dir = cache_dir
         
-        self.auth_data: Dict[str, Any] = {}
-        self.list_uuid: Optional[str] = None
-        self.catalog_cache: List[str] = []
-        self.details_cache: Dict[str, Dict[str, Any]] = {}
-        self.catalog_sections: Dict[str, Tuple[str, str]] = {}
+        self.auth_data: dict[str, Any] = {}
+        self.list_uuid: str | None = None
+        self.catalog_cache: list[str] = []
+        self.details_cache: dict[str, dict[str, Any]] = {}
+        self.catalog_sections: dict[str, tuple[str, str]] = {}
         
         self._cache_file = os.path.join(self.cache_dir, "bring_auth_cache.json")
         self._catalog_file = os.path.join(self.cache_dir, "bring_catalog_cache.json")
         self._catalog_sections_file = os.path.join(self.cache_dir, "bring_catalog_sections_cache.json")
 
-    def _get_headers(self) -> Dict[str, str]:
+    def _get_headers(self) -> dict[str, str]:
         headers = {
             'X-BRING-API-KEY': API_KEY,
             'X-BRING-CLIENT': CLIENT,
@@ -118,7 +120,7 @@ class BringAPI:
         self.list_uuid = self.auth_data.get('bringListUUID')
         return self.list_uuid
 
-    async def get_catalog(self) -> List[str]:
+    async def get_catalog(self) -> list[str]:
         """Fetch the list catalog (known items)."""
         if self.catalog_cache:
             return self.catalog_cache
@@ -155,7 +157,7 @@ class BringAPI:
             _LOGGER.error("Error fetching catalog: %s", str(e))
         return []
 
-    async def get_active_items(self) -> List[Dict[str, str]]:
+    async def get_active_items(self) -> list[dict[str, str]]:
         """Fetch active (purchase) items from the list."""
         list_uuid = await self.get_list_uuid()
         if not list_uuid:
@@ -185,7 +187,7 @@ class BringAPI:
             _LOGGER.error("Error fetching active items: %s", str(e))
             return []
 
-    async def execute_batch_changes(self, changes: List[Dict[str, Any]]) -> bool:
+    async def execute_batch_changes(self, changes: list[dict[str, Any]]) -> bool:
         """Send batch changes (add/remove) to Bring!."""
         if not changes:
             return True
@@ -210,7 +212,7 @@ class BringAPI:
             _LOGGER.error("Error executing changes: %s", str(e))
             return False
 
-    async def get_catalog_sections(self) -> Dict[str, Tuple[str, str]]:
+    async def get_catalog_sections(self) -> dict[str, tuple[str, str]]:
         """Fetch Bring! catalog sections and item mapping: {itemId_lower: (itemId, sectionName)}."""
         if self.catalog_sections:
             return self.catalog_sections
@@ -253,7 +255,7 @@ class BringAPI:
 
         return self.catalog_sections
 
-    async def get_item_details_map(self) -> Dict[str, Dict[str, Any]]:
+    async def get_item_details_map(self) -> dict[str, dict[str, Any]]:
         """Fetch custom item details (icons, sections) for the list."""
         list_uuid = await self.get_list_uuid()
         if not list_uuid:

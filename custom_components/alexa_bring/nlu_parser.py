@@ -1,11 +1,13 @@
 """Intelligent NLU Parsing Engine for German Grocery Items."""
+from __future__ import annotations
+
 import re
 import json
 import os
 import time
 import asyncio
 import logging
-from typing import List, Dict, Tuple, Any
+from typing import Any
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -13,7 +15,7 @@ OTA_VOCAB_URL = "https://raw.githubusercontent.com/springer-homelab/alexa-bring-
 CACHE_EXPIRY_SECONDS = 86400  # 24 hours
 
 class NLUParsingEngine:
-    def __init__(self, vocab: Dict[str, Any] = None):
+    def __init__(self, vocab: dict[str, Any] | None = None) -> None:
         if vocab is None:
             vocab = {}
             
@@ -494,7 +496,7 @@ class NLUParsingEngine:
                 formatted_words.append(w)
         return " ".join(formatted_words)
 
-    def extract_specification(self, text: str) -> Tuple[str, str]:
+    def extract_specification(self, text: str) -> tuple[str, str]:
         t = text.strip()
         t = re.sub(r'^(?:die|das|der|den|dem|des|ein|eine|einen|einem|einer)\s+', '', t, flags=re.IGNORECASE).strip()
 
@@ -528,7 +530,7 @@ class NLUParsingEngine:
 
         return t, ''
 
-    def decompose_grain_style(self, q_low: str, existing_spec: str = '') -> Tuple[str, str]:
+    def decompose_grain_style(self, q_low: str, existing_spec: str = '') -> tuple[str, str]:
         for prefix in sorted(self.grain_style_prefixes, key=len, reverse=True):
             rest = None
             if q_low.startswith(prefix + " "):
@@ -542,7 +544,7 @@ class NLUParsingEngine:
                 return rest, spec
         return q_low, existing_spec
 
-    def decompose_compound_item(self, word: str, existing_spec: str = '') -> Tuple[str, str]:
+    def decompose_compound_item(self, word: str, existing_spec: str = '') -> tuple[str, str]:
         w_low = word.lower().strip()
         if w_low in self.compound_protected_items or ' ' in w_low:
             return word, existing_spec
@@ -564,7 +566,7 @@ class NLUParsingEngine:
 
         return word, existing_spec
 
-    def extract_brand_item(self, query_name: str, existing_spec: str = '') -> Tuple[str, str]:
+    def extract_brand_item(self, query_name: str, existing_spec: str = '') -> tuple[str, str]:
         q_low = query_name.lower().strip()
 
         m_gerieben = re.match(r'^geriebene[rnse]?\s+(.+)$', q_low)
@@ -639,7 +641,7 @@ class NLUParsingEngine:
         tok = token.lower().strip()
         return any(k == tok or k.startswith(tok + ' ') for k in self.brand_map.keys()) or tok in self.unambiguous_brand_categories or tok in ['cola', 'fanta', 'sprite', 'spezi', 'bier', 'wasser']
 
-    def is_brand_extension(self, words: List[str], i: int) -> Tuple[int, str]:
+    def is_brand_extension(self, words: list[str], i: int) -> tuple[int, str]:
         w_low = words[i].lower().strip()
 
         if i + 4 < len(words):
@@ -692,7 +694,7 @@ class NLUParsingEngine:
 
         return 0, ""
 
-    def is_multiword_pair(self, w1: str, w2: str, catalog_names: List[str]) -> bool:
+    def is_multiword_pair(self, w1: str, w2: str, catalog_names: list[str]) -> bool:
         low1, low2 = w1.lower().strip(), w2.lower().strip()
         full_space = f"{low1} {low2}"
         full_compound = f"{low1}{low2}"
@@ -726,7 +728,7 @@ class NLUParsingEngine:
 
         return False
 
-    def split_compound_of_known_items(self, word: str, catalog_names: List[str]) -> List[str]:
+    def split_compound_of_known_items(self, word: str, catalog_names: list[str]) -> list[str]:
         w_low = word.lower().strip()
         for cat in catalog_names:
             clow = cat.lower()
@@ -749,7 +751,7 @@ class NLUParsingEngine:
                         return [cat1, cat2]
         return [word]
 
-    def smart_split_consecutive(self, text: str, catalog_names: List[str]) -> List[str]:
+    def smart_split_consecutive(self, text: str, catalog_names: list[str]) -> list[str]:
         t = text.strip()
         words = t.split()
         if len(words) <= 1:
@@ -839,7 +841,7 @@ class NLUParsingEngine:
 
         return results
 
-    def match_catalog_name(self, query_name: str, catalog_names: List[str]) -> str:
+    def match_catalog_name(self, query_name: str, catalog_names: list[str]) -> str:
         q_clean = query_name.strip()
         q_low = q_clean.lower()
         q_compound = q_low.replace(" ", "")
@@ -875,7 +877,7 @@ class NLUParsingEngine:
         res_words = [w.capitalize() for w in words]
         return " ".join(res_words)
 
-    def is_valid_grocery_item(self, name: str, catalog_names: List[str]) -> bool:
+    def is_valid_grocery_item(self, name: str, catalog_names: list[str]) -> bool:
         n_clean = name.strip()
         n_low = n_clean.lower()
         if not n_clean or len(n_clean) < 2:
@@ -895,7 +897,7 @@ class NLUParsingEngine:
             return False
         return True
 
-    def resolve_icon_and_section(self, item_name: str, catalog_sections: Dict[str, Any] = None) -> Tuple[Optional[str], Optional[str]]:
+    def resolve_icon_and_section(self, item_name: str, catalog_sections: dict[str, Any] | None = None) -> tuple[str | None, str | None]:
         """Resolve the most suitable Bring! catalog icon and category section for an item."""
         if not item_name:
             return None, None
@@ -986,7 +988,7 @@ class NLUParsingEngine:
 
         return None, None
 
-    def parse_items(self, raw_text: str, catalog_names: List[str]) -> List[Dict[str, str]]:
+    def parse_items(self, raw_text: str, catalog_names: list[str]) -> list[dict[str, str]]:
         if not raw_text or not isinstance(raw_text, str):
             return []
 
@@ -1105,4 +1107,6 @@ def detect_operation(raw_text: str) -> str:
     for w in delete_words:
         if w in low:
             return 'TO_RECENTLY'
+    if ('hak' in low or 'hake' in low) and ('ab' in low or 'weg' in low):
+        return 'TO_RECENTLY'
     return 'TO_PURCHASE'
