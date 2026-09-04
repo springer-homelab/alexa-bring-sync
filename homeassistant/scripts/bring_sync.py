@@ -836,6 +836,72 @@ def decompose_grain_style(q_low, existing_spec=''):
             return rest, spec
     return q_low, existing_spec
 
+CAT_HEAD_NOUNS = {
+    'kekse': 'Kekse', 'keks': 'Kekse', 'cookies': 'Kekse', 'cookie': 'Kekse',
+    'joghurt': 'Joghurt', 'joghurts': 'Joghurt',
+    'milch': 'Milch',
+    'butter': 'Butter',
+    'brot': 'Brot', 'brote': 'Brot',
+    'brötchen': 'Brötchen', 'broetchen': 'Brötchen', 'semmeln': 'Brötchen', 'wecken': 'Brötchen',
+    'mehl': 'Mehl',
+    'nudeln': 'Nudeln', 'spaghetti': 'Spaghetti', 'penne': 'Penne',
+    'käse': 'Käse', 'kase': 'Käse',
+    'schokolade': 'Schokolade',
+    'chips': 'Chips',
+    'saft': 'Saft', 'säfte': 'Saft', 'saefte': 'Saft',
+    'tee': 'Tee', 'tees': 'Tee',
+    'öl': 'Öl', 'oel': 'Öl', 'speiseöl': 'Öl', 'speiseoel': 'Öl',
+    'marmelade': 'Marmelade', 'konfitüre': 'Marmelade', 'konfituere': 'Marmelade',
+    'müsli': 'Müsli', 'muesli': 'Müsli',
+    'essig': 'Essig',
+    'senf': 'Senf',
+    'ketchup': 'Ketchup',
+    'quark': 'Quark',
+    'sahne': 'Sahne',
+    'reis': 'Reis',
+    'fleisch': 'Fleisch',
+    'wurst': 'Wurst', 'würstchen': 'Würstchen', 'wuerstchen': 'Würstchen',
+    'schinken': 'Schinken',
+    'suppe': 'Suppe', 'suppen': 'Suppe',
+    'sauce': 'Sauce', 'soße': 'Sauce', 'sosse': 'Sauce',
+    'eis': 'Eis', 'speiseeis': 'Eis'
+}
+
+COMPOUND_PROTECTED_ITEMS = {
+    'kräuterbutter', 'kraeuterbutter', 'frischkäse', 'frischkase', 'tomatenmark',
+    'hackfleisch', 'kochschinken', 'bratwurst', 'currywurst', 'leberwurst',
+    'apfelsaft', 'orangensaft', 'olivenöl', 'olivenoel', 'sauerkraut', 'rotkohl',
+    'kartoffelsalat', 'nudelsalat', 'eiersalat', 'fleischsalat', 'backpulver',
+    'vanillezucker', 'puderzucker', 'roggenbrot', 'vollkornbrot', 'toastbrot'
+}
+
+def decompose_compound_item(word, existing_spec=''):
+    """
+    Zerlegt deutsche Komposita (z. B. 'Nutellakekse' -> 'Kekse' 🍪, Spec: 'Nutella',
+    'Erdbeerjoghurt' -> 'Joghurt' 🍦, Spec: 'Erdbeere', 'Knoblauchbutter' -> 'Butter' 🧈, Spec: 'Knoblauch').
+    Schützt echte Katalog-Artikel wie 'Kräuterbutter', 'Frischkäse' und 'Tomatenmark'.
+    """
+    w_low = word.lower().strip()
+    if w_low in COMPOUND_PROTECTED_ITEMS or ' ' in w_low:
+        return word, existing_spec
+
+    for suffix, target_cat in sorted(CAT_HEAD_NOUNS.items(), key=lambda x: len(x[0]), reverse=True):
+        if w_low.endswith(suffix) and len(w_low) > len(suffix) + 2:
+            prefix = w_low[:-len(suffix)].strip()
+            if prefix.endswith('en') and len(prefix) > 4:
+                prefix_clean = prefix[:-1]
+            elif prefix.endswith('s') and len(prefix) > 4:
+                prefix_clean = prefix[:-1]
+            else:
+                prefix_clean = prefix
+
+            brand_match = BRAND_MAP.get(prefix) or BRAND_MAP.get(prefix_clean)
+            spec_add = brand_match if brand_match else prefix_clean.capitalize()
+            spec = f"{existing_spec} {spec_add}".strip() if existing_spec else spec_add
+            return target_cat, spec
+
+    return word, existing_spec
+
 def extract_brand_item(query_name, existing_spec=''):
     """
     Trennt Markennamen und Sorten dynamisch ab und mappt kanonische Begriffe,
@@ -916,6 +982,11 @@ def extract_brand_item(query_name, existing_spec=''):
     if decomp_rest != n_low:
         cap_name = " ".join([w.capitalize() for w in decomp_rest.split()])
         return cap_name, decomp_spec
+
+    # 7. Deutsche Komposita-Dekomposition (z. B. 'Nutellakekse' -> 'Kekse' 🍪, Spec: 'Nutella')
+    comp_name, comp_spec = decompose_compound_item(n_low, cur_spec)
+    if comp_name.lower() != n_low:
+        return comp_name, comp_spec
 
     return cur_name, cur_spec
 
@@ -1087,6 +1158,8 @@ def split_compound_of_known_items(word, catalog_names):
         c1_low = cat1.lower()
         if len(c1_low) >= 3 and w_low.startswith(c1_low):
             remainder = w_low[len(c1_low):].strip()
+            if remainder in CAT_HEAD_NOUNS:
+                return [word]
             for cat2 in catalog_names:
                 c2_low = cat2.lower()
                 if remainder == c2_low:
@@ -1435,11 +1508,61 @@ def get_cached_catalog(auth, list_uuid):
     except Exception:
         return []
 
+def beautify_active_bring_items(auth, list_uuid, raw_purchase, catalog_names):
+    """
+    Überprüft aktive Artikel auf der Bring!-Liste.
+    Falls ein Artikel kein offizielles Bring!-Icon hat (z. B. manuell eingetippte 'Nutellakekse'),
+    aber durch die Komposita- und Markenlogik zerlegt werden kann (z. B. zu 'Kekse' mit Spec 'Nutella'),
+    wird der Artikel auf Bring! automatisch durch die schöne Variante mit Icon ersetzt.
+    """
+    beautified_changes = []
+    for item in raw_purchase:
+        item_id = item.get('itemId') or item.get('name') or ''
+        item_spec = item.get('specification') or ''
+        if not item_id:
+            continue
+
+        if item_id in catalog_names:
+            continue
+
+        new_name, new_spec = extract_brand_item(item_id, item_spec)
+        if new_name != item_id and is_valid_grocery_item(new_name, catalog_names):
+            beautified_changes.append({
+                'accuracy': '0.0', 'altitude': '0.0', 'latitude': '0.0', 'longitude': '0.0',
+                'itemId': item_id, 'spec': item_spec, 'operation': 'TO_RECENTLY'
+            })
+            beautified_changes.append({
+                'accuracy': '0.0', 'altitude': '0.0', 'latitude': '0.0', 'longitude': '0.0',
+                'itemId': new_name, 'spec': new_spec, 'operation': 'TO_PURCHASE'
+            })
+            item['itemId'] = new_name
+            item['name'] = new_name
+            item['specification'] = new_spec
+
+    if beautified_changes:
+        headers = {
+            'Authorization': f"{auth['token_type']} {auth['access_token']}",
+            'X-BRING-API-KEY': API_KEY,
+            'X-BRING-CLIENT': CLIENT,
+            'X-BRING-APPLICATION': APPLICATION,
+            'X-BRING-COUNTRY': COUNTRY,
+            'X-BRING-USER-UUID': auth['uuid'],
+            'X-BRING-PUBLIC-USER-UUID': auth['publicUuid'],
+            'Content-Type': 'application/json'
+        }
+        payload = json.dumps({'changes': beautified_changes, 'sender': ''}).encode('utf-8')
+        url = f"{API_BASE}/v2/bringlists/{list_uuid}/items"
+        req = urllib.request.Request(url, data=payload, headers=headers, method='PUT')
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                pass
+        except Exception:
+            pass
+
 def fetch_active_bring_items():
     """
-    Holt alle aktiven Einkaufsartikel von Bring! und speichert sie als JSON-Array in .bring_active.json.
-    Dient als Datenquelle für den Home Assistant Sensor sensor.bring_active_items.
-    Inklusive automatischer Token-Erneuerung bei 401 Unauthorized.
+    Fragt aktive 'purchase'-Artikel über Bring! REST-API v2 ab, normalisiert & beautified sie
+    und speichert das Ergebnis lokal in bring_active_items.json.
     """
     try:
         email, password, list_name = get_credentials()
@@ -1474,6 +1597,9 @@ def fetch_active_bring_items():
                 raise
 
         raw_purchase = data.get('purchase') or (data.get('items', {}).get('purchase') if isinstance(data.get('items'), dict) else []) or []
+        catalog_names = get_cached_catalog(auth, list_uuid)
+        beautify_active_bring_items(auth, list_uuid, raw_purchase, catalog_names)
+
         items = []
         for item in raw_purchase:
             name = item.get('name') or item.get('itemId')
