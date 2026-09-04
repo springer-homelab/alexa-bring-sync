@@ -127,7 +127,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 has_shopping_intent = (
                     'einkaufsliste' in raw or 'einkaufszettel' in raw or 'bring liste' in raw or 'bringliste' in raw
                     or 'auf die liste' in raw or 'auf den zettel' in raw or 'von der liste' in raw or 'von dem zettel' in raw or 'von meiner liste' in raw
-                    or raw.startswith(('setze ', 'setz ', 'packe ', 'pack ', 'schreibe ', 'schreib ', 'füge ', 'füg ', 'lösche ', 'lösch ', 'entferne ', 'entfern ', 'streiche ', 'streich ', 'kaufe ', 'kauf ', 'wir brauchen noch ', 'wir benötigen noch '))
+                    or 'abhaken' in raw or 'abgehakt' in raw or 'erledigt' in raw
+                    or raw.startswith(('setze ', 'setz ', 'packe ', 'pack ', 'schreibe ', 'schreib ', 'füge ', 'füg ', 'hake ', 'hak ', 'lösche ', 'lösch ', 'entferne ', 'entfern ', 'streiche ', 'streich ', 'kaufe ', 'kauf ', 'wir brauchen noch ', 'wir benötigen noch '))
                 )
                 
                 if not is_question and has_shopping_intent:

@@ -294,8 +294,8 @@ class BringAPI:
 
         chunks = []
         for k, v in payload.items():
-            chunks.append(f'--{b_id}\r\nContent-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode('latin1'))
-        chunks.append(f'--{b_id}--\r\n'.encode('latin1'))
+            chunks.append(f'--{b_id}\r\nContent-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode('utf-8'))
+        chunks.append(f'--{b_id}--\r\n'.encode('utf-8'))
         body_bytes = b"".join(chunks)
 
         headers = self._get_headers()
