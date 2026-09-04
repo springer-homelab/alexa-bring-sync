@@ -279,45 +279,6 @@ class NLUParsingEngine:
         
         self.brand_pairs = {k for k in self.brand_map.keys() if ' ' in k}
 
-    async def async_update_vocab(self, session: aiohttp.ClientSession, cache_dir: str):
-        """Fetch updated vocab from GitHub if cache is older than 24 hours."""
-        cache_file = os.path.join(cache_dir, "bring_vocab_cache.json")
-        
-        # Check cache age
-        if os.path.exists(cache_file):
-            file_age = time.time() - os.path.getmtime(cache_file)
-            if file_age < CACHE_EXPIRY_SECONDS:
-                _LOGGER.debug("Vocab cache is fresh enough. Loading from cache.")
-                try:
-                    with open(cache_file, 'r', encoding='utf-8') as f:
-                        cached_vocab = json.load(f)
-                    self.__init__(cached_vocab)
-                    return
-                except Exception as e:
-                    _LOGGER.warning("Could not read vocab cache: %s", str(e))
-        
-        # Fetch from GitHub
-        _LOGGER.info("Fetching updated Bring! vocab from GitHub OTA...")
-        try:
-            async with session.get(OTA_VOCAB_URL) as resp:
-                if resp.status == 200:
-                    new_vocab = await resp.json(content_type=None)
-                    if new_vocab and isinstance(new_vocab, dict):
-                        # Save to cache
-                        os.makedirs(os.path.dirname(cache_file), exist_ok=True)
-                        with open(cache_file, 'w', encoding='utf-8') as f:
-                            json.dump(new_vocab, f, ensure_ascii=False)
-                        # Reinitialize self with new vocab
-                        self.__init__(new_vocab)
-                        _LOGGER.info("Successfully updated Bring! vocab OTA.")
-                    else:
-                        _LOGGER.warning("Invalid JSON structure fetched from OTA.")
-                else:
-                    _LOGGER.warning("Failed to fetch vocab OTA (HTTP %s). Using defaults.", resp.status)
-        except Exception as e:
-            _LOGGER.warning("Error fetching vocab OTA: %s. Using defaults.", str(e))
-
-        
         self.units_list = [
             'kg', 'kilo', 'kilogramm', 'g', 'gramm', 'l', 'liter', 'ml', 'milliliter', 'cl', 'dl',
             'qm', 'quadratmeter', 'meter', 'm', 'zentimeter', 'centimeter', 'cm', 'millimeter', 'mm', 'zoll',
@@ -370,6 +331,44 @@ class NLUParsingEngine:
         self.known_grain_nouns = {
             'spaghetti', 'nudeln', 'penne', 'brot', 'toast', 'mehl', 'reis', 'grieß', 'haferflocken', 'brötchen', 'kekse', 'waffeln', 'teig', 'wraps'
         }
+
+    async def async_update_vocab(self, session, cache_dir: str):
+        """Fetch updated vocab from GitHub if cache is older than 24 hours."""
+        cache_file = os.path.join(cache_dir, "bring_vocab_cache.json")
+        
+        # Check cache age
+        if os.path.exists(cache_file):
+            file_age = time.time() - os.path.getmtime(cache_file)
+            if file_age < CACHE_EXPIRY_SECONDS:
+                _LOGGER.debug("Vocab cache is fresh enough. Loading from cache.")
+                try:
+                    with open(cache_file, 'r', encoding='utf-8') as f:
+                        cached_vocab = json.load(f)
+                    self.__init__(cached_vocab)
+                    return
+                except Exception as e:
+                    _LOGGER.warning("Could not read vocab cache: %s", str(e))
+        
+        # Fetch from GitHub
+        _LOGGER.info("Fetching updated Bring! vocab from GitHub OTA...")
+        try:
+            async with session.get(OTA_VOCAB_URL) as resp:
+                if resp.status == 200:
+                    new_vocab = await resp.json(content_type=None)
+                    if new_vocab and isinstance(new_vocab, dict):
+                        # Save to cache
+                        os.makedirs(os.path.dirname(cache_file), exist_ok=True)
+                        with open(cache_file, 'w', encoding='utf-8') as f:
+                            json.dump(new_vocab, f, ensure_ascii=False)
+                        # Reinitialize self with new vocab
+                        self.__init__(new_vocab)
+                        _LOGGER.info("Successfully updated Bring! vocab OTA.")
+                    else:
+                        _LOGGER.warning("Invalid JSON structure fetched from OTA.")
+                else:
+                    _LOGGER.warning("Failed to fetch vocab OTA (HTTP %s). Using defaults.", resp.status)
+        except Exception as e:
+            _LOGGER.warning("Error fetching vocab OTA: %s. Using defaults.", str(e))
 
     def _stem_german(self, word: str) -> str:
         w = word.lower().strip()
