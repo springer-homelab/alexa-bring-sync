@@ -9,18 +9,23 @@
     "asiatischen",
     "asiatischer",
     "bio",
+    "blanchiert",
     "braune",
     "braunen",
     "brauner",
     "braunes",
+    "brut",
     "dunkle",
     "dunklen",
     "dunkler",
     "dunkles",
+    "entsteint",
+    "extrafein",
     "feine",
     "feinen",
     "feiner",
     "feines",
+    "feinherb",
     "fettarm",
     "fettarme",
     "fettarmen",
@@ -39,6 +44,8 @@
     "gehackten",
     "gehackter",
     "gehacktes",
+    "gehobelt",
+    "gemahlen",
     "gemischte",
     "gemischten",
     "gemischter",
@@ -47,6 +54,9 @@
     "geriebenen",
     "geriebener",
     "geriebenes",
+    "geräuchert",
+    "gesalzen",
+    "geschält",
     "getrocknete",
     "getrockneten",
     "getrockneter",
@@ -67,10 +77,12 @@
     "grünen",
     "grüner",
     "grünes",
+    "halbtrocken",
     "helle",
     "hellen",
     "heller",
     "helles",
+    "herb",
     "italienische",
     "italienischen",
     "italienischer",
@@ -80,6 +92,8 @@
     "kaltgepressten",
     "kaltgepresster",
     "kaltgepresstes",
+    "kernlos",
+    "klar",
     "koffeinfrei",
     "koffeinfreie",
     "koffeinfreien",
@@ -89,15 +103,18 @@
     "laktosefreie",
     "laktosefreien",
     "laktosefreies",
+    "lieblich",
     "milde",
     "milden",
     "milder",
     "mildes",
+    "mittelscharf",
     "nativ",
     "native",
     "nativen",
     "nativer",
     "natives",
+    "naturtrüb",
     "passierte",
     "passierten",
     "passierter",
@@ -139,6 +156,9 @@
     "tiefgekühlten",
     "tiefgekühlter",
     "tiefgekühltes",
+    "trocken",
+    "ungesalzen",
+    "ungeschält",
     "vegan",
     "vegane",
     "veganen",
@@ -686,7 +706,42 @@
     "oral b": "Oral-B",
     "gillette": "Gillette",
     "wilkinson": "Wilkinson",
-    "pampers": "Pampers"
+    "pampers": "Pampers",
+    "gösser": "Gösser",
+    "chiemseer": "Chiemseer",
+    "bayreuther": "Bayreuther",
+    "stiegl": "Stiegl",
+    "dr pepper": "Dr Pepper",
+    "dr. pepper": "Dr Pepper",
+    "almdudler": "Almdudler",
+    "holy energy": "Holy Energy",
+    "kong strong": "Kong Strong",
+    "yfood": "Yfood",
+    "vly": "Vly",
+    "beyond meat": "Beyond Meat",
+    "likemeat": "LikeMeat",
+    "greenforce": "Greenforce",
+    "rügenwalder": "Rügenwalder",
+    "ruegenwalder": "Rügenwalder",
+    "merci": "Merci",
+    "skittles": "Skittles",
+    "maltesers": "Maltesers",
+    "celebrations": "Celebrations",
+    "doritos": "Doritos",
+    "lays": "Lay's",
+    "pom-bär": "Pom-Bär",
+    "pombär": "Pom-Bär",
+    "crunchips": "Crunchips",
+    "gut & günstig": "Gut & Günstig",
+    "gut und günstig": "Gut & Günstig",
+    "k-classic": "K-Classic",
+    "milbona": "Milbona",
+    "dmbio": "dmBio",
+    "balea": "Balea",
+    "denkmit": "Denkmit",
+    "domol": "Domol",
+    "alesto": "Alesto",
+    "ja!": "ja!"
   },
   "unambiguous_brand_categories": {
     "augustiner": [
@@ -1204,6 +1259,150 @@
     "gillette": [
       "Rasierklingen",
       "Gillette"
+    ],
+    "gösser": [
+      "Bier",
+      "Gösser Radler"
+    ],
+    "gösser radler": [
+      "Bier",
+      "Gösser Radler"
+    ],
+    "chiemseer": [
+      "Bier",
+      "Chiemseer"
+    ],
+    "bayreuther": [
+      "Bier",
+      "Bayreuther"
+    ],
+    "stiegl": [
+      "Bier",
+      "Stiegl"
+    ],
+    "kellerbier": [
+      "Bier",
+      "Kellerbier"
+    ],
+    "radler": [
+      "Bier",
+      "Radler"
+    ],
+    "dr pepper": [
+      "Cola",
+      "Dr Pepper"
+    ],
+    "dr. pepper": [
+      "Cola",
+      "Dr Pepper"
+    ],
+    "almdudler": [
+      "Limonade",
+      "Almdudler"
+    ],
+    "reign": [
+      "Energy Drink",
+      "Reign"
+    ],
+    "kong strong": [
+      "Energy Drink",
+      "Kong Strong"
+    ],
+    "holy energy": [
+      "Energy Drink",
+      "Holy Energy"
+    ],
+    "yfood": [
+      "Milch",
+      "Yfood"
+    ],
+    "alpro": [
+      "Hafermilch",
+      "Alpro"
+    ],
+    "vly": [
+      "Hafermilch",
+      "Vly"
+    ],
+    "beyond meat": [
+      "Fleisch",
+      "Beyond Meat"
+    ],
+    "likemeat": [
+      "Fleisch",
+      "LikeMeat"
+    ],
+    "greenforce": [
+      "Fleisch",
+      "Greenforce"
+    ],
+    "rügenwalder": [
+      "Wurst",
+      "Rügenwalder"
+    ],
+    "ruegenwalder": [
+      "Wurst",
+      "Rügenwalder"
+    ],
+    "merci": [
+      "Schokolade",
+      "Merci"
+    ],
+    "werthers echte": [
+      "Bonbons",
+      "Werther's Original"
+    ],
+    "werther's original": [
+      "Bonbons",
+      "Werther's Original"
+    ],
+    "skittles": [
+      "Bonbons",
+      "Skittles"
+    ],
+    "maltesers": [
+      "Schokolade",
+      "Maltesers"
+    ],
+    "celebrations": [
+      "Pralinen",
+      "Celebrations"
+    ],
+    "doritos": [
+      "Chips",
+      "Doritos"
+    ],
+    "lays": [
+      "Chips",
+      "Lay's"
+    ],
+    "lay's": [
+      "Chips",
+      "Lay's"
+    ],
+    "pom-bär": [
+      "Chips",
+      "Pom-Bär"
+    ],
+    "pombär": [
+      "Chips",
+      "Pom-Bär"
+    ],
+    "crunchips": [
+      "Chips",
+      "Crunchips"
+    ],
+    "frosch": [
+      "Spülmittel",
+      "Frosch"
+    ],
+    "denkmit": [
+      "Reinigungsmittel",
+      "Denkmit"
+    ],
+    "domol": [
+      "Reinigungsmittel",
+      "Domol"
     ]
   },
   "bring_canonical_synonyms": {
@@ -1286,6 +1485,270 @@
     "schmand": [
       "Sauerrahm",
       ""
+    ],
+    "semmeln": [
+      "Brötchen",
+      ""
+    ],
+    "semmel": [
+      "Brötchen",
+      ""
+    ],
+    "schrippen": [
+      "Brötchen",
+      ""
+    ],
+    "schrippe": [
+      "Brötchen",
+      ""
+    ],
+    "wecken": [
+      "Brötchen",
+      ""
+    ],
+    "rundstücke": [
+      "Brötchen",
+      ""
+    ],
+    "topfen": [
+      "Quark",
+      ""
+    ],
+    "magerquark": [
+      "Quark",
+      "Mager"
+    ],
+    "speisequark": [
+      "Quark",
+      ""
+    ],
+    "kräuterquark": [
+      "Quark",
+      "Kräuter"
+    ],
+    "schlagobers": [
+      "Sahne",
+      ""
+    ],
+    "obers": [
+      "Sahne",
+      ""
+    ],
+    "haferdrink": [
+      "Hafermilch",
+      ""
+    ],
+    "sojadrink": [
+      "Sojamilch",
+      ""
+    ],
+    "mandeldrink": [
+      "Mandelmilch",
+      ""
+    ],
+    "reisdrink": [
+      "Reismilch",
+      ""
+    ],
+    "kokosdrink": [
+      "Kokosmilch",
+      ""
+    ],
+    "faschiertes": [
+      "Hackfleisch",
+      ""
+    ],
+    "gehacktes": [
+      "Hackfleisch",
+      ""
+    ],
+    "karfiol": [
+      "Blumenkohl",
+      ""
+    ],
+    "paradeiser": [
+      "Tomaten",
+      ""
+    ],
+    "kukuruz": [
+      "Mais",
+      ""
+    ],
+    "erdäpfel": [
+      "Kartoffeln",
+      ""
+    ],
+    "erdaepfel": [
+      "Kartoffeln",
+      ""
+    ],
+    "vogerlsalat": [
+      "Feldsalat",
+      ""
+    ],
+    "möhren": [
+      "Karotten",
+      ""
+    ],
+    "moehren": [
+      "Karotten",
+      ""
+    ],
+    "mohrrüben": [
+      "Karotten",
+      ""
+    ],
+    "gelbe rüben": [
+      "Karotten",
+      ""
+    ],
+    "blaukraut": [
+      "Rotkohl",
+      ""
+    ],
+    "rotkraut": [
+      "Rotkohl",
+      ""
+    ],
+    "champignons": [
+      "Pilze",
+      "Champignons"
+    ],
+    "braune champignons": [
+      "Pilze",
+      "Champignons braun"
+    ],
+    "sprudelwasser": [
+      "Mineralwasser",
+      "Sprudel"
+    ],
+    "stilles wasser": [
+      "Wasser",
+      "still"
+    ],
+    "sprudel": [
+      "Mineralwasser",
+      ""
+    ],
+    "mineralwasser": [
+      "Wasser",
+      "mit Kohlensäure"
+    ],
+    "klopapier": [
+      "Toilettenpapier",
+      ""
+    ],
+    "kloopapier": [
+      "Toilettenpapier",
+      ""
+    ],
+    "wc papier": [
+      "Toilettenpapier",
+      ""
+    ],
+    "wc-papier": [
+      "Toilettenpapier",
+      ""
+    ],
+    "küchenrolle": [
+      "Küchenrollen",
+      ""
+    ],
+    "küchentücher": [
+      "Küchenrollen",
+      ""
+    ],
+    "kuechenrolle": [
+      "Küchenrollen",
+      ""
+    ],
+    "haushaltsrolle": [
+      "Küchenrollen",
+      ""
+    ],
+    "haushaltstücher": [
+      "Küchenrollen",
+      ""
+    ],
+    "taschentücher": [
+      "Taschentücher",
+      ""
+    ],
+    "taschentuecher": [
+      "Taschentücher",
+      ""
+    ],
+    "papiertaschentücher": [
+      "Taschentücher",
+      ""
+    ],
+    "spülmittel": [
+      "Spülmittel",
+      ""
+    ],
+    "spüli": [
+      "Spülmittel",
+      ""
+    ],
+    "geschirrspülmittel": [
+      "Spülmittel",
+      ""
+    ],
+    "spülitabs": [
+      "Geschirrtabs",
+      ""
+    ],
+    "spuelmaschinentabs": [
+      "Geschirrtabs",
+      ""
+    ],
+    "klarspüler": [
+      "Klarspüler",
+      ""
+    ],
+    "spülmaschinensalz": [
+      "Regeneriersalz",
+      ""
+    ],
+    "regeneriersalz": [
+      "Regeneriersalz",
+      ""
+    ],
+    "alufolie": [
+      "Alufolie",
+      ""
+    ],
+    "frischhaltefolie": [
+      "Frischhaltefolie",
+      ""
+    ],
+    "backpapier": [
+      "Backpapier",
+      ""
+    ],
+    "backin": [
+      "Backpulver",
+      ""
+    ],
+    "vanillin": [
+      "Vanillezucker",
+      ""
+    ],
+    "speisestärke": [
+      "Stärke",
+      ""
+    ],
+    "mondamin": [
+      "Stärke",
+      ""
+    ],
+    "puderzucker": [
+      "Puderzucker",
+      ""
+    ],
+    "staubzucker": [
+      "Puderzucker",
+      ""
     ]
   },
   "cat_head_nouns": {
@@ -1342,7 +1805,15 @@
     "soße": "Sauce",
     "sosse": "Sauce",
     "eis": "Eis",
-    "speiseeis": "Eis"
+    "speiseeis": "Eis",
+    "toilettenpapier": "Toilettenpapier",
+    "taschentücher": "Taschentücher",
+    "küchenrollen": "Küchenrollen",
+    "zahnpasta": "Zahnpasta",
+    "shampoo": "Shampoo",
+    "duschgel": "Duschgel",
+    "spülmittel": "Spülmittel",
+    "waschmittel": "Waschmittel"
   },
   "compound_protected_items": [
     "apfelsaft",
