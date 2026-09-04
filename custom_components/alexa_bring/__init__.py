@@ -1,5 +1,6 @@
 """The Alexa-Bring! Sync integration."""
 import logging
+import time
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
@@ -104,6 +105,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # 1. Alexa Voice Sniffer
     if media_players:
+        last_processed = {"summary": "", "time": 0.0}
+
         async def alexa_state_changed_listener(event: Event):
             new_state = event.data.get("new_state")
             old_state = event.data.get("old_state")
@@ -129,6 +132,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 
                 if not is_question and has_shopping_intent:
                     summary = new_state.attributes.get("last_called_summary", "").replace('"', '').replace("'", "")
+                    now = time.time()
+                    if summary.lower() == last_processed["summary"] and (now - last_processed["time"]) < 3.0:
+                        return
+                    last_processed["summary"] = summary.lower()
+                    last_processed["time"] = now
+
                     _LOGGER.info("Intercepted Alexa shopping intent: %s", summary)
                     # Trigger sync
                     hass.async_create_task(

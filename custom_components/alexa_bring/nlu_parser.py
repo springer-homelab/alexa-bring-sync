@@ -1097,7 +1097,11 @@ class NLUParsingEngine:
 def detect_operation(raw_text: str) -> str:
     """Detect if items should be added or removed."""
     low = raw_text.lower()
-    delete_words = ['lösch', 'lösche', 'entfern', 'entferne', 'streich', 'streiche', 'nimm', 'runter', 'weg', 'löschen', 'entfernen', 'streichen']
+    delete_words = [
+        'lösch', 'lösche', 'entfern', 'entferne', 'streich', 'streiche',
+        'nimm', 'runter', 'weg', 'löschen', 'entfernen', 'streichen',
+        'abhak', 'abgehakt', 'erledigt', 'gekauft'
+    ]
     for w in delete_words:
         if w in low:
             return 'TO_RECENTLY'

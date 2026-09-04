@@ -3,6 +3,7 @@ secrets.yaml
 .env
 bring_auth_cache.json
 bring_catalog_cache.json
+bring_catalog_sections_cache.json
 bring_vocab_cache.json
 .storage/
 

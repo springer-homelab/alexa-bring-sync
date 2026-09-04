@@ -16,13 +16,15 @@
   *„Alexa, setze 2 Bananen, Hafermilch und Nutellakekse auf die Einkaufsliste“*
 * 🧠 **Fortschrittliche NLU (Natural Language Understanding):**
   * **Mengenerkennung:** Erkennt Zahlen, Brüche und Einheiten (*„ein halbes Kilo Mehl“*, *„2 Packungen Butter“*) und trennt sie sauber in Mengenspezifikationen ab.
-  * **Automatisches Compound-Splitting:** Trennt zusammengesetzte Nomen wie *„Nutellakekse“* ➔ Name: *„Kekse“*, Spezifikation: *„Nutella“*, damit Bring! immer das richtige Symbol/Icon zuordnet.
-  * **Markenerkennung & Normalisierung:** Erkennt Marken (*„Paulaner Spezi“*, *„Coca Cola Zero“*, *„Gustavo Gusto“*) und weiß, ob es sich um ein eigenständiges Produkt oder eine Variante handelt.
-  * **Deutscher Lemmatizer:** Plural- und Grammatikformen werden automatisch auf die Bring!-Katalogform abgebildet (*„rote Tomaten“* ➔ *„Tomaten“* mit Spezifikation *„rot“*).
+  * **Native Symbol- & Warengruppenzuweisung:** Weist Artikeln wie *„Nutellakekse“* oder *„Dosenwurst“* vollautomatisch das passende Bring!-Katalogicon (z.B. Keks 🍪 oder Wurst 🥫) und die richtige Warengruppe zu, ohne den echten Namen zu verändern.
+  * **100 % Kollisionsfrei:** Beliebig viele Sorten derselben Kategorie (z.B. *„Nutellakekse“* UND *„Haferkekse“*) stehen gleichzeitig und friedlich nebeneinander auf der Liste, ohne sich gegenseitig zu überschreiben.
+  * **Intelligente Spezifikationen:** Erkennt Marken und Sorten bei Basiskatalog-Artikeln (*„Gustavo Gusto Pizza“* ➔ **Pizza** mit Spezifikation *Gustavo Gusto*, *„Vollkorntoast“* ➔ **Toast** mit Spezifikation *Vollkorn*).
+  * **Markenerkennung & Normalisierung:** Erkennt Marken (*„Paulaner Spezi“*, *„Coca Cola Zero“*, *„Alpro“*, *„Gösser“*) und ordnet sie sofort dem passenden Symbol zu.
+  * **Deutscher Lemmatizer & Dialekt-Support:** Pluralformen, österreichische/schweizerische Dialektwörter (*„Semmeln“*, *„Topfen“*, *„Schlagobers“*, *„Faschiertes“*, *„Karfiol“*) werden nahtlos verstanden.
 * 🔄 **Amazon Todo 1-Way Mirror:**  
   Hält die interne Amazon Alexa Todo-Liste synchron mit Bring!, sodass beide Listen immer denselben Stand zeigen.
-* 📦 **Auto-Beautifier:**  
-  Auch wenn du unterwegs Einträge per Hand in der Bring!-App tippst, erkennt die Integration diese und formatiert sie sauber auf den Standardkatalog um.
+* 📦 **Auto-Kategorisierung im Hintergrund:**  
+  Auch wenn du unterwegs Einträge per Hand in der Bring!-App tippst, erkennt die Integration diese und weist im Hintergrund automatisch das passende Bring!-Icon und die Warengruppe zu.
 * 🌐 **Over-The-Air (OTA) Lexikon-Updates:**  
   Das Lebensmittel- und Markenlexikon wird im Hintergrund automatisch alle 24 Stunden von GitHub aktualisiert – ganz ohne Neustart oder HACS-Update.
 * 🖥️ **100 % UI-Konfiguration (Config Flow & Options Flow):**  
