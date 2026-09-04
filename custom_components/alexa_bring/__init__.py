@@ -56,6 +56,40 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "listeners": []
     }
 
+    # Clean up obsolete/orphaned legacy entities from previous YAML setup
+    try:
+        from homeassistant.helpers import entity_registry as er
+        ent_reg = er.async_get(hass)
+
+        # 1. Purge obsolete command_line sensor
+        old_cmd = ent_reg.async_get("sensor.bring_active_items")
+        if old_cmd and old_cmd.platform == "command_line":
+            _LOGGER.info("Purging orphaned command_line sensor.bring_active_items")
+            ent_reg.async_remove("sensor.bring_active_items")
+
+        # 2. Purge obsolete legacy YAML automations & input_texts
+        for old_id in [
+            "automation.alexa_bring_sprach_sniffer_echtzeit",
+            "automation.bring_alexa_amazon_liste_nach_einkauf_leeren",
+            "automation.bring_amazon_listen_spiegelung_echtzeit",
+            "automation.bring_alexa_gerauschlose_listen_synchronisation_http",
+            "automation.bring_amazon_1_way_mirror_reconciler",
+            "input_text.bring_synced_items",
+            "input_text.bring_last_processed_command",
+            "input_text.bring_last_called_timestamp",
+        ]:
+            if ent_reg.async_get(old_id):
+                _LOGGER.info("Purging orphaned legacy entity %s", old_id)
+                ent_reg.async_remove(old_id)
+
+        # 3. Rename alexa_bring sensor_2 back to clean sensor.bring_active_items
+        our_ent = ent_reg.async_get("sensor.bring_active_items_2")
+        if our_ent and our_ent.platform == DOMAIN:
+            _LOGGER.info("Renaming sensor.bring_active_items_2 -> sensor.bring_active_items")
+            ent_reg.async_update_entity("sensor.bring_active_items_2", new_entity_id="sensor.bring_active_items")
+    except Exception as err:
+        _LOGGER.warning("Entity registry migration notice: %s", err)
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     async def handle_sync_spoken_text(call: ServiceCall):

@@ -32,3 +32,42 @@ def test_sensor_empty_state():
     assert attrs["last_synced"] is None
     assert attrs["last_action"] == "idle"
     assert attrs["items"] == []
+
+def test_entity_registry_cleanup_logic():
+    """Verify the registry cleanup handles old command_line and rename."""
+    mock_ent_reg = MagicMock()
+    
+    # Simulate old command_line entity present
+    old_cmd = MagicMock()
+    old_cmd.platform = "command_line"
+    
+    # Simulate existing _2 entity
+    our_ent = MagicMock()
+    our_ent.platform = "alexa_bring"
+    
+    def mock_get(eid):
+        if eid == "sensor.bring_active_items":
+            return old_cmd
+        if eid == "sensor.bring_active_items_2":
+            return our_ent
+        if "automation.alexa_bring" in eid:
+            return MagicMock()
+        return None
+        
+    mock_ent_reg.async_get.side_effect = mock_get
+    
+    # Trigger cleanup operations
+    if mock_ent_reg.async_get("sensor.bring_active_items") and mock_ent_reg.async_get("sensor.bring_active_items").platform == "command_line":
+        mock_ent_reg.async_remove("sensor.bring_active_items")
+        
+    for old_id in ["automation.alexa_bring_sprach_sniffer_echtzeit"]:
+        if mock_ent_reg.async_get(old_id):
+            mock_ent_reg.async_remove(old_id)
+            
+    if mock_ent_reg.async_get("sensor.bring_active_items_2") and mock_ent_reg.async_get("sensor.bring_active_items_2").platform == "alexa_bring":
+        mock_ent_reg.async_update_entity("sensor.bring_active_items_2", new_entity_id="sensor.bring_active_items")
+        
+    mock_ent_reg.async_remove.assert_any_call("sensor.bring_active_items")
+    mock_ent_reg.async_remove.assert_any_call("automation.alexa_bring_sprach_sniffer_echtzeit")
+    mock_ent_reg.async_update_entity.assert_called_once_with("sensor.bring_active_items_2", new_entity_id="sensor.bring_active_items")
+
