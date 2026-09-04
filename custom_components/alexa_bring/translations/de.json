@@ -1,0 +1,43 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Mit Bring! verbinden",
+        "description": "Gib deine Bring! Zugangsdaten ein.",
+        "data": {
+          "email": "E-Mail Adresse",
+          "password": "Passwort",
+          "list_name": "Listen-Name (z.B. Einkaufsliste)"
+        }
+      },
+      "devices": {
+        "title": "Geräte auswählen",
+        "description": "Wähle die Amazon Echos aus, die abgehört werden sollen, und die Amazon Todo-Liste für die Synchronisation.",
+        "data": {
+          "media_players": "Echo Geräte (Media Players)",
+          "todo_list": "Amazon Todo Liste"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung fehlgeschlagen. Bitte prüfe die Internetverbindung oder den Listen-Namen.",
+      "invalid_auth": "Ungültige E-Mail oder Passwort.",
+      "unknown": "Unerwarteter Fehler"
+    },
+    "abort": {
+      "single_instance_allowed": "Bereits konfiguriert. Es ist nur eine einzige Konfiguration möglich."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Geräte konfigurieren",
+        "description": "Aktualisiere die überwachten Amazon Echos und die Todo-Liste.",
+        "data": {
+          "media_players": "Echo Geräte (Media Players)",
+          "todo_list": "Amazon Todo Liste"
+        }
+      }
+    }
+  }
+}

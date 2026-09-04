@@ -1,0 +1,1375 @@
+{
+  "grocery_adjectives": [
+    "alkoholfrei",
+    "alkoholfreie",
+    "alkoholfreien",
+    "alkoholfreier",
+    "alkoholfreies",
+    "asiatische",
+    "asiatischen",
+    "asiatischer",
+    "bio",
+    "braune",
+    "braunen",
+    "brauner",
+    "braunes",
+    "dunkle",
+    "dunklen",
+    "dunkler",
+    "dunkles",
+    "feine",
+    "feinen",
+    "feiner",
+    "feines",
+    "fettarm",
+    "fettarme",
+    "fettarmen",
+    "fettarmer",
+    "fettarmes",
+    "freiland",
+    "frische",
+    "frischen",
+    "frischer",
+    "frisches",
+    "gefrorene",
+    "gefrorenen",
+    "gefrorener",
+    "gefrorenes",
+    "gehackte",
+    "gehackten",
+    "gehackter",
+    "gehacktes",
+    "gemischte",
+    "gemischten",
+    "gemischter",
+    "gemischtes",
+    "geriebene",
+    "geriebenen",
+    "geriebener",
+    "geriebenes",
+    "getrocknete",
+    "getrockneten",
+    "getrockneter",
+    "getrocknetes",
+    "glutenfrei",
+    "glutenfreie",
+    "glutenfreien",
+    "glutenfreies",
+    "griechische",
+    "griechischen",
+    "griechischer",
+    "griechisches",
+    "grobe",
+    "groben",
+    "grober",
+    "grobes",
+    "grüne",
+    "grünen",
+    "grüner",
+    "grünes",
+    "helle",
+    "hellen",
+    "heller",
+    "helles",
+    "italienische",
+    "italienischen",
+    "italienischer",
+    "italienisches",
+    "kaltgepresst",
+    "kaltgepresste",
+    "kaltgepressten",
+    "kaltgepresster",
+    "kaltgepresstes",
+    "koffeinfrei",
+    "koffeinfreie",
+    "koffeinfreien",
+    "koffeinfreier",
+    "koffeinfreies",
+    "laktosefrei",
+    "laktosefreie",
+    "laktosefreien",
+    "laktosefreies",
+    "milde",
+    "milden",
+    "milder",
+    "mildes",
+    "nativ",
+    "native",
+    "nativen",
+    "nativer",
+    "natives",
+    "passierte",
+    "passierten",
+    "passierter",
+    "passiertes",
+    "pflanzlich",
+    "pflanzliche",
+    "pflanzlichen",
+    "pflanzlicher",
+    "pflanzliches",
+    "regional",
+    "regionale",
+    "regionalen",
+    "regionales",
+    "rote",
+    "roten",
+    "roter",
+    "rotes",
+    "saure",
+    "sauren",
+    "saurer",
+    "saures",
+    "scharfe",
+    "scharfen",
+    "scharfer",
+    "scharfes",
+    "schwarze",
+    "schwarzen",
+    "schwarzer",
+    "schwarzes",
+    "stille",
+    "stillen",
+    "stiller",
+    "stilles",
+    "süße",
+    "süßen",
+    "süßer",
+    "süßes",
+    "tiefgekühlte",
+    "tiefgekühlten",
+    "tiefgekühlter",
+    "tiefgekühltes",
+    "vegan",
+    "vegane",
+    "veganen",
+    "veganer",
+    "veganes",
+    "vegetarisch",
+    "vegetarische",
+    "vegetarischen",
+    "vegetarischer",
+    "vegetarisches",
+    "weiße",
+    "weißen",
+    "weißer",
+    "weißes",
+    "wiener",
+    "zuckerfrei",
+    "zuckerfreie",
+    "zuckerfreien",
+    "zuckerfreier",
+    "zuckerfreies"
+  ],
+  "compound_prefixes": [
+    "alu",
+    "apfel",
+    "back",
+    "balsamico",
+    "blaubeer",
+    "brat",
+    "cashew",
+    "chili",
+    "dinkel",
+    "erdbeer",
+    "erdnuss",
+    "fenchel",
+    "fisch",
+    "frisch",
+    "frischhalte",
+    "garnelen",
+    "geflügel",
+    "gefrier",
+    "gewürz",
+    "hafer",
+    "hart",
+    "haselnuss",
+    "heidelbeer",
+    "himbeer",
+    "hähnchen",
+    "hühner",
+    "hütten",
+    "kakao",
+    "kakaopulver",
+    "kalbs",
+    "kamillen",
+    "kirsch",
+    "klo",
+    "knoblauch",
+    "koch",
+    "kokos",
+    "kräuter",
+    "küchen",
+    "lachs",
+    "lamm",
+    "mager",
+    "mais",
+    "mandel",
+    "mineral",
+    "multi",
+    "multivitamin",
+    "müll",
+    "oliven",
+    "orangen",
+    "pfefferminz",
+    "puder",
+    "puten",
+    "putz",
+    "raps",
+    "rinder",
+    "rispen",
+    "roggen",
+    "schafs",
+    "schoko",
+    "schweine",
+    "soja",
+    "sonnenblumen",
+    "spül",
+    "spülmaschinen",
+    "stauden",
+    "strauch",
+    "suppen",
+    "thunfisch",
+    "tiefkühl",
+    "tk",
+    "toiletten",
+    "trauben",
+    "trocken",
+    "truthahn",
+    "vanille",
+    "voll",
+    "vollmilch",
+    "walnuss",
+    "wasch",
+    "weich",
+    "weizen",
+    "zartbitter",
+    "ziegen",
+    "zitronen"
+  ],
+  "dependent_suffixes": [
+    "aufschnitt",
+    "beutel",
+    "filet",
+    "flocken",
+    "folie",
+    "geschnetzeltes",
+    "hackfleisch",
+    "kotelett",
+    "papier",
+    "paste",
+    "pulver",
+    "rollen",
+    "schnitzel",
+    "stäbchen",
+    "tabs"
+  ],
+  "valid_base_compounds": [
+    "alufolie",
+    "aufbackbrötchen",
+    "backpapier",
+    "backpulver",
+    "bergkäse",
+    "bockwurst",
+    "bratwurst",
+    "currypaste",
+    "currywurst",
+    "eiersalat",
+    "fencheltee",
+    "feta käse",
+    "fetakäse",
+    "fleischwurst",
+    "frisch käse",
+    "frischhaltefolie",
+    "frischkäse",
+    "fruchtjoghurt",
+    "gurkensalat",
+    "hafermilch",
+    "hartkäse",
+    "heumilch",
+    "kaffeesahne",
+    "kamillentee",
+    "kartoffelsalat",
+    "kirschtomaten",
+    "kochschinken",
+    "kokosmilch",
+    "kräuterquark",
+    "käseaufschnitt",
+    "küchenrollen",
+    "leberwurst",
+    "mandelmilch",
+    "mettwurst",
+    "müllbeutel",
+    "naturjoghurt",
+    "nudelsalat",
+    "pfefferminztee",
+    "puderzucker",
+    "roggenbrot",
+    "salatgurke",
+    "salatgurken",
+    "sauresahne",
+    "schlagsahne",
+    "schmelzkäse",
+    "sojamilch",
+    "speisequark",
+    "staudensellerie",
+    "teewurst",
+    "thunfischsalat",
+    "toastbrot",
+    "toilettenpapier",
+    "tomatenmark",
+    "vanillezucker",
+    "vollkornbrot",
+    "vollmilch",
+    "weichkäse",
+    "weißbrot",
+    "wurstaufschnitt"
+  ],
+  "foreign_terms": [
+    "balsamico essig",
+    "barbecue sauce",
+    "basmati reis",
+    "bbq sauce",
+    "ben & jerrys",
+    "ben and jerrys",
+    "blend a med",
+    "blend-a-med",
+    "chai latte",
+    "chicken nuggets",
+    "chicken wings",
+    "club mate",
+    "coca cola",
+    "coca-cola",
+    "coke zero",
+    "cold brew",
+    "coppenrath & wiese",
+    "coppenrath und wiese",
+    "cream cheese",
+    "creme fraiche",
+    "crème fraîche",
+    "curry paste",
+    "dr oetker",
+    "dr. oetker",
+    "ferrero rocher",
+    "french dressing",
+    "fritz kola",
+    "fritz limo",
+    "fritz-kola",
+    "funny frisch",
+    "funny-frisch",
+    "fuze tea",
+    "garam masala",
+    "ginger ale",
+    "grana padano",
+    "gustavo gusto",
+    "haagen dazs",
+    "head & shoulders",
+    "head and shoulders",
+    "hohes c",
+    "hot dog",
+    "iberico schinken",
+    "ice tea",
+    "jasmin reis",
+    "kinder bueno",
+    "kinder country",
+    "kinder joy",
+    "kinder maxi king",
+    "kinder pingui",
+    "kinder riegel",
+    "maple syrup",
+    "mie nudeln",
+    "milch schnitte",
+    "mini babybel",
+    "mio mio",
+    "mio mio mate",
+    "mon cheri",
+    "mon chéri",
+    "monster energy",
+    "nacho chips",
+    "oral b",
+    "oral-b",
+    "oro di parma",
+    "parmigiano reggiano",
+    "paulaner spezi",
+    "peanut butter",
+    "pecorino romano",
+    "pepsi max",
+    "pesto genovese",
+    "pesto rosso",
+    "pollo fino",
+    "prosciutto di parma",
+    "pulled pork",
+    "ramen nudeln",
+    "red bull",
+    "ritter sport",
+    "salsa dip",
+    "salsa verde",
+    "san pellegrino",
+    "serrano schinken",
+    "sour cream",
+    "sriracha sauce",
+    "sushi reis",
+    "sweet chili",
+    "sweet chili sauce",
+    "sweet sour",
+    "taco shells",
+    "teriyaki sauce",
+    "tikka masala",
+    "tonic water",
+    "tortilla chips",
+    "true fruits",
+    "udon nudeln",
+    "yogi tea"
+  ],
+  "standalone_products": {
+    "coca cola zero": "Coca-Cola Zero",
+    "coca-cola zero": "Coca-Cola Zero",
+    "coke zero": "Coke Zero",
+    "pepsi max": "Pepsi Max",
+    "paulaner spezi": "Paulaner Spezi",
+    "red bull": "Red Bull",
+    "monster energy": "Monster Energy",
+    "fritz kola": "Fritz-Kola",
+    "fritz-kola": "Fritz-Kola",
+    "club mate": "Club-Mate",
+    "mio mio mate": "Mio Mio Mate",
+    "kinder bueno": "Kinder Bueno",
+    "kinder riegel": "Kinder Riegel",
+    "kinder country": "Kinder Country",
+    "kinder pingui": "Kinder Pingui",
+    "kinder maxi king": "Kinder Maxi King",
+    "kinder joy": "Kinder Joy",
+    "kinder schokolade": "Kinder Schokolade",
+    "ferrero rocher": "Ferrero Rocher",
+    "mon cheri": "Mon Chéri",
+    "mon chéri": "Mon Chéri",
+    "ritter sport": "Ritter Sport",
+    "funny frisch": "Funny-Frisch",
+    "funny-frisch": "Funny-Frisch",
+    "mini babybel": "Mini Babybel"
+  },
+  "brand_map": {
+    "coca cola": "Coca-Cola",
+    "coca-cola": "Coca-Cola",
+    "coke zero": "Coke Zero",
+    "coca cola zero": "Coca-Cola Zero",
+    "pepsi max": "Pepsi Max",
+    "pepsi": "Pepsi",
+    "fanta": "Fanta",
+    "sprite": "Sprite",
+    "mezzo mix": "Mezzo Mix",
+    "schwip schwap": "Schwip Schwap",
+    "paulaner spezi": "Paulaner Spezi",
+    "spezi": "Spezi",
+    "bionade": "Bionade",
+    "fritz kola": "Fritz-Kola",
+    "fritz-kola": "Fritz-Kola",
+    "fritz limo": "Fritz Limo",
+    "club mate": "Club-Mate",
+    "mio mio": "Mio Mio",
+    "mio mio mate": "Mio Mio Mate",
+    "red bull": "Red Bull",
+    "monster energy": "Monster Energy",
+    "monster": "Monster",
+    "rockstar": "Rockstar",
+    "effect": "Effect",
+    "fuze tea": "Fuze Tea",
+    "lipton": "Lipton",
+    "arizona": "AriZona",
+    "gerolsteiner": "Gerolsteiner",
+    "volvic": "Volvic",
+    "vittel": "Vittel",
+    "evian": "Evian",
+    "san pellegrino": "San Pellegrino",
+    "adelholzener": "Adelholzener",
+    "rhönsprudel": "RhönSprudel",
+    "apollinaris": "Apollinaris",
+    "black forest": "Black Forest",
+    "hohes c": "Hohes C",
+    "granini": "Granini",
+    "valensina": "Valensina",
+    "pfanner": "Pfanner",
+    "amecke": "Amecke",
+    "innocent": "Innocent",
+    "true fruits": "True Fruits",
+    "rauch": "Rauch",
+    "krombacher": "Krombacher",
+    "bitburger": "Bitburger",
+    "warsteiner": "Warsteiner",
+    "becks": "Beck's",
+    "beck's": "Beck's",
+    "paulaner": "Paulaner",
+    "erdinger": "Erdinger",
+    "franziskaner": "Franziskaner",
+    "augustiner": "Augustiner",
+    "tegernseer": "Tegernseer",
+    "rothaus": "Rothaus",
+    "heineken": "Heineken",
+    "corona": "Corona",
+    "desperados": "Desperados",
+    "astra": "Astra",
+    "jever": "Jever",
+    "veltins": "Veltins",
+    "hasseröder": "Hasseröder",
+    "oettinger": "Oettinger",
+    "schöfferhofer": "Schöfferhofer",
+    "guinness": "Guinness",
+    "flensburger": "Flensburger",
+    "tchibo": "Tchibo",
+    "jacobs": "Jacobs",
+    "dallmayr": "Dallmayr",
+    "lavazza": "Lavazza",
+    "segafredo": "Segafredo",
+    "melitta": "Melitta",
+    "nespresso": "Nespresso",
+    "senseo": "Senseo",
+    "dolce gusto": "Dolce Gusto",
+    "teekanne": "Teekanne",
+    "messmer": "Meßmer",
+    "meßmer": "Meßmer",
+    "yogi tea": "Yogi Tea",
+    "kaba": "Kaba",
+    "nesquik": "Nesquik",
+    "ovomaltine": "Ovomaltine",
+    "oatly": "Oatly",
+    "alpro": "Alpro",
+    "bärenmarke": "Bärenmarke",
+    "weihenstephan": "Weihenstephan",
+    "landliebe": "Landliebe",
+    "müllermilch": "Müllermilch",
+    "gustavo gusto": "Gustavo Gusto",
+    "gusto gustavo": "Gustavo Gusto",
+    "dr oetker": "Dr. Oetker",
+    "dr. oetker": "Dr. Oetker",
+    "doktor oetker": "Dr. Oetker",
+    "wagner": "Wagner",
+    "original wagner": "Original Wagner",
+    "frosta": "Frosta",
+    "iglo": "Iglo",
+    "mccain": "McCain",
+    "coppenrath & wiese": "Coppenrath & Wiese",
+    "coppenrath und wiese": "Coppenrath & Wiese",
+    "ben and jerrys": "Ben & Jerry's",
+    "ben und jerrys": "Ben & Jerry's",
+    "ben & jerrys": "Ben & Jerry's",
+    "haagen dazs": "Häagen-Dazs",
+    "häagen dazs": "Häagen-Dazs",
+    "magnum": "Magnum",
+    "cornetto": "Cornetto",
+    "langnese": "Langnese",
+    "ritter sport": "Ritter Sport",
+    "milka": "Milka",
+    "lindt": "Lindt",
+    "ferrero rocher": "Ferrero Rocher",
+    "mon cheri": "Mon Chéri",
+    "mon chéri": "Mon Chéri",
+    "kinder bueno": "Kinder Bueno",
+    "kinder riegel": "Kinder Riegel",
+    "kinder country": "Kinder Country",
+    "kinder pingui": "Kinder Pingui",
+    "kinder maxi king": "Kinder Maxi King",
+    "kinder schokolade": "Kinder Schokolade",
+    "kinder joy": "Kinder Joy",
+    "raffaello": "Raffaello",
+    "giotto": "Giotto",
+    "giottos": "Giotto",
+    "nutella": "Nutella",
+    "duplo": "Duplo",
+    "hanuta": "Hanuta",
+    "toffifee": "Toffifee",
+    "knoppers": "Knoppers",
+    "haribo": "Haribo",
+    "katjes": "Katjes",
+    "trolli": "Trolli",
+    "nimm 2": "Nimm 2",
+    "chio": "Chio",
+    "funny frisch": "Funny-Frisch",
+    "funny-frisch": "Funny-Frisch",
+    "pringles": "Pringles",
+    "lorenz": "Lorenz",
+    "ültje": "Ültje",
+    "ueltje": "Ültje",
+    "leibniz": "Leibniz",
+    "bahlsen": "Bahlsen",
+    "prinzenrolle": "Prinzenrolle",
+    "prinzen rolle": "Prinzenrolle",
+    "oreo": "Oreo",
+    "kitkat": "KitKat",
+    "kit kat": "KitKat",
+    "twix": "Twix",
+    "snickers": "Snickers",
+    "mars": "Mars",
+    "bounty": "Bounty",
+    "milky way": "Milky Way",
+    "m&ms": "M&Ms",
+    "m&m": "M&Ms",
+    "milch schnitte": "Milchschnitte",
+    "milchschnitte": "Milchschnitte",
+    "philadelphia": "Philadelphia",
+    "almette": "Almette",
+    "miree": "Miree",
+    "bresso": "Bresso",
+    "exquisa": "Exquisa",
+    "brunch": "Brunch",
+    "kerrygold": "Kerrygold",
+    "rama": "Rama",
+    "becel": "Becel",
+    "meggle": "Meggle",
+    "lätta": "Lätta",
+    "laetta": "Lätta",
+    "leerdammer": "Leerdammer",
+    "babybel": "Babybel",
+    "mini babybel": "Mini Babybel",
+    "kiri": "Kiri",
+    "zott": "Zott",
+    "zottarella": "Zottarella",
+    "monte": "Monte",
+    "ehrmann": "Ehrmann",
+    "grand dessert": "Grand Dessert",
+    "danone": "Danone",
+    "activia": "Activia",
+    "actimel": "Actimel",
+    "fruchtzwerge": "Fruchtzwerge",
+    "froop": "Froop",
+    "barilla": "Barilla",
+    "de cecco": "De Cecco",
+    "buitoni": "Buitoni",
+    "miracoli": "Mirácoli",
+    "mirácoli": "Mirácoli",
+    "maggi": "Maggi",
+    "knorr": "Knorr",
+    "thomy": "Thomy",
+    "heinz": "Heinz",
+    "kraft": "Kraft",
+    "kühne": "Kühne",
+    "hengstenberg": "Hengstenberg",
+    "bonduelle": "Bonduelle",
+    "erasco": "Erasco",
+    "birkel": "Birkel",
+    "mutti": "Mutti",
+    "oro di parma": "Oro di Parma",
+    "saupiquet": "Saupiquet",
+    "appel": "Appel",
+    "tempo": "Tempo",
+    "zewa": "Zewa",
+    "hakle": "Hakle",
+    "ariel": "Ariel",
+    "persil": "Persil",
+    "spee": "Spee",
+    "lenor": "Lenor",
+    "perwoll": "Perwoll",
+    "frosch": "Frosch",
+    "pril": "Pril",
+    "fairy": "Fairy",
+    "somat": "Somat",
+    "finish": "Finish",
+    "calgon": "Calgon",
+    "meister proper": "Meister Proper",
+    "bref": "Bref",
+    "cillit bang": "Cillit Bang",
+    "domestos": "Domestos",
+    "viss": "Viss",
+    "sagrotan": "Sagrotan",
+    "nivea": "Nivea",
+    "dove": "Dove",
+    "palmolive": "Palmolive",
+    "garnier": "Garnier",
+    "head & shoulders": "Head & Shoulders",
+    "head and shoulders": "Head & Shoulders",
+    "schauma": "Schauma",
+    "colgate": "Colgate",
+    "blend-a-med": "Blend-a-med",
+    "blend a med": "Blend-a-med",
+    "sensodyne": "Sensodyne",
+    "elmex": "Elmex",
+    "aronal": "Aronal",
+    "oral-b": "Oral-B",
+    "oral b": "Oral-B",
+    "gillette": "Gillette",
+    "wilkinson": "Wilkinson",
+    "pampers": "Pampers"
+  },
+  "unambiguous_brand_categories": {
+    "augustiner": [
+      "Bier",
+      "Augustiner"
+    ],
+    "krombacher": [
+      "Bier",
+      "Krombacher"
+    ],
+    "bitburger": [
+      "Bier",
+      "Bitburger"
+    ],
+    "warsteiner": [
+      "Bier",
+      "Warsteiner"
+    ],
+    "becks": [
+      "Bier",
+      "Beck's"
+    ],
+    "beck's": [
+      "Bier",
+      "Beck's"
+    ],
+    "erdinger": [
+      "Bier",
+      "Erdinger"
+    ],
+    "franziskaner": [
+      "Bier",
+      "Franziskaner"
+    ],
+    "tegernseer": [
+      "Bier",
+      "Tegernseer"
+    ],
+    "rothaus": [
+      "Bier",
+      "Rothaus"
+    ],
+    "heineken": [
+      "Bier",
+      "Heineken"
+    ],
+    "corona": [
+      "Bier",
+      "Corona"
+    ],
+    "desperados": [
+      "Bier",
+      "Desperados"
+    ],
+    "astra": [
+      "Bier",
+      "Astra"
+    ],
+    "jever": [
+      "Bier",
+      "Jever"
+    ],
+    "veltins": [
+      "Bier",
+      "Veltins"
+    ],
+    "hasseröder": [
+      "Bier",
+      "Hasseröder"
+    ],
+    "oettinger": [
+      "Bier",
+      "Oettinger"
+    ],
+    "schöfferhofer": [
+      "Bier",
+      "Schöfferhofer"
+    ],
+    "flensburger": [
+      "Bier",
+      "Flensburger"
+    ],
+    "guinness": [
+      "Bier",
+      "Guinness"
+    ],
+    "gerolsteiner": [
+      "Mineralwasser",
+      "Gerolsteiner"
+    ],
+    "volvic": [
+      "Wasser",
+      "Volvic"
+    ],
+    "vittel": [
+      "Wasser",
+      "Vittel"
+    ],
+    "evian": [
+      "Wasser",
+      "Evian"
+    ],
+    "san pellegrino": [
+      "Mineralwasser",
+      "San Pellegrino"
+    ],
+    "adelholzener": [
+      "Mineralwasser",
+      "Adelholzener"
+    ],
+    "rhönsprudel": [
+      "Mineralwasser",
+      "RhönSprudel"
+    ],
+    "apollinaris": [
+      "Mineralwasser",
+      "Apollinaris"
+    ],
+    "black forest": [
+      "Wasser",
+      "Black Forest"
+    ],
+    "coca cola": [
+      "Cola",
+      "Coca-Cola"
+    ],
+    "coca-cola": [
+      "Cola",
+      "Coca-Cola"
+    ],
+    "coke zero": [
+      "Cola",
+      "Coke Zero"
+    ],
+    "coca cola zero": [
+      "Cola",
+      "Coca-Cola Zero"
+    ],
+    "pepsi": [
+      "Cola",
+      "Pepsi"
+    ],
+    "pepsi max": [
+      "Cola",
+      "Pepsi Max"
+    ],
+    "fanta": [
+      "Limonade",
+      "Fanta"
+    ],
+    "sprite": [
+      "Limonade",
+      "Sprite"
+    ],
+    "mezzo mix": [
+      "Spezi",
+      "Mezzo Mix"
+    ],
+    "schwip schwap": [
+      "Spezi",
+      "Schwip Schwap"
+    ],
+    "paulaner spezi": [
+      "Spezi",
+      "Paulaner Spezi"
+    ],
+    "bionade": [
+      "Limonade",
+      "Bionade"
+    ],
+    "fritz kola": [
+      "Cola",
+      "Fritz-Kola"
+    ],
+    "fritz-kola": [
+      "Cola",
+      "Fritz-Kola"
+    ],
+    "fritz limo": [
+      "Limonade",
+      "Fritz Limo"
+    ],
+    "club mate": [
+      "Eistee",
+      "Club-Mate"
+    ],
+    "mio mio mate": [
+      "Eistee",
+      "Mio Mio Mate"
+    ],
+    "red bull": [
+      "Energy Drink",
+      "Red Bull"
+    ],
+    "monster energy": [
+      "Energy Drink",
+      "Monster Energy"
+    ],
+    "monster": [
+      "Energy Drink",
+      "Monster"
+    ],
+    "rockstar": [
+      "Energy Drink",
+      "Rockstar"
+    ],
+    "effect": [
+      "Energy Drink",
+      "Effect"
+    ],
+    "hohes c": [
+      "Saft",
+      "Hohes C"
+    ],
+    "granini": [
+      "Saft",
+      "Granini"
+    ],
+    "valensina": [
+      "Saft",
+      "Valensina"
+    ],
+    "amecke": [
+      "Saft",
+      "Amecke"
+    ],
+    "innocent": [
+      "Smoothie",
+      "Innocent"
+    ],
+    "true fruits": [
+      "Smoothie",
+      "True Fruits"
+    ],
+    "lavazza": [
+      "Kaffee",
+      "Lavazza"
+    ],
+    "dallmayr": [
+      "Kaffee",
+      "Dallmayr"
+    ],
+    "melitta": [
+      "Kaffee",
+      "Melitta"
+    ],
+    "tchibo": [
+      "Kaffee",
+      "Tchibo"
+    ],
+    "segafredo": [
+      "Kaffee",
+      "Segafredo"
+    ],
+    "nespresso": [
+      "Kaffeekapseln",
+      "Nespresso"
+    ],
+    "senseo": [
+      "Kaffeepads",
+      "Senseo"
+    ],
+    "dolce gusto": [
+      "Kaffeekapseln",
+      "Dolce Gusto"
+    ],
+    "teekanne": [
+      "Tee",
+      "Teekanne"
+    ],
+    "messmer": [
+      "Tee",
+      "Meßmer"
+    ],
+    "meßmer": [
+      "Tee",
+      "Meßmer"
+    ],
+    "yogi tea": [
+      "Tee",
+      "Yogi Tea"
+    ],
+    "oatly": [
+      "Hafermilch",
+      "Oatly"
+    ],
+    "ritter sport": [
+      "Schokolade",
+      "Ritter Sport"
+    ],
+    "milka": [
+      "Schokolade",
+      "Milka"
+    ],
+    "lindt": [
+      "Schokolade",
+      "Lindt"
+    ],
+    "ferrero rocher": [
+      "Pralinen",
+      "Ferrero Rocher"
+    ],
+    "mon cheri": [
+      "Pralinen",
+      "Mon Chéri"
+    ],
+    "mon chéri": [
+      "Pralinen",
+      "Mon Chéri"
+    ],
+    "kinder bueno": [
+      "Schokoriegel",
+      "Kinder Bueno"
+    ],
+    "kinder riegel": [
+      "Schokoriegel",
+      "Kinder Riegel"
+    ],
+    "kinder country": [
+      "Schokoriegel",
+      "Kinder Country"
+    ],
+    "kinder pingui": [
+      "Milchschnitte",
+      "Kinder Pingui"
+    ],
+    "kinder maxi king": [
+      "Milchschnitte",
+      "Kinder Maxi King"
+    ],
+    "kinder schokolade": [
+      "Schokolade",
+      "Kinder Schokolade"
+    ],
+    "raffaello": [
+      "Pralinen",
+      "Raffaello"
+    ],
+    "giotto": [
+      "Pralinen",
+      "Giotto"
+    ],
+    "nutella": [
+      "Nutella",
+      ""
+    ],
+    "duplo": [
+      "Schokoriegel",
+      "Duplo"
+    ],
+    "hanuta": [
+      "Waffeln",
+      "Hanuta"
+    ],
+    "toffifee": [
+      "Pralinen",
+      "Toffifee"
+    ],
+    "knoppers": [
+      "Waffeln",
+      "Knoppers"
+    ],
+    "haribo": [
+      "Gummibärchen",
+      "Haribo"
+    ],
+    "katjes": [
+      "Gummibärchen",
+      "Katjes"
+    ],
+    "trolli": [
+      "Gummibärchen",
+      "Trolli"
+    ],
+    "nimm 2": [
+      "Bonbons",
+      "Nimm 2"
+    ],
+    "pringles": [
+      "Chips",
+      "Pringles"
+    ],
+    "funny frisch": [
+      "Chips",
+      "Funny-Frisch"
+    ],
+    "funny-frisch": [
+      "Chips",
+      "Funny-Frisch"
+    ],
+    "chio": [
+      "Chips",
+      "Chio"
+    ],
+    "prinzenrolle": [
+      "Kekse",
+      "Prinzenrolle"
+    ],
+    "oreo": [
+      "Kekse",
+      "Oreo"
+    ],
+    "kitkat": [
+      "Schokoriegel",
+      "KitKat"
+    ],
+    "twix": [
+      "Schokoriegel",
+      "Twix"
+    ],
+    "snickers": [
+      "Schokoriegel",
+      "Snickers"
+    ],
+    "mars": [
+      "Schokoriegel",
+      "Mars"
+    ],
+    "bounty": [
+      "Schokoriegel",
+      "Bounty"
+    ],
+    "m&ms": [
+      "Schokolinsen",
+      "M&Ms"
+    ],
+    "tempo": [
+      "Taschentücher",
+      "Tempo"
+    ],
+    "zewa": [
+      "Küchenrollen",
+      "Zewa"
+    ],
+    "hakle": [
+      "Toilettenpapier",
+      "Hakle"
+    ],
+    "pampers": [
+      "Windeln",
+      "Pampers"
+    ],
+    "persil": [
+      "Waschmittel",
+      "Persil"
+    ],
+    "ariel": [
+      "Waschmittel",
+      "Ariel"
+    ],
+    "spee": [
+      "Waschmittel",
+      "Spee"
+    ],
+    "perwoll": [
+      "Waschmittel",
+      "Perwoll"
+    ],
+    "lenor": [
+      "Weichspüler",
+      "Lenor"
+    ],
+    "pril": [
+      "Spülmittel",
+      "Pril"
+    ],
+    "fairy": [
+      "Spülmittel",
+      "Fairy"
+    ],
+    "somat": [
+      "Spülmaschinentabs",
+      "Somat"
+    ],
+    "finish": [
+      "Spülmaschinentabs",
+      "Finish"
+    ],
+    "calgon": [
+      "Wasserenthärter",
+      "Calgon"
+    ],
+    "meister proper": [
+      "Allzweckreiniger",
+      "Meister Proper"
+    ],
+    "sagrotan": [
+      "Desinfektionsmittel",
+      "Sagrotan"
+    ],
+    "head & shoulders": [
+      "Shampoo",
+      "Head & Shoulders"
+    ],
+    "schauma": [
+      "Shampoo",
+      "Schauma"
+    ],
+    "colgate": [
+      "Zahnpasta",
+      "Colgate"
+    ],
+    "blend-a-med": [
+      "Zahnpasta",
+      "Blend-a-med"
+    ],
+    "sensodyne": [
+      "Zahnpasta",
+      "Sensodyne"
+    ],
+    "elmex": [
+      "Zahnpasta",
+      "Elmex"
+    ],
+    "gillette": [
+      "Rasierklingen",
+      "Gillette"
+    ]
+  },
+  "bring_canonical_synonyms": {
+    "geriebener käse": [
+      "Käse",
+      "gerieben"
+    ],
+    "geriebener kase": [
+      "Käse",
+      "gerieben"
+    ],
+    "käse gerieben": [
+      "Käse",
+      "gerieben"
+    ],
+    "kase gerieben": [
+      "Käse",
+      "gerieben"
+    ],
+    "streukäse": [
+      "Käse",
+      "gerieben"
+    ],
+    "gratinkäse": [
+      "Käse",
+      "gerieben"
+    ],
+    "geriebener gouda": [
+      "Käse",
+      "Gouda gerieben"
+    ],
+    "geriebener mozzarella": [
+      "Mozzarella",
+      "gerieben"
+    ],
+    "geriebener parmesan": [
+      "Parmesan",
+      "gerieben"
+    ],
+    "toastbrot": [
+      "Toast",
+      ""
+    ],
+    "spülmaschinentabs": [
+      "Geschirrtabs",
+      ""
+    ],
+    "geschirrspültabs": [
+      "Geschirrtabs",
+      ""
+    ],
+    "müllbeutel": [
+      "Müllsäcke",
+      ""
+    ],
+    "mülltüten": [
+      "Müllsäcke",
+      ""
+    ],
+    "paniermehl": [
+      "Semmelbrösel",
+      ""
+    ],
+    "gehackte tomaten": [
+      "Dosentomaten",
+      ""
+    ],
+    "stückige tomaten": [
+      "Dosentomaten",
+      ""
+    ],
+    "pelati": [
+      "Dosentomaten",
+      ""
+    ],
+    "schlagsahne": [
+      "Sahne",
+      ""
+    ],
+    "schmand": [
+      "Sauerrahm",
+      ""
+    ]
+  },
+  "cat_head_nouns": {
+    "kekse": "Kekse",
+    "keks": "Kekse",
+    "cookies": "Kekse",
+    "cookie": "Kekse",
+    "joghurt": "Joghurt",
+    "joghurts": "Joghurt",
+    "milch": "Milch",
+    "butter": "Butter",
+    "brot": "Brot",
+    "brote": "Brot",
+    "brötchen": "Brötchen",
+    "broetchen": "Brötchen",
+    "semmeln": "Brötchen",
+    "wecken": "Brötchen",
+    "mehl": "Mehl",
+    "nudeln": "Nudeln",
+    "spaghetti": "Spaghetti",
+    "penne": "Penne",
+    "käse": "Käse",
+    "kase": "Käse",
+    "schokolade": "Schokolade",
+    "chips": "Chips",
+    "saft": "Saft",
+    "säfte": "Saft",
+    "saefte": "Saft",
+    "tee": "Tee",
+    "tees": "Tee",
+    "öl": "Öl",
+    "oel": "Öl",
+    "speiseöl": "Öl",
+    "speiseoel": "Öl",
+    "marmelade": "Marmelade",
+    "konfitüre": "Marmelade",
+    "konfituere": "Marmelade",
+    "müsli": "Müsli",
+    "muesli": "Müsli",
+    "essig": "Essig",
+    "senf": "Senf",
+    "ketchup": "Ketchup",
+    "quark": "Quark",
+    "sahne": "Sahne",
+    "reis": "Reis",
+    "fleisch": "Fleisch",
+    "wurst": "Wurst",
+    "würstchen": "Würstchen",
+    "wuerstchen": "Würstchen",
+    "schinken": "Schinken",
+    "suppe": "Suppe",
+    "suppen": "Suppe",
+    "sauce": "Sauce",
+    "soße": "Sauce",
+    "sosse": "Sauce",
+    "eis": "Eis",
+    "speiseeis": "Eis"
+  },
+  "compound_protected_items": [
+    "apfelsaft",
+    "backpulver",
+    "bratwurst",
+    "currywurst",
+    "eiersalat",
+    "fleischsalat",
+    "frischkase",
+    "frischkäse",
+    "hackfleisch",
+    "kartoffelsalat",
+    "kochschinken",
+    "kraeuterbutter",
+    "kräuterbutter",
+    "leberwurst",
+    "nudelsalat",
+    "olivenoel",
+    "olivenöl",
+    "orangensaft",
+    "puderzucker",
+    "roggenbrot",
+    "rotkohl",
+    "sauerkraut",
+    "toastbrot",
+    "tomatenmark",
+    "vanillezucker",
+    "vollkornbrot"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Bring!",
+        "description": "Enter your Bring! account details.",
+        "data": {
+          "email": "Email",
+          "password": "Password",
+          "list_name": "List Name (e.g., Einkaufsliste)"
+        }
+      },
+      "devices": {
+        "title": "Select Devices",
+        "description": "Select the Amazon Echo devices to monitor for voice commands, and the Amazon Todo list to sync with.",
+        "data": {
+          "media_players": "Echo Devices (Media Players)",
+          "todo_list": "Amazon Todo List"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect, please check your network or list name.",
+      "invalid_auth": "Invalid authentication credentials.",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "single_instance_allowed": "Already configured. Only a single configuration possible."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure Devices",
+        "description": "Update the Amazon Echo devices and Todo list to sync.",
+        "data": {
+          "media_players": "Echo Devices (Media Players)",
+          "todo_list": "Amazon Todo List"
+        }
+      }
+    }
+  }
+}
