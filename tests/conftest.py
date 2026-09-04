@@ -19,6 +19,10 @@ class MockCoordinatorEntity(MockEntity):
     def __init__(self, coordinator, *args, **kwargs):
         self.coordinator = coordinator
 
+# Mock voluptuous if not installed in lightweight environments
+if "voluptuous" not in sys.modules:
+    sys.modules["voluptuous"] = MagicMock()
+
 # Mock Home Assistant modules so unit tests can run standalone without heavy HA core dependencies
 ha_mock_modules = [
     "homeassistant",
