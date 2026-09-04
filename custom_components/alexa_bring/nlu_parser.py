@@ -763,6 +763,16 @@ class NLUParsingEngine:
         if low in self.foreign_terms or low.replace(" ", "") in self.foreign_terms or low in self.brand_map or low in self.standalone_products:
             return [t]
 
+        for b in self.brand_map.keys():
+            if (low.startswith(b + ' ') and low[len(b)+1:].strip() in [c.lower() for c in catalog_names]) or \
+               (low.endswith(' ' + b) and low[:-len(b)-1].strip() in [c.lower() for c in catalog_names]):
+                return [t]
+
+        for gp in self.grain_style_prefixes:
+            if (low.startswith(gp) and low[len(gp):].strip() in self.known_grain_nouns) or \
+               (low.endswith(gp) and low[:-len(gp)].strip() in self.known_grain_nouns):
+                return [t]
+
         results = []
         i = 0
         while i < len(words):
@@ -1021,6 +1031,43 @@ class NLUParsingEngine:
                 name, spec = self.extract_specification(sub)
                 if not name:
                     continue
+                low_name = name.lower().strip()
+
+                # 1. Grain style prefix + grain noun (e.g. Vollkorntoast, Toast Vollkorn)
+                matched_grain = False
+                for gp in self.grain_style_prefixes:
+                    if low_name.startswith(gp):
+                        rest = low_name[len(gp):].strip()
+                        if rest in self.known_grain_nouns:
+                            name = rest.capitalize()
+                            spec = f"{spec} {gp.capitalize()}".strip() if spec else gp.capitalize()
+                            matched_grain = True
+                            break
+                    elif low_name.endswith(gp):
+                        base = low_name[:-len(gp)].strip()
+                        if base in self.known_grain_nouns:
+                            name = base.capitalize()
+                            spec = f"{spec} {gp.capitalize()}".strip() if spec else gp.capitalize()
+                            matched_grain = True
+                            break
+
+                # 2. Multi-word brand + catalog noun (e.g. Gustavo Gusto Pizza, Pizza Gustavo Gusto)
+                if not matched_grain:
+                    for b in sorted(self.brand_map.keys(), key=len, reverse=True):
+                        b_disp = self.brand_map[b]
+                        if low_name.startswith(b + ' '):
+                            noun = low_name[len(b)+1:].strip()
+                            if noun in [c.lower() for c in catalog_names]:
+                                name = noun.capitalize()
+                                spec = f"{spec} {b_disp}".strip() if spec else b_disp
+                                break
+                        elif low_name.endswith(' ' + b):
+                            noun = low_name[:-len(b)-1].strip()
+                            if noun in [c.lower() for c in catalog_names]:
+                                name = noun.capitalize()
+                                spec = f"{spec} {b_disp}".strip() if spec else b_disp
+                                break
+
                 low_name = name.lower().strip()
                 if low_name in self.bring_canonical_synonyms:
                     canon_name, canon_spec = self.bring_canonical_synonyms[low_name]
