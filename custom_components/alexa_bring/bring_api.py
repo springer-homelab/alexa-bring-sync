@@ -121,7 +121,7 @@ class BringAPI:
         return self.list_uuid
 
     async def get_catalog(self) -> list[str]:
-        """Fetch the list catalog (known items)."""
+        """Fetch the list catalog (standard master items and custom items)."""
         if self.catalog_cache:
             return self.catalog_cache
             
@@ -137,25 +137,36 @@ class BringAPI:
             except Exception:
                 pass
 
-        list_uuid = await self.get_list_uuid()
-        if not list_uuid:
-            return []
-
+        master_items: list[str] = []
         try:
-            url = f"{API_BASE}/v2/bringlists/{list_uuid}/details"
-            async with self.session.get(url, headers=self._get_headers()) as resp:
-                if resp.status == 200:
-                    items = await resp.json()
-                    self.catalog_cache = [i.get('itemId') for i in items if i.get('itemId')]
-                    def _save():
-                        os.makedirs(os.path.dirname(self._catalog_file), exist_ok=True)
-                        with open(self._catalog_file, 'w', encoding='utf-8') as f:
-                            json.dump(self.catalog_cache, f, ensure_ascii=False)
-                    await asyncio.to_thread(_save)
-                    return self.catalog_cache
+            sections = await self.get_catalog_sections()
+            master_items = [v[0] for v in sections.values() if isinstance(v, (list, tuple))]
         except Exception as e:
-            _LOGGER.error("Error fetching catalog: %s", str(e))
-        return []
+            _LOGGER.warning("Could not fetch master catalog items: %s", e)
+
+        custom_items: list[str] = []
+        list_uuid = await self.get_list_uuid()
+        if list_uuid:
+            try:
+                url = f"{API_BASE}/v2/bringlists/{list_uuid}/details"
+                async with self.session.get(url, headers=self._get_headers()) as resp:
+                    if resp.status == 200:
+                        items = await resp.json()
+                        custom_items = [i.get('itemId') for i in items if i.get('itemId')]
+            except Exception as e:
+                _LOGGER.error("Error fetching list details: %s", str(e))
+
+        combined = list(dict.fromkeys(master_items + custom_items))
+        if combined:
+            self.catalog_cache = combined
+            def _save():
+                os.makedirs(os.path.dirname(self._catalog_file), exist_ok=True)
+                with open(self._catalog_file, 'w', encoding='utf-8') as f:
+                    json.dump(self.catalog_cache, f, ensure_ascii=False)
+            await asyncio.to_thread(_save)
+            return self.catalog_cache
+
+        return master_items or custom_items
 
     async def get_active_items(self) -> list[dict[str, str]]:
         """Fetch active (purchase) items from the list."""
@@ -320,4 +331,19 @@ class BringAPI:
         except Exception as e:
             _LOGGER.error("Error saving detail for '%s': %s", item_id, str(e))
             return False
+
+    async def delete_item_detail(self, detail_uuid: str) -> bool:
+        """Delete a custom item detail from Bring! by its UUID."""
+        if not detail_uuid:
+            return False
+        url = f"{API_BASE}/v2/bringlistitemdetails/{detail_uuid}"
+        h = self._get_headers()
+        headers = {k: v for k, v in h.items() if k != 'Content-Type'}
+        try:
+            async with self.session.delete(url, headers=headers) as resp:
+                return resp.status in (200, 204)
+        except Exception as e:
+            _LOGGER.error("Error deleting detail %s: %s", detail_uuid, str(e))
+            return False
+
 

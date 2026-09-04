@@ -93,7 +93,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                         low_name = item_name.strip().lower()
                         if item_name not in catalog and low_name not in details_map:
                             icon, section = nlu_engine.resolve_icon_and_section(item_name, catalog_sections)
-                            if icon:
+                            if icon and icon.lower() != low_name:
                                 hass.async_create_task(api.save_item_detail(item_name, icon, section))
                 await coordinator.async_request_refresh()
             else:

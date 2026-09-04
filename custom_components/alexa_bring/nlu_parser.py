@@ -260,6 +260,7 @@ class NLUParsingEngine:
             'schlagobers': ('Sahne', ''), 'marillen': ('Aprikosen', ''), 'marille': ('Aprikosen', ''),
             'champignons': ('Pilze', ''), 'schwämme': ('Pilze', ''), 'schwammerl': ('Pilze', ''),
             'semmeln': ('Brötchen', ''), 'semmel': ('Brötchen', ''),
+            'pommes': ('Pommes Frites', ''),
             'klopapier': ('Toilettenpapier', '')
         })
         
@@ -945,7 +946,7 @@ class NLUParsingEngine:
             'fleisch': 'Fleisch & Fisch', 'wurst': 'Fleisch & Fisch', 'fisch': 'Fleisch & Fisch',
             'schinken': 'Fleisch & Fisch', 'hackfleisch': 'Fleisch & Fisch',
             'brot': 'Brot & Gebäck', 'brötchen': 'Brot & Gebäck', 'toast': 'Brot & Gebäck',
-            'pizza': 'Fertig- & Tiefkühlprodukte', 'pommes': 'Fertig- & Tiefkühlprodukte',
+            'pizza': 'Fertig- & Tiefkühlprodukte', 'pommes': 'Fertig- & Tiefkühlprodukte', 'pommes frites': 'Fertig- & Tiefkühlprodukte',
             'nudeln': 'Getreideprodukte', 'reis': 'Getreideprodukte', 'spaghetti': 'Getreideprodukte',
             'mehl': 'Zutaten & Gewürze', 'öl': 'Zutaten & Gewürze', 'essig': 'Zutaten & Gewürze',
             'gewürze': 'Zutaten & Gewürze', 'kräuter': 'Obst & Gemüse', 'salat': 'Obst & Gemüse',

@@ -49,7 +49,7 @@ class BringDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 # If item is not in catalog and has no detail yet, assign one
                 if item_name not in catalog and low_name not in details_map:
                     icon, section = self.nlu_engine.resolve_icon_and_section(item_name, catalog_sections)
-                    if icon:
+                    if icon and icon.lower() != low_name:
                         _LOGGER.info("Auto-assigning Bring! detail to '%s': icon='%s', section='%s'", item_name, icon, section)
                         await self.api.save_item_detail(item_name, icon, section)
 
