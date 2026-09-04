@@ -2,6 +2,7 @@
 import logging
 import json
 import os
+import asyncio
 import aiohttp
 from typing import Dict, Any, List, Optional
 
@@ -44,24 +45,25 @@ class BringAPI:
         """Authenticate with Bring! API."""
         if os.path.exists(self._cache_file):
             try:
-                with open(self._cache_file, 'r', encoding='utf-8') as f:
-                    self.auth_data = json.load(f)
-                    if self.auth_data.get('access_token'):
-                        return True
+                def _load():
+                    with open(self._cache_file, 'r', encoding='utf-8') as f:
+                        return json.load(f)
+                cached = await asyncio.to_thread(_load)
+                if cached and cached.get('access_token'):
+                    self.auth_data = cached
+                    return True
             except Exception:
                 pass
 
-        payload = f"email={self.email}&password={self.password}"
         headers = {
             'X-BRING-API-KEY': API_KEY,
             'X-BRING-CLIENT': CLIENT,
             'X-BRING-APPLICATION': APPLICATION,
             'X-BRING-COUNTRY': COUNTRY,
-            'Content-Type': 'application/x-www-form-urlencoded'
         }
         
         try:
-            async with self.session.post(f"{API_BASE}/v2/bringauth", data=payload, headers=headers) as resp:
+            async with self.session.post(f"{API_BASE}/v2/bringauth", data={'email': self.email, 'password': self.password}, headers=headers) as resp:
                 if resp.status == 200:
                     data = await resp.json()
                     self.auth_data = {
@@ -71,9 +73,11 @@ class BringAPI:
                         'publicUuid': data.get('publicUuid') or data.get('uuid', ''),
                         'bringListUUID': data.get('bringListUUID', '')
                     }
-                    os.makedirs(os.path.dirname(self._cache_file), exist_ok=True)
-                    with open(self._cache_file, 'w', encoding='utf-8') as f:
-                        json.dump(self.auth_data, f, ensure_ascii=False)
+                    def _save():
+                        os.makedirs(os.path.dirname(self._cache_file), exist_ok=True)
+                        with open(self._cache_file, 'w', encoding='utf-8') as f:
+                            json.dump(self.auth_data, f, ensure_ascii=False)
+                    await asyncio.to_thread(_save)
                     return True
                 else:
                     _LOGGER.error("Bring! Authentication failed: %s", resp.status)
@@ -117,10 +121,13 @@ class BringAPI:
             
         if os.path.exists(self._catalog_file):
             try:
-                with open(self._catalog_file, 'r', encoding='utf-8') as f:
-                    self.catalog_cache = json.load(f)
-                    if self.catalog_cache:
-                        return self.catalog_cache
+                def _load():
+                    with open(self._catalog_file, 'r', encoding='utf-8') as f:
+                        return json.load(f)
+                cached = await asyncio.to_thread(_load)
+                if cached:
+                    self.catalog_cache = cached
+                    return self.catalog_cache
             except Exception:
                 pass
 
@@ -134,9 +141,11 @@ class BringAPI:
                 if resp.status == 200:
                     items = await resp.json()
                     self.catalog_cache = [i.get('itemId') for i in items if i.get('itemId')]
-                    os.makedirs(os.path.dirname(self._catalog_file), exist_ok=True)
-                    with open(self._catalog_file, 'w', encoding='utf-8') as f:
-                        json.dump(self.catalog_cache, f, ensure_ascii=False)
+                    def _save():
+                        os.makedirs(os.path.dirname(self._catalog_file), exist_ok=True)
+                        with open(self._catalog_file, 'w', encoding='utf-8') as f:
+                            json.dump(self.catalog_cache, f, ensure_ascii=False)
+                    await asyncio.to_thread(_save)
                     return self.catalog_cache
         except Exception as e:
             _LOGGER.error("Error fetching catalog: %s", str(e))

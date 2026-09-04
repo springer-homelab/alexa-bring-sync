@@ -36,6 +36,11 @@ class BringDataUpdateCoordinator(DataUpdateCoordinator):
             
             # Auto-Beautify manually added items
             beautified_changes = []
+            active_base_names = {
+                (item.get('name') or item.get('itemId') or '').strip().lower()
+                for item in raw_items
+            }
+
             for item in raw_items:
                 item_id = item.get('itemId') or item.get('name') or ''
                 item_spec = item.get('specification') or ''
@@ -43,7 +48,13 @@ class BringDataUpdateCoordinator(DataUpdateCoordinator):
                     continue
 
                 new_name, new_spec = self.nlu_engine.extract_brand_item(item_id, item_spec)
-                if new_name != item_id and self.nlu_engine.is_valid_grocery_item(new_name, catalog):
+                # Prevent collision: if new_name is ALREADY on the active list (e.g. "Kekse" with another spec),
+                # do NOT collapse into new_name as that would overwrite the existing item in Bring!
+                if (
+                    new_name != item_id
+                    and new_name.strip().lower() not in active_base_names
+                    and self.nlu_engine.is_valid_grocery_item(new_name, catalog)
+                ):
                     beautified_changes.append({
                         'accuracy': '0.0', 'altitude': '0.0', 'latitude': '0.0', 'longitude': '0.0',
                         'itemId': item_id, 'spec': item_spec, 'operation': 'TO_RECENTLY'
@@ -52,6 +63,8 @@ class BringDataUpdateCoordinator(DataUpdateCoordinator):
                         'accuracy': '0.0', 'altitude': '0.0', 'latitude': '0.0', 'longitude': '0.0',
                         'itemId': new_name, 'spec': new_spec, 'operation': 'TO_PURCHASE'
                     })
+                    active_base_names.discard(item_id.strip().lower())
+                    active_base_names.add(new_name.strip().lower())
                     item['itemId'] = new_name
                     item['name'] = new_name
                     item['specification'] = new_spec

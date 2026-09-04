@@ -3,6 +3,7 @@ import re
 import json
 import os
 import time
+import asyncio
 import logging
 from typing import List, Dict, Tuple, Any
 
@@ -342,8 +343,10 @@ class NLUParsingEngine:
             if file_age < CACHE_EXPIRY_SECONDS:
                 _LOGGER.debug("Vocab cache is fresh enough. Loading from cache.")
                 try:
-                    with open(cache_file, 'r', encoding='utf-8') as f:
-                        cached_vocab = json.load(f)
+                    def _load_vocab():
+                        with open(cache_file, 'r', encoding='utf-8') as f:
+                            return json.load(f)
+                    cached_vocab = await asyncio.to_thread(_load_vocab)
                     self.__init__(cached_vocab)
                     return
                 except Exception as e:
@@ -356,11 +359,11 @@ class NLUParsingEngine:
                 if resp.status == 200:
                     new_vocab = await resp.json(content_type=None)
                     if new_vocab and isinstance(new_vocab, dict):
-                        # Save to cache
-                        os.makedirs(os.path.dirname(cache_file), exist_ok=True)
-                        with open(cache_file, 'w', encoding='utf-8') as f:
-                            json.dump(new_vocab, f, ensure_ascii=False)
-                        # Reinitialize self with new vocab
+                        def _save_vocab():
+                            os.makedirs(os.path.dirname(cache_file), exist_ok=True)
+                            with open(cache_file, 'w', encoding='utf-8') as f:
+                                json.dump(new_vocab, f, ensure_ascii=False)
+                        await asyncio.to_thread(_save_vocab)
                         self.__init__(new_vocab)
                         _LOGGER.info("Successfully updated Bring! vocab OTA.")
                     else:
