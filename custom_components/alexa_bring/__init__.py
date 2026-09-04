@@ -80,6 +80,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             success = await api.execute_batch_changes(changes)
             if success:
                 _LOGGER.info("Successfully synced to Bring!: %s", changes)
+                if op == 'TO_PURCHASE':
+                    catalog_sections = await api.get_catalog_sections()
+                    details_map = await api.get_item_details_map()
+                    for item in parsed_items:
+                        item_name = item['name']
+                        low_name = item_name.strip().lower()
+                        if item_name not in catalog and low_name not in details_map:
+                            icon, section = nlu_engine.resolve_icon_and_section(item_name, catalog_sections)
+                            if icon:
+                                hass.async_create_task(api.save_item_detail(item_name, icon, section))
                 await coordinator.async_request_refresh()
             else:
                 _LOGGER.error("Failed to sync items to Bring!")

@@ -33,45 +33,22 @@ class BringDataUpdateCoordinator(DataUpdateCoordinator):
         try:
             catalog = await self.api.get_catalog()
             raw_items = await self.api.get_active_items()
-            
-            # Auto-Beautify manually added items
-            beautified_changes = []
-            active_base_names = {
-                (item.get('name') or item.get('itemId') or '').strip().lower()
-                for item in raw_items
-            }
+            details_map = await self.api.get_item_details_map()
+            catalog_sections = await self.api.get_catalog_sections()
 
+            # Auto-assign icons & categories to custom items missing details
             for item in raw_items:
-                item_id = item.get('itemId') or item.get('name') or ''
-                item_spec = item.get('specification') or ''
-                if not item_id or item_id in catalog:
+                item_name = item.get('name') or item.get('itemId') or ''
+                if not item_name:
                     continue
 
-                new_name, new_spec = self.nlu_engine.extract_brand_item(item_id, item_spec)
-                # Prevent collision: if new_name is ALREADY on the active list (e.g. "Kekse" with another spec),
-                # do NOT collapse into new_name as that would overwrite the existing item in Bring!
-                if (
-                    new_name != item_id
-                    and new_name.strip().lower() not in active_base_names
-                    and self.nlu_engine.is_valid_grocery_item(new_name, catalog)
-                ):
-                    beautified_changes.append({
-                        'accuracy': '0.0', 'altitude': '0.0', 'latitude': '0.0', 'longitude': '0.0',
-                        'itemId': item_id, 'spec': item_spec, 'operation': 'TO_RECENTLY'
-                    })
-                    beautified_changes.append({
-                        'accuracy': '0.0', 'altitude': '0.0', 'latitude': '0.0', 'longitude': '0.0',
-                        'itemId': new_name, 'spec': new_spec, 'operation': 'TO_PURCHASE'
-                    })
-                    active_base_names.discard(item_id.strip().lower())
-                    active_base_names.add(new_name.strip().lower())
-                    item['itemId'] = new_name
-                    item['name'] = new_name
-                    item['specification'] = new_spec
-
-            if beautified_changes:
-                _LOGGER.info("Beautifying %s items on Bring!", len(beautified_changes) // 2)
-                await self.api.execute_batch_changes(beautified_changes)
+                low_name = item_name.strip().lower()
+                # If item is not in catalog and has no detail yet, assign one
+                if item_name not in catalog and low_name not in details_map:
+                    icon, section = self.nlu_engine.resolve_icon_and_section(item_name, catalog_sections)
+                    if icon:
+                        _LOGGER.info("Auto-assigning Bring! detail to '%s': icon='%s', section='%s'", item_name, icon, section)
+                        await self.api.save_item_detail(item_name, icon, section)
 
             formatted_items = []
             for item in raw_items:

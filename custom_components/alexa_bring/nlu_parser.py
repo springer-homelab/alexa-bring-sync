@@ -885,6 +885,97 @@ class NLUParsingEngine:
             return False
         return True
 
+    def resolve_icon_and_section(self, item_name: str, catalog_sections: Dict[str, Any] = None) -> Tuple[Optional[str], Optional[str]]:
+        """Resolve the most suitable Bring! catalog icon and category section for an item."""
+        if not item_name:
+            return None, None
+
+        if catalog_sections is None:
+            catalog_sections = {}
+
+        low = item_name.lower().strip()
+
+        fallback_sections = {
+            'kekse': 'Snacks & Süsswaren', 'schokolade': 'Snacks & Süsswaren',
+            'chips': 'Snacks & Süsswaren', 'pommes chips': 'Snacks & Süsswaren',
+            'waffeln': 'Snacks & Süsswaren', 'gummibärchen': 'Snacks & Süsswaren',
+            'pralinen': 'Snacks & Süsswaren', 'bonbons': 'Snacks & Süsswaren',
+            'bier': 'Getränke', 'wein': 'Getränke', 'cola': 'Getränke',
+            'limonade': 'Getränke', 'saft': 'Getränke', 'wasser': 'Getränke',
+            'mineralwasser': 'Getränke', 'eistee': 'Getränke', 'kaffee': 'Getränke', 'tee': 'Getränke',
+            'milch': 'Milch & Käse', 'käse': 'Milch & Käse', 'butter': 'Milch & Käse',
+            'joghurt': 'Milch & Käse', 'quark': 'Milch & Käse', 'sahne': 'Milch & Käse',
+            'fleisch': 'Fleisch & Fisch', 'wurst': 'Fleisch & Fisch', 'fisch': 'Fleisch & Fisch',
+            'schinken': 'Fleisch & Fisch', 'hackfleisch': 'Fleisch & Fisch',
+            'brot': 'Brot & Gebäck', 'brötchen': 'Brot & Gebäck', 'toast': 'Brot & Gebäck',
+            'pizza': 'Fertig- & Tiefkühlprodukte', 'pommes': 'Fertig- & Tiefkühlprodukte',
+            'nudeln': 'Getreideprodukte', 'reis': 'Getreideprodukte', 'spaghetti': 'Getreideprodukte',
+            'mehl': 'Zutaten & Gewürze', 'öl': 'Zutaten & Gewürze', 'essig': 'Zutaten & Gewürze',
+            'gewürze': 'Zutaten & Gewürze', 'kräuter': 'Obst & Gemüse', 'salat': 'Obst & Gemüse',
+            'obst': 'Obst & Gemüse', 'gemüse': 'Obst & Gemüse', 'tomaten': 'Obst & Gemüse',
+            'waschmittel': 'Haushalt', 'spülmittel': 'Haushalt', 'toilettenpapier': 'Haushalt',
+            'taschentücher': 'Pflege & Gesundheit', 'zahnpasta': 'Pflege & Gesundheit', 'shampoo': 'Pflege & Gesundheit',
+        }
+
+        def _get_sec(icon_id: str) -> str:
+            if not icon_id:
+                return ''
+            i_low = icon_id.lower()
+            if i_low in catalog_sections:
+                val = catalog_sections[i_low]
+                return val[1] if isinstance(val, (list, tuple)) else str(val)
+            return fallback_sections.get(i_low, '')
+
+        # 1. Exact match in catalog sections
+        if low in catalog_sections:
+            val = catalog_sections[low]
+            icon = val[0] if isinstance(val, (list, tuple)) else item_name
+            sec = val[1] if isinstance(val, (list, tuple)) else str(val)
+            return icon, sec
+
+        # 2. Canonical synonyms
+        if low in self.bring_canonical_synonyms:
+            canon_name, _ = self.bring_canonical_synonyms[low]
+            return canon_name, _get_sec(canon_name)
+
+        # 3. Unambiguous brand categories
+        if low in self.unambiguous_brand_categories:
+            cat_icon, _ = self.unambiguous_brand_categories[low]
+            return cat_icon, _get_sec(cat_icon)
+
+        # 4. Compound suffix match (e.g. Nutellakekse -> Kekse, Dosenwurst -> Wurst)
+        for suffix, target_cat in sorted(self.cat_head_nouns.items(), key=lambda x: len(x[0]), reverse=True):
+            if low.endswith(suffix) and len(low) > len(suffix) + 1:
+                return target_cat, _get_sec(target_cat)
+
+        # 5. Grain style match (e.g. Vollkorntoast -> Toast)
+        for prefix in self.grain_style_prefixes:
+            if low.startswith(prefix) and len(low) > len(prefix) + 2:
+                rest = low[len(prefix):].strip()
+                if rest in self.cat_head_nouns:
+                    icon = self.cat_head_nouns[rest]
+                    return icon, _get_sec(icon)
+                if rest in catalog_sections:
+                    val = catalog_sections[rest]
+                    icon = val[0] if isinstance(val, (list, tuple)) else rest.capitalize()
+                    return icon, _get_sec(icon)
+
+        # 6. Word boundary match (e.g. Gustavo Gusto Pizza -> Pizza, Italienische Kräuter -> Kräuter)
+        words = low.split()
+        for w in words:
+            if w in self.unambiguous_brand_categories:
+                cat_icon, _ = self.unambiguous_brand_categories[w]
+                return cat_icon, _get_sec(cat_icon)
+            if w in self.cat_head_nouns:
+                icon = self.cat_head_nouns[w]
+                return icon, _get_sec(icon)
+            if w in catalog_sections:
+                val = catalog_sections[w]
+                icon = val[0] if isinstance(val, (list, tuple)) else w.capitalize()
+                return icon, _get_sec(icon)
+
+        return None, None
+
     def parse_items(self, raw_text: str, catalog_names: List[str]) -> List[Dict[str, str]]:
         if not raw_text or not isinstance(raw_text, str):
             return []
@@ -930,8 +1021,14 @@ class NLUParsingEngine:
                 name, spec = self.extract_specification(sub)
                 if not name:
                     continue
-                matched_name = self.match_catalog_name(name, catalog_names)
-                final_name, final_spec = self.extract_brand_item(matched_name, spec)
+                low_name = name.lower().strip()
+                if low_name in self.bring_canonical_synonyms:
+                    canon_name, canon_spec = self.bring_canonical_synonyms[low_name]
+                    final_name = canon_name
+                    final_spec = f"{spec} {canon_spec}".strip() if spec else canon_spec
+                else:
+                    final_name = self.match_catalog_name(name, catalog_names)
+                    final_spec = spec
                 if self.is_valid_grocery_item(final_name, catalog_names):
                     items.append({'name': final_name, 'specification': final_spec})
 
