@@ -37,18 +37,39 @@
 Das Projekt setzt auf das Beste aus zwei Welten:
 
 1. **Home Assistant** (mind. 2024.1)
-2. **[Alexa Devices](https://www.home-assistant.io/integrations/alexa_devices)** *(Offizielle Home Assistant Core Integration)*:
+2. **[HACS](https://hacs.xyz/)** *(Home Assistant Community Store)*:
+   * **Aufgabe:** Dient als „App Store“ für Home Assistant, um Community-Integrationen wie den *Alexa Media Player* und dieses Repository mit einem Klick zu installieren und automatisch aktuell zu halten.
+   
+   <details>
+   <summary>👉 <b>Du hast HACS noch nicht installiert? (Klicke hier für die 2-Minuten-Anleitung)</b></summary>
+
+   1. Öffne das Terminal in Home Assistant (z. B. über das offizielle Add-on *Terminal & SSH*) und führe folgenden Befehl aus:
+      ```bash
+      wget -O - https://get.hacs.xyz | bash -
+      ```
+   2. Starte Home Assistant neu (*Entwicklerwerkzeuge ➔ YAML ➔ Neu starten*).
+   3. Gehe auf *Einstellungen ➔ Geräte & Dienste ➔ Integration hinzufügen*, suche nach **HACS** und bestätige die Hinweise.
+   4. Verknüpfe HACS einmalig mit deinem kostenlosen GitHub-Account (über den im Dialog angezeigten Gerätecode auf [github.com/login/device](https://github.com/login/device)).
+   </details>
+
+3. **[Alexa Devices](https://www.home-assistant.io/integrations/alexa_devices)** *(Offizielle Home Assistant Core Integration)*:
    * **Aufgabe:** Bereitstellung der nativen Alexa-Einkaufsliste (`todo.*_einkaufsliste`) in Home Assistant.
    * **Vorteil:** Nutzt Amazons modernen HTTP/2-Push-Client für verzögerungsfreie Synchronisation in Echtzeit (ersetzt die veraltete HACS-Integration *Alexa To-do Lists* vollständig).
-3. **[Alexa Media Player](https://github.com/alandtse/alexa_media_player)** *(via HACS)*:
+4. **[Alexa Media Player](https://github.com/alandtse/alexa_media_player)** *(via HACS)*:
    * **Aufgabe:** Echtzeit-Sprach-Sniffer (`last_called_summary` Event).
    * **Vorteil:** Erfasst den echten, ungefilterten Roh-Wortlaut deiner Sprachbefehle an allen Amazon Echos, sodass unsere NLU Mengenangaben, Worttrennungen und Bring!-Icons sekundenschnell verarbeiten kann.
-4. Ein aktives **Bring! Konto** (E-Mail & Passwort).
+   * **Installation:** In HACS einfach nach *Alexa Media Player* suchen und installieren.
+5. Ein aktives **Bring! Konto** (E-Mail & Passwort).
 
 ---
 
 ## 🚀 Installation via HACS
 
+### 1. Alexa Media Player installieren (falls noch nicht vorhanden)
+1. Öffne **HACS** in der Seitenleiste von Home Assistant.
+2. Suche nach **Alexa Media Player**, klicke auf **Herunterladen** und richte die Integration anschließend unter *Einstellungen ➔ Geräte & Dienste* ein.
+
+### 2. Alexa to Bring! Sync installieren
 1. Öffne **HACS** in Home Assistant.
 2. Klicke oben rechts auf das Drei-Punkte-Menü (`...`) und wähle **Benutzerdefinierte Repositories** (*Custom repositories*).
 3. Füge folgende Repository-URL ein:
@@ -56,7 +77,7 @@ Das Projekt setzt auf das Beste aus zwei Welten:
    * **Typ:** `Integration`
 4. Klicke auf **Hinzufügen**.
 5. Suche nach **Alexa to Bring! Sync** und klicke auf **Herunterladen**.
-6. Starte Home Assistant neu.
+6. Starte Home Assistant neu (*Entwicklerwerkzeuge ➔ YAML ➔ Neu starten*).
 
 ---
 
