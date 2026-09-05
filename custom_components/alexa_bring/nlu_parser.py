@@ -1157,3 +1157,61 @@ def has_shopping_intent(raw_text: str) -> bool:
         or 'abhaken' in raw or 'abgehakt' in raw or 'erledigt' in raw
         or raw.startswith(('setze ', 'setz ', 'packe ', 'pack ', 'schreibe ', 'schreib ', 'füge ', 'füg ', 'hake ', 'hak ', 'lösche ', 'lösch ', 'entferne ', 'entfern ', 'streiche ', 'streich ', 'kaufe ', 'kauf ', 'wir brauchen noch ', 'wir benötigen noch '))
     )
+
+def is_item_match(amazon_summary: str, bring_formatted: str) -> bool:
+    """Check if an Amazon todo item matches a Bring formatted item with smart equivalence."""
+    a = amazon_summary.strip()
+    b = bring_formatted.strip()
+    if not a or not b:
+        return False
+
+    a_low = a.lower()
+    b_low = b.lower()
+
+    # 1. Exact or case-insensitive match
+    if a_low == b_low:
+        return True
+
+    # 2. Compact string match (ignores whitespace, dashes, parentheses)
+    clean_a = re.sub(r'[\s\(\),.\-_/]', '', a_low)
+    clean_b = re.sub(r'[\s\(\),.\-_/]', '', b_low)
+    if clean_a and clean_a == clean_b:
+        return True
+
+    # 3. Word set match (order-independent words)
+    words_a = set(re.sub(r'[\(\),.\-_/]', ' ', a_low).split())
+    words_b = set(re.sub(r'[\(\),.\-_/]', ' ', b_low).split())
+    if words_a and words_a == words_b:
+        return True
+
+    # 4. Specification permutation & compound matching
+    # e.g., Bring: "Spaghetti (Vollkorn)" vs Amazon: "Vollkornspaghetti" or "Vollkorn Spaghetti"
+    spec_match_b = re.match(r'^(.*?)\s*\((.*?)\)$', b)
+    if spec_match_b:
+        name = spec_match_b.group(1).strip().lower()
+        spec = spec_match_b.group(2).strip().lower()
+        variants = {
+            f"{spec} {name}",
+            f"{name} {spec}",
+            f"{spec}{name}",
+            f"{name}{spec}",
+        }
+        clean_variants = {re.sub(r'[\s\-_]', '', v) for v in variants}
+        if a_low in variants or clean_a in clean_variants:
+            return True
+
+    spec_match_a = re.match(r'^(.*?)\s*\((.*?)\)$', a)
+    if spec_match_a:
+        name = spec_match_a.group(1).strip().lower()
+        spec = spec_match_a.group(2).strip().lower()
+        variants = {
+            f"{spec} {name}",
+            f"{name} {spec}",
+            f"{spec}{name}",
+            f"{name}{spec}",
+        }
+        clean_variants = {re.sub(r'[\s\-_]', '', v) for v in variants}
+        if b_low in variants or clean_b in clean_variants:
+            return True
+
+    return False

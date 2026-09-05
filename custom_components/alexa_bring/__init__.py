@@ -14,7 +14,7 @@ from homeassistant.helpers.event import async_track_state_change_event
 
 from .const import DOMAIN, CONF_LIST_NAME, SERVICE_SYNC_TEXT, ATTR_SPOKEN_TEXT, CONF_MEDIA_PLAYERS, CONF_TODO_LIST
 from .bring_api import BringAPI
-from .nlu_parser import NLUParsingEngine, detect_operation, is_voice_question, has_shopping_intent
+from .nlu_parser import NLUParsingEngine, detect_operation, is_voice_question, has_shopping_intent, is_item_match
 from .coordinator import BringDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -204,8 +204,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     
                     for a_item in amazon_items:
                         s = a_item.get("summary", "").strip()
-                        if s in items_to_add:
-                            items_to_add.remove(s)
+                        matched_bring_item = None
+                        for b_item in items_to_add:
+                            if is_item_match(s, b_item):
+                                matched_bring_item = b_item
+                                break
+                                
+                        if matched_bring_item:
+                            items_to_add.remove(matched_bring_item)
                         else:
                             items_to_remove.append(s)
                             
