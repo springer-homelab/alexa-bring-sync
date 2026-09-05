@@ -543,17 +543,6 @@ class NLUParsingEngine:
         return t, ''
 
     def decompose_grain_style(self, q_low: str, existing_spec: str = '') -> tuple[str, str]:
-        for prefix in sorted(self.grain_style_prefixes, key=len, reverse=True):
-            rest = None
-            if q_low.startswith(prefix + " "):
-                rest = q_low[len(prefix) + 1:].strip()
-            elif q_low.startswith(prefix) and len(q_low) > len(prefix):
-                rest = q_low[len(prefix):].strip()
-
-            if rest and (rest in self.known_grain_nouns or len(rest) >= 4):
-                spec_add = prefix.capitalize()
-                spec = f"{existing_spec} {spec_add}".strip() if existing_spec else spec_add
-                return rest, spec
         return q_low, existing_spec
 
     def decompose_compound_item(self, word: str, existing_spec: str = '') -> tuple[str, str]:
@@ -894,8 +883,15 @@ class NLUParsingEngine:
         words = q_clean.split()
         if len(words) == 2:
             w1_low = words[0].lower()
+            w2_low = words[1].lower()
             if re.match(r'^\d+er$', w1_low):
                 return f"{words[0]} {words[1].capitalize()}"
+            if w1_low in self.brand_map or w2_low in self.brand_map or self.is_brand_token(w1_low) or self.is_brand_token(w2_low):
+                b1 = self.brand_map.get(w1_low, words[0].capitalize())
+                b2 = self.brand_map.get(w2_low, words[1].capitalize())
+                return f"{b1} {b2}"
+            if w2_low in self.grain_style_prefixes and w1_low in self.known_grain_nouns:
+                return f"{w2_low.capitalize()}{w1_low}"
             if w1_low in self.grocery_adjectives:
                 return f"{words[0].capitalize()} {words[1].capitalize()}"
             return f"{words[0].capitalize()}{words[1].lower()}"
@@ -1066,40 +1062,6 @@ class NLUParsingEngine:
                     continue
                 low_name = name.lower().strip()
 
-                # 1. Grain style prefix + grain noun (e.g. Vollkorntoast, Toast Vollkorn)
-                matched_grain = False
-                for gp in self.grain_style_prefixes:
-                    if low_name.startswith(gp):
-                        rest = low_name[len(gp):].strip()
-                        if rest in self.known_grain_nouns:
-                            name = rest.capitalize()
-                            spec = f"{spec} {gp.capitalize()}".strip() if spec else gp.capitalize()
-                            matched_grain = True
-                            break
-                    elif low_name.endswith(gp):
-                        base = low_name[:-len(gp)].strip()
-                        if base in self.known_grain_nouns:
-                            name = base.capitalize()
-                            spec = f"{spec} {gp.capitalize()}".strip() if spec else gp.capitalize()
-                            matched_grain = True
-                            break
-
-                # 2. Multi-word brand + catalog noun (e.g. Gustavo Gusto Pizza, Pizza Gustavo Gusto)
-                if not matched_grain:
-                    for b in sorted(self.brand_map.keys(), key=len, reverse=True):
-                        b_disp = self.brand_map[b]
-                        if low_name.startswith(b + ' '):
-                            noun = low_name[len(b)+1:].strip()
-                            if noun in [c.lower() for c in catalog_names]:
-                                name = noun.capitalize()
-                                spec = f"{spec} {b_disp}".strip() if spec else b_disp
-                                break
-                        elif low_name.endswith(' ' + b):
-                            noun = low_name[:-len(b)-1].strip()
-                            if noun in [c.lower() for c in catalog_names]:
-                                name = noun.capitalize()
-                                spec = f"{spec} {b_disp}".strip() if spec else b_disp
-                                break
 
                 low_name = name.lower().strip()
                 catalog_lows = {c.lower() for c in catalog_names}

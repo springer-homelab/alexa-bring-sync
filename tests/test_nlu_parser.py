@@ -48,28 +48,44 @@ def test_quantity_and_units(nlu, catalog):
     assert items[1]["specification"] == "3 Flaschen"
 
 def test_specification_extraction_for_catalog_items(nlu, catalog):
-    # Brand + Catalog Item
+    # Brand + Catalog Item (preserved collision-free)
     p1 = nlu.parse_items("Gustavo Gusto Pizza", catalog)
     assert len(p1) == 1
-    assert p1[0]["name"] == "Pizza"
-    assert "Gustavo Gusto" in p1[0]["specification"]
+    assert p1[0]["name"] == "Gustavo Gusto Pizza"
+    assert p1[0]["specification"] == ""
 
     # Catalog Item + Brand
     p2 = nlu.parse_items("Pizza Gustavo Gusto", catalog)
     assert len(p2) == 1
-    assert p2[0]["name"] == "Pizza"
-    assert "Gustavo Gusto" in p2[0]["specification"]
+    assert p2[0]["name"] == "Pizza Gustavo Gusto"
+    assert p2[0]["specification"] == ""
 
     # Grain style + Grain noun
     p3 = nlu.parse_items("Vollkorntoast", catalog)
     assert len(p3) == 1
-    assert p3[0]["name"] == "Toast"
-    assert "Vollkorn" in p3[0]["specification"]
+    assert p3[0]["name"] == "Vollkorntoast"
+    assert p3[0]["specification"] == ""
 
     p4 = nlu.parse_items("Dinkelbrot", catalog)
     assert len(p4) == 1
-    assert p4[0]["name"] == "Brot"
-    assert "Dinkel" in p4[0]["specification"]
+    assert p4[0]["name"] == "Dinkelbrot"
+    assert p4[0]["specification"] == ""
+
+def test_collision_free_coexistence(nlu, catalog):
+    # Vollkornspaghetti and regular Spaghetti spoken together or consecutive
+    items = nlu.parse_items("Vollkornspaghetti und Spaghetti", catalog)
+    assert len(items) == 2
+    names = [it["name"] for it in items]
+    assert "Vollkornspaghetti" in names
+    assert "Spaghetti" in names
+
+    # With quantities
+    items_q = nlu.parse_items("2 Packungen Vollkornspaghetti und 1 Packung Spaghetti", catalog)
+    assert len(items_q) == 2
+    by_name = {it["name"]: it["specification"] for it in items_q}
+    assert by_name["Vollkornspaghetti"] == "2 Packungen"
+    assert by_name["Spaghetti"] == "1 Packung"
+
 
 def test_native_icon_and_section_resolution(nlu, catalog_sections):
     # Nutellakekse -> Kekse (Snacks & Süsswaren)
