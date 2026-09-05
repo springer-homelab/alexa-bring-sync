@@ -15,14 +15,15 @@
 * 🗣️ **Nativer Alexa-Sprachbefehl:**  
   *„Alexa, setze 2 Bananen, Hafermilch und Nutellakekse auf die Einkaufsliste“*
 * 🧠 **Fortschrittliche NLU (Natural Language Understanding):**
-  * **Mengenerkennung:** Erkennt Zahlen, Brüche und Einheiten (*„ein halbes Kilo Mehl“*, *„2 Packungen Butter“*) und trennt sie sauber in Mengenspezifikationen ab.
-  * **Native Symbol- & Warengruppenzuweisung:** Weist Artikeln wie *„Nutellakekse“* oder *„Dosenwurst“* vollautomatisch das passende Bring!-Katalogicon (z.B. Keks 🍪 oder Wurst 🥫) und die richtige Warengruppe zu, ohne den echten Namen zu verändern.
-  * **100 % Kollisionsfrei:** Beliebig viele Sorten derselben Kategorie (z.B. *„Nutellakekse“* UND *„Haferkekse“*) stehen gleichzeitig und friedlich nebeneinander auf der Liste, ohne sich gegenseitig zu überschreiben.
-  * **Intelligente Spezifikationen:** Erkennt Marken und Sorten bei Basiskatalog-Artikeln (*„Gustavo Gusto Pizza“* ➔ **Pizza** mit Spezifikation *Gustavo Gusto*, *„Vollkorntoast“* ➔ **Toast** mit Spezifikation *Vollkorn*).
-  * **Markenerkennung & Normalisierung:** Erkennt Marken (*„Paulaner Spezi“*, *„Coca Cola Zero“*, *„Alpro“*, *„Gösser“*) und ordnet sie sofort dem passenden Symbol zu.
+  * **100 % Kollisionsfrei & Sortenvielfalt:** Artikel wie *„Gustavo Gusto Pizza“*, *„Vollkornspaghetti“*, *„Dr. Oetker Backmischung“* oder *„Nutellakekse“* behalten ihren vollen Namen auf der Liste. Gleichzeitig erhalten sie vollautomatisch das passende Bring!-Katalogicon und die richtige Warengruppe – so können z. B. *„Vollkornspaghetti“* und *„Spaghetti“* friedlich nebeneinander existieren, ohne sich gegenseitig zu überschreiben.
+  * **Native Symbol- & Warengruppenzuweisung:** Weist auch Nicht-Katalogartikeln, Marken und Backmischungen vollautomatisch das passende Bring!-Katalogicon (z. B. 🧁 *Backpulver* für *„Dr. Oetker Backmischung“*, 🍕 *Pizza* für *„Gustavo Gusto Pizza“*, 🍪 *Kekse* für *„Nutellakekse“*) und die richtige Warengruppe zu.
+  * **Mengenerkennung & Spezifikationen:** Erkennt Zahlen, Brüche und Einheiten (*„ein halbes Kilo Mehl“*, *„2 Packungen Butter“*, *„1 Kasten Cola“*) sowie Zubereitungsformen (*„geriebener Gouda“* ➔ Spezifikation: *Gouda gerieben*) und trennt sie sauber in das Spezifikationsfeld ab.
+  * **Markenerkennung & Normalisierung:** Erkennt Marken (*„Paulaner Spezi“*, *„Coca Cola Zero“*, *„Alpro“*, *„Gösser“*, *„Dr. Oetker“*) und ordnet sie sofort dem passenden Symbol zu.
   * **Deutscher Lemmatizer & Dialekt-Support:** Pluralformen, österreichische/schweizerische Dialektwörter (*„Semmeln“*, *„Topfen“*, *„Schlagobers“*, *„Faschiertes“*, *„Karfiol“*) werden nahtlos verstanden.
+* 🗑️ **Intelligente Zielerkennung beim Entfernen (Active List Matching):**  
+  Beim Löschen (*„Alexa, entferne Gustavo von der Einkaufsliste“* oder *„...nimm die Pizza runter“*) gleicht die Integration gesprochene Begriffe und Kurzformen mit den tatsächlich vorhandenen aktiven Artikeln auf Bring! ab und hakt den passenden Eintrag (*„Gustavo Gusto Pizza“*) zuverlässig ab.
 * 🔄 **Amazon Todo Synchronisation (2-Way Mirror):**  
-  Hält die interne Amazon Alexa Einkaufsliste synchron mit Bring!, sodass beide Listen immer denselben Stand zeigen und abgehakte Artikel automatisch bereinigt werden.
+  Hält die interne Amazon Alexa Einkaufsliste synchron mit Bring!, inklusive Erkennung flexibler Wortstellungen (*„Toast Vollkorn“* ⟷ *„Vollkorntoast“*), sodass beide Listen immer denselben Stand zeigen und abgehakte Artikel automatisch bereinigt werden.
 * 📦 **Auto-Kategorisierung im Hintergrund:**  
   Auch wenn du unterwegs Einträge per Hand in der Bring!-App tippst, erkennt die Integration diese und weist im Hintergrund automatisch das passende Bring!-Icon und die Warengruppe zu.
 * 🌐 **Over-The-Air (OTA) Lexikon-Updates:**  
