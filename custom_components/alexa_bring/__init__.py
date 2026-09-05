@@ -107,6 +107,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if not parsed_items:
             _LOGGER.info("No valid items parsed from: %s", text)
             return
+
+        if op == 'TO_RECENTLY':
+            raw_active = await api.get_active_items()
+            active_item_names = [it.get('itemId') or it.get('name') for it in raw_active if it.get('itemId') or it.get('name')]
+            for item in parsed_items:
+                resolved = nlu_engine.resolve_removal_target(item['name'], active_item_names)
+                if resolved != item['name']:
+                    _LOGGER.info("Resolved removal target '%s' -> '%s'", item['name'], resolved)
+                    item['name'] = resolved
             
         changes = []
         for item in parsed_items:

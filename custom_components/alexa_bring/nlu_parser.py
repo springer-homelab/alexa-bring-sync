@@ -149,7 +149,7 @@ class NLUParsingEngine:
             'yogi tea': 'Yogi Tea', 'kaba': 'Kaba', 'nesquik': 'Nesquik', 'ovomaltine': 'Ovomaltine',
             'oatly': 'Oatly', 'alpro': 'Alpro', 'bärenmarke': 'Bärenmarke', 'weihenstephan': 'Weihenstephan',
             'landliebe': 'Landliebe', 'müllermilch': 'Müllermilch',
-            'gustavo gusto': 'Gustavo Gusto', 'gusto gustavo': 'Gustavo Gusto',
+            'gustavo gusto': 'Gustavo Gusto', 'gusto gustavo': 'Gustavo Gusto', 'gustavo': 'Gustavo Gusto',
             'dr oetker': 'Dr. Oetker', 'dr. oetker': 'Dr. Oetker', 'doktor oetker': 'Dr. Oetker',
             'wagner': 'Wagner', 'original wagner': 'Original Wagner',
             'frosta': 'Frosta', 'iglo': 'Iglo', 'mccain': 'McCain', 'coppenrath & wiese': 'Coppenrath & Wiese',
@@ -438,6 +438,7 @@ class NLUParsingEngine:
         t = re.sub(r'\bdoktor\s+oetker\b', 'Dr. Oetker', t, flags=re.IGNORECASE)
         t = re.sub(r'\bdr\s+oetker\b', 'Dr. Oetker', t, flags=re.IGNORECASE)
         t = re.sub(r'\bgusto\s+gustavo\b', 'Gustavo Gusto', t, flags=re.IGNORECASE)
+        t = re.sub(r'\bgustavo\s+pizza\b', 'Gustavo Gusto Pizza', t, flags=re.IGNORECASE)
         t = re.sub(r'\bben\s+(?:und|and|&)\s+jerrys\b', 'Ben and Jerrys', t, flags=re.IGNORECASE)
         t = re.sub(r'\bhäagen\s+dazs\b|\bhaagen\s+dazs\b', 'Haagen Dazs', t, flags=re.IGNORECASE)
         t = re.sub(r'\bmilch\s+schnitte\b', 'Milchschnitte', t, flags=re.IGNORECASE)
@@ -463,7 +464,7 @@ class NLUParsingEngine:
 
         patterns = [
             r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:lösch(?:e)?|entfern(?:e)?|streich(?:e)?)\s+(.+?)\s+(?:von|aus|von\s+der|von\s+den|von\s+unserer|von\s+meiner)\s+(?:der|meiner|unserer|den|die)?\s*(?:einkaufsliste|einkaufszettel|liste|zettel|bring(?:\s*liste)?)$',
-            r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:nimm|tu)\s+(.+?)\s+(?:von|aus)\s+(?:der|den|meiner|unserer)\s+(?:einkaufsliste|liste|zettel)\s*runter$',
+            r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:nimm|tu)\s+(.+?)\s+(?:von|aus)\s+(?:der|den|meiner|unserer)\s+(?:einkaufsliste|liste|zettel)(?:\s*runter)?$',
             r'^(?:alexa,?\s*)?(?:bitte\s*)?(?:lösch(?:e)?|entfern(?:e)?|streich(?:e)?)\s+(.+)$',
             r'^(?:alexa,?\s*)?(?:bitte\s*)?(.+?)\s+(?:von|aus)\s+(?:der|den|meiner|unserer)\s+(?:einkaufsliste|liste|zettel)\s+(?:löschen|entfernen|streichen|runternehmen)$',
             r'^(?:alexa,?\s*)?(?:bitte\s*)?(.+?)\s+(?:löschen|entfernen|streichen|abhaken)$',
@@ -1015,6 +1016,31 @@ class NLUParsingEngine:
 
         return None, None
 
+    def resolve_removal_target(self, item_name: str, active_item_names: list[str]) -> str:
+        """Resolve a spoken item name to a matching active Bring! list item for removal."""
+        if not item_name or not active_item_names:
+            return item_name
+        p_low = item_name.lower().strip()
+        # 1. Exact match
+        for act in active_item_names:
+            if act.lower().strip() == p_low:
+                return act
+        # 2. Compact / is_item_match
+        for act in active_item_names:
+            if is_item_match(item_name, act):
+                return act
+        # 3. Brand match (e.g. "Gustavo Gusto" / "Gustavo" -> "Gustavo Gusto Pizza")
+        brand_disp = self.brand_map.get(p_low)
+        if brand_disp:
+            brand_matches = [act for act in active_item_names if brand_disp.lower() in act.lower()]
+            if len(brand_matches) == 1:
+                return brand_matches[0]
+        # 4. Word subset match (e.g. "Pizza" -> "Gustavo Gusto Pizza" if only one pizza on list)
+        word_matches = [act for act in active_item_names if p_low in act.lower().split()]
+        if len(word_matches) == 1:
+            return word_matches[0]
+        return item_name
+
     def parse_items(self, raw_text: str, catalog_names: list[str]) -> list[dict[str, str]]:
         if not raw_text or not isinstance(raw_text, str):
             return []
@@ -1116,8 +1142,8 @@ def has_shopping_intent(raw_text: str) -> bool:
     return (
         'einkaufsliste' in raw or 'einkaufszettel' in raw or 'bring liste' in raw or 'bringliste' in raw
         or 'auf die liste' in raw or 'auf den zettel' in raw or 'von der liste' in raw or 'von dem zettel' in raw or 'von meiner liste' in raw
-        or 'abhaken' in raw or 'abgehakt' in raw or 'erledigt' in raw
-        or raw.startswith(('setze ', 'setz ', 'packe ', 'pack ', 'schreibe ', 'schreib ', 'füge ', 'füg ', 'hake ', 'hak ', 'lösche ', 'lösch ', 'entferne ', 'entfern ', 'streiche ', 'streich ', 'kaufe ', 'kauf ', 'wir brauchen noch ', 'wir benötigen noch '))
+        or any(w in raw for w in ['entfernen', 'entferne', 'löschen', 'lösche', 'streichen', 'streiche', 'abhaken', 'abgehakt', 'erledigt'])
+        or raw.startswith(('setze ', 'setz ', 'packe ', 'pack ', 'schreibe ', 'schreib ', 'füge ', 'füg ', 'hake ', 'hak ', 'nimm ', 'lösche ', 'lösch ', 'entferne ', 'entfern ', 'streiche ', 'streich ', 'kaufe ', 'kauf ', 'wir brauchen noch ', 'wir benötigen noch '))
     )
 
 def is_item_match(amazon_summary: str, bring_formatted: str) -> bool:

@@ -34,3 +34,22 @@ def test_separated_german_prefix_verbs():
     assert detect_operation("Hak Haferkekse ab") == "TO_RECENTLY"
     assert detect_operation("Hake Milch ab") == "TO_RECENTLY"
     assert detect_operation("Hak bitte Brot ab") == "TO_RECENTLY"
+
+def test_resolve_removal_target():
+    from custom_components.alexa_bring.nlu_parser import NLUParsingEngine
+    nlu = NLUParsingEngine()
+    active_items = ["Gustavo Gusto Pizza", "Nutellakekse", "Dosenwurst", "Vollkornspaghetti"]
+
+    # Exact
+    assert nlu.resolve_removal_target("Nutellakekse", active_items) == "Nutellakekse"
+
+    # Brand shorthand / omission
+    assert nlu.resolve_removal_target("Gustavo Gusto", active_items) == "Gustavo Gusto Pizza"
+    assert nlu.resolve_removal_target("Gustavo", active_items) == "Gustavo Gusto Pizza"
+    assert nlu.resolve_removal_target("Gustavo Gusto Pizza", active_items) == "Gustavo Gusto Pizza"
+
+    # Single category noun on list
+    assert nlu.resolve_removal_target("Pizza", active_items) == "Gustavo Gusto Pizza"
+
+    # Non-matching item stays unchanged
+    assert nlu.resolve_removal_target("Milch", active_items) == "Milch"
