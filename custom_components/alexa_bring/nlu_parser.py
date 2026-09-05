@@ -277,7 +277,18 @@ class NLUParsingEngine:
             'quark': 'Quark', 'sahne': 'Sahne', 'reis': 'Reis', 'fleisch': 'Fleisch',
             'wurst': 'Wurst', 'würstchen': 'Würstchen', 'wuerstchen': 'Würstchen', 'schinken': 'Schinken',
             'suppe': 'Suppe', 'suppen': 'Suppe', 'sauce': 'Sauce', 'soße': 'Sauce', 'sosse': 'Sauce',
-            'eis': 'Eis', 'speiseeis': 'Eis'
+            'eis': 'Eis', 'speiseeis': 'Eis',
+            'backmischung': 'Backpulver', 'backmischungen': 'Backpulver',
+            'kuchenmischung': 'Backpulver', 'kuchenmischungen': 'Backpulver',
+            'brotbackmischung': 'Brot', 'brotmischung': 'Brot',
+            'backpulver': 'Backpulver', 'vanillezucker': 'Backpulver', 'vanillinzucker': 'Backpulver',
+            'natron': 'Backpulver', 'puderzucker': 'Backpulver',
+            'hefe': 'Hefe', 'trockenhefe': 'Hefe',
+            'kuchen': 'Kuchen', 'torte': 'Torte', 'torten': 'Torte',
+            'muffins': 'Muffins', 'muffin': 'Muffins',
+            'glasur': 'Backpulver', 'kuchenglasur': 'Backpulver', 'schokoglasur': 'Backpulver',
+            'streusel': 'Backpulver', 'zuckerstreusel': 'Backpulver', 'schokostreusel': 'Backpulver',
+            'pudding': 'Dessert', 'puddingpulver': 'Dessert'
         })
         
         self.compound_protected_items = set(vocab.get('compound_protected_items', [
@@ -285,7 +296,9 @@ class NLUParsingEngine:
             'hackfleisch', 'kochschinken', 'bratwurst', 'currywurst', 'leberwurst',
             'apfelsaft', 'orangensaft', 'olivenöl', 'olivenoel', 'sauerkraut', 'rotkohl',
             'kartoffelsalat', 'nudelsalat', 'eiersalat', 'fleischsalat', 'backpulver',
-            'vanillezucker', 'puderzucker', 'roggenbrot', 'vollkornbrot', 'toastbrot'
+            'vanillezucker', 'puderzucker', 'roggenbrot', 'vollkornbrot', 'toastbrot',
+            'backmischung', 'backmischungen', 'kuchenbackmischung', 'brotbackmischung',
+            'kuchenmischung', 'brotmischung', 'puddingpulver', 'kuchenglasur', 'schokoglasur'
         ]))
         
         self.brand_pairs = {k for k in self.brand_map.keys() if ' ' in k}
@@ -548,7 +561,7 @@ class NLUParsingEngine:
 
     def decompose_compound_item(self, word: str, existing_spec: str = '') -> tuple[str, str]:
         w_low = word.lower().strip()
-        if w_low in self.compound_protected_items or ' ' in w_low:
+        if w_low in self.compound_protected_items or ' ' in w_low or w_low.endswith('backmischung') or w_low.endswith('backmischungen'):
             return word, existing_spec
 
         for suffix, target_cat in sorted(self.cat_head_nouns.items(), key=lambda x: len(x[0]), reverse=True):
@@ -943,13 +956,19 @@ class NLUParsingEngine:
             'fleisch': 'Fleisch & Fisch', 'wurst': 'Fleisch & Fisch', 'fisch': 'Fleisch & Fisch',
             'schinken': 'Fleisch & Fisch', 'hackfleisch': 'Fleisch & Fisch',
             'brot': 'Brot & Gebäck', 'brötchen': 'Brot & Gebäck', 'toast': 'Brot & Gebäck',
+            'muffins': 'Brot & Gebäck',
+            'kuchen': 'Snacks & Süsswaren', 'torte': 'Snacks & Süsswaren',
+            'lebkuchen': 'Snacks & Süsswaren', 'dessert': 'Snacks & Süsswaren',
             'pizza': 'Fertig- & Tiefkühlprodukte', 'pommes': 'Fertig- & Tiefkühlprodukte', 'pommes frites': 'Fertig- & Tiefkühlprodukte',
             'nudeln': 'Getreideprodukte', 'reis': 'Getreideprodukte', 'spaghetti': 'Getreideprodukte',
-            'mehl': 'Zutaten & Gewürze', 'öl': 'Zutaten & Gewürze', 'essig': 'Zutaten & Gewürze',
-            'gewürze': 'Zutaten & Gewürze', 'kräuter': 'Obst & Gemüse', 'salat': 'Obst & Gemüse',
+            'mehl': 'Getreideprodukte', 'öl': 'Zutaten & Gewürze', 'essig': 'Zutaten & Gewürze',
+            'gewürze': 'Zutaten & Gewürze', 'backpulver': 'Zutaten & Gewürze', 'hefe': 'Zutaten & Gewürze',
+            'paniermehl': 'Zutaten & Gewürze',
+            'kräuter': 'Obst & Gemüse', 'salat': 'Obst & Gemüse',
             'obst': 'Obst & Gemüse', 'gemüse': 'Obst & Gemüse', 'tomaten': 'Obst & Gemüse',
             'blumenkohl': 'Obst & Gemüse', 'kartoffeln': 'Obst & Gemüse', 'aprikosen': 'Obst & Gemüse', 'pilze': 'Obst & Gemüse',
             'geschirrtabs': 'Haushalt', 'müllsäcke': 'Haushalt', 'waschmittel': 'Haushalt', 'spülmittel': 'Haushalt', 'toilettenpapier': 'Haushalt',
+            'backpapier': 'Haushalt',
             'taschentücher': 'Pflege & Gesundheit', 'zahnpasta': 'Pflege & Gesundheit', 'shampoo': 'Pflege & Gesundheit',
         }
 

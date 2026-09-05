@@ -25,7 +25,9 @@ def catalog_sections():
         "zahnpasta": ["Zahnpasta", "Pflege & Gesundheit"],
         "pizza": ["Pizza", "Fertig- & Tiefkühlprodukte"],
         "toast": ["Toast", "Brot & Gebäck"],
-        "käse": ["Käse", "Milch & Käse"]
+        "käse": ["Käse", "Milch & Käse"],
+        "backpulver": ["Backpulver", "Zutaten & Gewürze"],
+        "hefe": ["Hefe", "Zutaten & Gewürze"]
     }
 
 def test_standalone_products_exact_preservation(nlu, catalog):
@@ -64,6 +66,11 @@ def test_brand_and_product_collision_free_preservation(nlu, catalog):
     assert p5[0]["name"] == "Barilla Spaghetti"
     assert p5[0]["specification"] == ""
 
+    # Dr. Oetker Backmischung -> Dr. Oetker Backmischung
+    p6 = nlu.parse_items("Dr. Oetker Backmischung", catalog)
+    assert p6[0]["name"] == "Dr. Oetker Backmischung"
+    assert p6[0]["specification"] == ""
+
 def test_unambiguous_brand_icon_and_section(nlu, catalog_sections):
     # Coca-Cola Zero -> Cola (Getränke)
     icon, sec = nlu.resolve_icon_and_section("Coca-Cola Zero", catalog_sections)
@@ -89,6 +96,32 @@ def test_unambiguous_brand_icon_and_section(nlu, catalog_sections):
     icon, sec = nlu.resolve_icon_and_section("Persil", catalog_sections)
     assert icon == "Waschmittel"
     assert sec == "Haushalt"
+
+def test_baking_mixes_and_ingredients_icon_and_section(nlu, catalog_sections):
+    # Dr. Oetker Backmischung -> Backpulver (Zutaten & Gewürze)
+    icon, sec = nlu.resolve_icon_and_section("Dr. Oetker Backmischung", catalog_sections)
+    assert icon == "Backpulver"
+    assert sec == "Zutaten & Gewürze"
+
+    # Backmischung -> Backpulver (Zutaten & Gewürze)
+    icon, sec = nlu.resolve_icon_and_section("Backmischung", catalog_sections)
+    assert icon == "Backpulver"
+    assert sec == "Zutaten & Gewürze"
+
+    # Kuchenbackmischung -> Backpulver (Zutaten & Gewürze)
+    icon, sec = nlu.resolve_icon_and_section("Kuchenbackmischung", catalog_sections)
+    assert icon == "Backpulver"
+    assert sec == "Zutaten & Gewürze"
+
+    # Dr. Oetker Hefe -> Hefe (Zutaten & Gewürze)
+    icon, sec = nlu.resolve_icon_and_section("Dr. Oetker Hefe", catalog_sections)
+    assert icon == "Hefe"
+    assert sec == "Zutaten & Gewürze"
+
+    # Fallback without catalog_sections passed
+    icon, sec = nlu.resolve_icon_and_section("Dr. Oetker Backmischung")
+    assert icon == "Backpulver"
+    assert sec == "Zutaten & Gewürze"
 
 def test_grain_styles_and_diets(nlu, catalog):
     # Vollkorntoast -> Vollkorntoast
