@@ -1146,7 +1146,17 @@ def is_item_match(amazon_summary: str, bring_formatted: str) -> bool:
     if words_a and words_a == words_b:
         return True
 
-    # 4. Specification permutation & compound matching
+    # 4. Inverted 2-word compound match (e.g. "Toast Vollkorn" vs "Vollkorntoast")
+    words_clean_a = re.sub(r'[\(\),.\-_/]', ' ', a_low).split()
+    words_clean_b = re.sub(r'[\(\),.\-_/]', ' ', b_low).split()
+    if len(words_clean_a) == 2 and len(words_clean_b) == 1:
+        if f"{words_clean_a[1]}{words_clean_a[0]}" == clean_b or f"{words_clean_a[0]}{words_clean_a[1]}" == clean_b:
+            return True
+    if len(words_clean_b) == 2 and len(words_clean_a) == 1:
+        if f"{words_clean_b[1]}{words_clean_b[0]}" == clean_a or f"{words_clean_b[0]}{words_clean_b[1]}" == clean_a:
+            return True
+
+    # 5. Specification permutation & compound matching
     # e.g., Bring: "Spaghetti (Vollkorn)" vs Amazon: "Vollkornspaghetti" or "Vollkorn Spaghetti"
     spec_match_b = re.match(r'^(.*?)\s*\((.*?)\)$', b)
     if spec_match_b:

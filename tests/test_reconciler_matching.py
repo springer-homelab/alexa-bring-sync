@@ -13,6 +13,9 @@ def test_compound_and_spacing_matches():
     assert is_item_match("Vollkorn-Spaghetti", "Vollkornspaghetti")
     assert is_item_match("Hafer Kekse", "Haferkekse")
     assert is_item_match("Haferkekse", "Hafer Kekse")
+    assert is_item_match("Toast Vollkorn", "Vollkorntoast")
+    assert is_item_match("Vollkorntoast", "Toast Vollkorn")
+    assert is_item_match("Spaghetti Vollkorn", "Vollkornspaghetti")
 
 def test_specification_parentheses_matches():
     # Bring has Name (Specification) vs Amazon flat utterance
