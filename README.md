@@ -21,8 +21,8 @@
   * **Intelligente Spezifikationen:** Erkennt Marken und Sorten bei Basiskatalog-Artikeln (*„Gustavo Gusto Pizza“* ➔ **Pizza** mit Spezifikation *Gustavo Gusto*, *„Vollkorntoast“* ➔ **Toast** mit Spezifikation *Vollkorn*).
   * **Markenerkennung & Normalisierung:** Erkennt Marken (*„Paulaner Spezi“*, *„Coca Cola Zero“*, *„Alpro“*, *„Gösser“*) und ordnet sie sofort dem passenden Symbol zu.
   * **Deutscher Lemmatizer & Dialekt-Support:** Pluralformen, österreichische/schweizerische Dialektwörter (*„Semmeln“*, *„Topfen“*, *„Schlagobers“*, *„Faschiertes“*, *„Karfiol“*) werden nahtlos verstanden.
-* 🔄 **Amazon Todo 1-Way Mirror:**  
-  Hält die interne Amazon Alexa Todo-Liste synchron mit Bring!, sodass beide Listen immer denselben Stand zeigen.
+* 🔄 **Amazon Todo Synchronisation (2-Way Mirror):**  
+  Hält die interne Amazon Alexa Einkaufsliste synchron mit Bring!, sodass beide Listen immer denselben Stand zeigen und abgehakte Artikel automatisch bereinigt werden.
 * 📦 **Auto-Kategorisierung im Hintergrund:**  
   Auch wenn du unterwegs Einträge per Hand in der Bring!-App tippst, erkennt die Integration diese und weist im Hintergrund automatisch das passende Bring!-Icon und die Warengruppe zu.
 * 🌐 **Over-The-Air (OTA) Lexikon-Updates:**  
@@ -32,13 +32,18 @@
 
 ---
 
-## 📋 Voraussetzungen
+## 📋 Voraussetzungen & Zusammenspiel
+
+Das Projekt setzt auf das Beste aus zwei Welten:
 
 1. **Home Assistant** (mind. 2024.1)
-2. **[HACS](https://hacs.xyz/)** (Home Assistant Community Store)
-3. **[Alexa Media Player](https://github.com/alandtse/alexa_media_player)** (via HACS) – zum Erkennen der Spracheingaben auf deinen Amazon Echos.
-4. **[Alexa To-do Lists](https://github.com/lonlazer/ha-alexa-todo-lists)** (via HACS, optional) – falls die interne Amazon Alexa Todo-Liste synchron gehalten werden soll.
-5. Ein aktives **Bring! Konto** (E-Mail & Passwort).
+2. **[Alexa Devices](https://www.home-assistant.io/integrations/alexa_devices)** *(Offizielle Home Assistant Core Integration)*:
+   * **Aufgabe:** Bereitstellung der nativen Alexa-Einkaufsliste (`todo.*_einkaufsliste`) in Home Assistant.
+   * **Vorteil:** Nutzt Amazons modernen HTTP/2-Push-Client für verzögerungsfreie Synchronisation in Echtzeit (ersetzt die veraltete HACS-Integration *Alexa To-do Lists* vollständig).
+3. **[Alexa Media Player](https://github.com/alandtse/alexa_media_player)** *(via HACS)*:
+   * **Aufgabe:** Echtzeit-Sprach-Sniffer (`last_called_summary` Event).
+   * **Vorteil:** Erfasst den echten, ungefilterten Roh-Wortlaut deiner Sprachbefehle an allen Amazon Echos, sodass unsere NLU Mengenangaben, Worttrennungen und Bring!-Icons sekundenschnell verarbeiten kann.
+4. Ein aktives **Bring! Konto** (E-Mail & Passwort).
 
 ---
 
@@ -62,31 +67,40 @@
 3. **Schritt 1 (Bring! Zugangsdaten):**  
    Gib deine Bring! E-Mail-Adresse, dein Passwort und den gewünschten Listen-Namen ein (Standard: `Einkaufsliste`).
 4. **Schritt 2 (Geräte auswählen):**  
-   * **Echo Geräte:** Wähle alle Amazon Echo-Lautsprecher aus, die abgehört werden sollen (Mehrfachauswahl möglich).
-   * **Amazon Todo Liste:** Wähle deine Alexa Todo-Liste für die automatische Synchronisation aus.
+   * **Echo Geräte:** Wähle alle Amazon Echo-Lautsprecher aus, die abgehört werden sollen (über `alexa_media_player` mit Cast-Symbol).
+   * **Amazon Todo Liste:** Wähle deine native Alexa-Einkaufsliste für die automatische 2-Wege-Synchronisation aus (über `alexa_devices`, z.B. `todo.*_einkaufsliste`).
 5. Fertig! 🎉
 
-> **Tipp:** Du kannst die ausgewählten Echo-Lautsprecher und die Todo-Liste jederzeit unter *Einstellungen ➔ Geräte & Dienste ➔ Alexa to Bring! Sync ➔ Konfigurieren* ändern.
+> **Tipp:** Du kannst die ausgewählten Echo-Lautsprecher und die Todo-Liste jederzeit unter *Einstellungen ➔ Geräte & Dienste ➔ Alexa to Bring! Sync ➔ Konfigurieren* anpassen.
 
 ---
 
-## 🏗️ Architektur
+## 🏗️ Architektur & Datenfluss
 
 ```mermaid
 flowchart TD
-    A["🗣️ Spracheingabe an Echo: 'Alexa, setze Milch auf die Einkaufsliste'"] --> B["Amazon Alexa Cloud"]
-    B --> C["HACS: Alexa Media Player"]
-    C -->|last_called_summary Event| D["alexa_bring Custom Integration"]
-    
-    subgraph AlexaBring ["alexa_bring Integration"]
-        D --> E["NLUParsingEngine (Morphologie, Grammatik, Marken)"]
-        E --> F["OTA Vocab Cache (GitHub Sync)"]
-        E --> G["BringAPI (Async aiohttp v2)"]
+    subgraph AlexaVoice ["🗣️ Spracheingabe & Sniffer"]
+        A["Sprachbefehl an Echo:\n'Alexa, setze 2 Milch und Haferkekse auf die Liste'"] --> B["Amazon Alexa Cloud"]
+        B --> C["HACS: Alexa Media Player\n(Websocket Push)"]
+        C -->|last_called_summary| D["alexa_bring Sniffer"]
     end
-    
-    G -->|Batch Change| H["🛒 Bring! Cloud API"]
-    G -->|Update Coordinator| I["sensor.bring_active_items"]
-    I -->|Reconcile| J["Amazon Todo Liste (1-Way Mirror)"]
+
+    subgraph AlexaBring ["⚙️ alexa_bring Integration"]
+        D --> E["NLUParsingEngine\n(Mengen, Lemmatizer, Marken)"]
+        E --> F["OTA Vocab Cache\n(GitHub Auto-Sync)"]
+        E --> G["BringAPI Client\n(Async HTTP v2)"]
+        G --> M["Update Coordinator\nsensor.bring_active_items"]
+    end
+
+    subgraph BringCloud ["🛒 Bring! Ökosystem"]
+        G -->|Batch Add/Remove| H["Bring! Cloud API"]
+        H --> I["Bring! Smartphone App\n(Icons, Warengruppen, Mengen)"]
+    end
+
+    subgraph TodoSync ["🔄 2-Wege Listen-Spiegelung"]
+        M <-->|Reconciler| J["HA Core: Alexa Devices\n(HTTP/2 Stream)"]
+        J <--> K["Amazon Todo Liste\n(Alexa App / Echo)"]
+    end
 ```
 
 ---
